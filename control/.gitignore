@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+.env
+*.db
+*.sqlite
+node_modules/
+dist/
+build/
+_test_*.db
+test_*.db
+_cookies.txt
