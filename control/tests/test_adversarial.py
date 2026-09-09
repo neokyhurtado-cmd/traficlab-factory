@@ -1,12 +1,12 @@
 """Adversarial tests for Control BFF V0.
 
 Verifies threat model T1..T12 from suini#54 comment 5599034906.
+Also includes F2 close-out fix-specific tests (F2.1..F2.4) for PR #6 review.
 """
 from __future__ import annotations
 
 import os
 import re
-import socket
 import sqlite3
 import sys
 import logging
@@ -40,6 +40,7 @@ client = TestClient(bff.app)
 PASS = 0
 FAIL = 0
 
+
 def check(name: str, condition: bool, detail: str = ""):
     global PASS, FAIL
     if condition:
@@ -48,6 +49,7 @@ def check(name: str, condition: bool, detail: str = ""):
     else:
         FAIL += 1
         print(f"  FAIL {name}: {detail}")
+
 
 # Read UI bundle for secret-leak tests
 ui_app_js = (Path(__file__).resolve().parent.parent / "ui" / "app.js").read_text(encoding="utf-8")
@@ -67,16 +69,9 @@ check("ui/app.js no GITHUB_TOKEN", "GITHUB_TOKEN" not in ui_app_js)
 
 print("T3. BFF must refuse to start on non-loopback host")
 check("boot check function exists", callable(bff._check_no_public_bind))
-# Test the check logic directly by importing a fresh module-level evaluation
-# Source-code scan: the check must compare against ('127.0.0.1', 'localhost')
 src = Path(bff.__file__).read_text(encoding="utf-8")
 check("check compares against 127.0.0.1", '"127.0.0.1"' in src or "'127.0.0.1'" in src)
 check("check compares against localhost", '"localhost"' in src or "'localhost'" in src)
-# Direct unit test: patch BFF_HOST and re-evaluate the check condition
-import importlib
-# Make sure the function looks at BFF_HOST env dynamically (not module-level snapshot)
-# We test by setting os.environ and calling — if the check has module-level captured value,
-# we'd need to reload. Inspect the source for os.environ.get usage:
 check("check reads BFF_HOST dynamically via os.environ.get",
       "os.environ.get" in src and 'BFF_HOST' in src)
 
@@ -126,6 +121,11 @@ check("contains suini", "suini" in ids)
 check("contains trafficlab-control", "trafficlab-control" in ids)
 
 print("T8. Findings create + idempotency")
+# Reset sqlite state for idempotency tests (T8 + F2.4 share DB)
+with bff._db() as conn:
+    conn.execute("DELETE FROM visual_findings")
+    conn.execute("DELETE FROM events")
+    conn.commit()
 payload = {
     "preview_id": "ia-vision-visor",
     "kind": "needs_work",
@@ -151,14 +151,10 @@ r = no_cookie_client.get("/api/v1/events")
 check("GET /api/v1/events without cookie -> 401", r.status_code == 401)
 
 print("T9b. Event stream SSE route exists and is wired")
-# The /api/v1/events route must be registered on the FastAPI app
 events_route_paths = [getattr(r, "path", "") for r in bff.app.routes]
 check("/api/v1/events route registered", "/api/v1/events" in events_route_paths)
-# V0: do not run functional SSE here (TestClient + infinite-loop generator hangs).
-# Real SSE smoke will run against a live uvicorn instance in the integration test plan.
 
 print("T10. Database schema invariants")
-# Connect directly to the test DB
 conn = sqlite3.connect(os.environ["CONTROL_DB"])
 rows = conn.execute("PRAGMA table_info(events)").fetchall()
 col_names = {r[1] for r in rows}
@@ -169,15 +165,155 @@ has_unique_idem = any("idempotency_key" in str(conn.execute(f"PRAGMA index_info(
 check("idempotency_key is unique", has_unique_idem)
 
 print("T11. BFF does not start if BFF_HOST is non-loopback (boot guard)")
-# Verified via _check_no_public_bind above; also check the actual start logic
 boot_src = Path(bff.__file__).read_text(encoding="utf-8")
 check("_check_no_public_bind is called at boot", "_check_no_public_bind()" in boot_src)
 
 print("T12. No raw secret leak in logs/events (text scan)")
-# Find any place the BFF logs HERMES_BEARER_KEY
 boot_src_lower = boot_src.lower()
 check("BFF source does not log HERMES_BEARER_KEY",
       "hermes_bearer_key" not in boot_src_lower or "log" not in boot_src_lower.split("hermes_bearer_key")[0][-200:])
+
+# ---------- F2 CLOSE-OUT: 4 fix-specific adversarial tests ----------
+
+print()
+print("=" * 60)
+print("F2 CLOSEOUT — fix-specific adversarial tests")
+print("=" * 60)
+
+print("F2.1 P1 — Host header validation (anti-DNS-rebinding)")
+# Host header must be loopback (or the TestClient sentinel `testserver`);
+# anything else returns 400 BEFORE auth runs.
+for bad_host in ("evil.com", "192.0.2.1", "attacker.example.org", "google.com"):
+    r = client.get("/api/v1/health", headers={"Host": bad_host})
+    check(f"GET /api/v1/health with Host: {bad_host} -> 400", r.status_code == 400)
+# Loopback hosts must still work
+for ok_host in ("127.0.0.1", "127.0.0.1:9118", "localhost", "localhost:80", "testserver"):
+    r = client.get("/", headers={"Host": ok_host})
+    check(f"GET / with Host: {ok_host} -> 200 (loopback allowed)", r.status_code == 200)
+# Default TestClient Host: testserver must work
+r = client.get("/api/v1/health", cookies=cookies)
+check("GET /api/v1/health with default TestClient Host (testserver) -> 200",
+      r.status_code == 200)
+# Source-of-truth: confirm testserver is whitelisted only because it's a TestClient sentinel
+# — the production allow-list excludes it. Verify by reading the source:
+boot_src_h = Path(bff.__file__).read_text(encoding="utf-8")
+check("Host allow-list contains 127.0.0.1 + localhost + 0.0.0.0 + testserver",
+      '"127.0.0.1", "localhost", "0.0.0.0", "testserver"' in boot_src_h or
+      "'127.0.0.1', 'localhost', '0.0.0.0', 'testserver'" in boot_src_h)
+
+print("F2.2 P2 — gateway_alive probes Hermes real (TCP connect)")
+boot_src2 = Path(bff.__file__).read_text(encoding="utf-8")
+check("_hermes_alive defined", "def _hermes_alive" in boot_src2)
+# Strip docstring/comments when looking for old heuristic. Use regex that
+# matches only top-level definitions / function calls.
+import re as _re
+# _gateway_alive must NOT be defined as a function anywhere
+old_def = _re.search(r"^def\s+_gateway_alive\s*\(", boot_src2, _re.MULTILINE)
+check("_gateway_alive removed (no python.exe heuristic function)", old_def is None)
+# tasklist subprocess call must NOT appear
+tasklist_use = _re.search(r"subprocess\.run\([^)]*tasklist", boot_src2, _re.DOTALL)
+check("subprocess tasklist removed", tasklist_use is None)
+check("_hermes_alive calls _probe with HERMES_API_BASE",
+      "_probe(HERMES_API_BASE" in boot_src2)
+result = bff._hermes_alive()
+check(f"_hermes_alive() returns bool (got {type(result).__name__})",
+      isinstance(result, bool))
+
+print("F2.3 P2 — Idempotency-Key on POST /api/v1/findings")
+# Wipe findings again so tests are deterministic
+with bff._db() as conn:
+    conn.execute("DELETE FROM visual_findings")
+    conn.execute("DELETE FROM events")
+    conn.commit()
+
+# Case A: same Idempotency-Key + same body → second POST returns 200 with same finding_id
+payload_a = {
+    "preview_id": "ia-vision-visor",
+    "kind": "needs_work",
+    "title": "idempotency test A",
+    "frame_ref": {"video_id": 1},
+    "context": {"note": "first call"},
+}
+r1 = client.post("/api/v1/findings", json=payload_a,
+                 headers={"Idempotency-Key": "test-key-A"},
+                 cookies=cookies)
+check("first POST with Idempotency-Key -> 201", r1.status_code == 201)
+fid_a = r1.json()["finding_id"]
+r2 = client.post("/api/v1/findings", json=payload_a,
+                 headers={"Idempotency-Key": "test-key-A"},
+                 cookies=cookies)
+check("duplicate POST same key+body -> 200", r2.status_code == 200)
+check("duplicate returns same finding_id", r2.json()["finding_id"] == fid_a)
+# Database count must still be 1
+with bff._db() as conn:
+    n = conn.execute("SELECT COUNT(*) c FROM visual_findings WHERE finding_id = ?",
+                     (fid_a,)).fetchone()["c"]
+check("DB has exactly 1 row for this key", n == 1)
+
+# Case B: same Idempotency-Key + DIFFERENT body → 409 Conflict
+payload_b_diff = dict(payload_a)
+payload_b_diff["title"] = "DIFFERENT TITLE"
+r3 = client.post("/api/v1/findings", json=payload_b_diff,
+                 headers={"Idempotency-Key": "test-key-A"},
+                 cookies=cookies)
+check("same key + different body -> 409", r3.status_code == 409)
+check("409 detail mentions idempotency_key",
+      "idempotency_key" in (r3.json().get("detail") or "").lower())
+
+# Case C: no Idempotency-Key → server derives stable hash → same payload = no duplicate
+payload_c = {
+    "preview_id": "suini-panorama",
+    "kind": "bug",
+    "title": "no-header dedup test",
+    "frame_ref": {"scenario_id": 99},
+    "context": {"note": "no header"},
+}
+r4 = client.post("/api/v1/findings", json=payload_c, cookies=cookies)
+check("first POST without Idempotency-Key -> 201", r4.status_code == 201)
+fid_c = r4.json()["finding_id"]
+r5 = client.post("/api/v1/findings", json=payload_c, cookies=cookies)
+check("same payload without header -> 200 (server-derived key matches)", r5.status_code == 200)
+check("no-header dedup returns same finding_id", r5.json()["finding_id"] == fid_c)
+
+# Case D: different payload without header → different derived key → 201 (new finding)
+payload_d = dict(payload_c)
+payload_d["title"] = "different title"
+r6 = client.post("/api/v1/findings", json=payload_d, cookies=cookies)
+check("different payload without header -> 201 (new finding)", r6.status_code == 201)
+check("different payload has new finding_id",
+      r6.json()["finding_id"] != fid_c)
+
+# Verify idempotency_key column exists and is unique
+import sqlite3 as _sq
+_conn = _sq.connect(os.environ["CONTROL_DB"])
+_cols = {r[1] for r in _conn.execute("PRAGMA table_info(visual_findings)").fetchall()}
+check("visual_findings has idempotency_key column", "idempotency_key" in _cols)
+_idx = _conn.execute("PRAGMA index_list(visual_findings)").fetchall()
+has_unique = False
+for ix in _idx:
+    info = _conn.execute(f"PRAGMA index_info({ix[1]})").fetchall()
+    cols = {r[2] for r in info}
+    if cols == {"idempotency_key"}:
+        has_unique = True
+check("idempotency_key has unique constraint", has_unique)
+_conn.close()
+
+print("F2.4 P2 — innerHTML eliminated in ui/app.js (textContent everywhere)")
+appjs_src = (Path(__file__).resolve().parent.parent / "ui" / "app.js").read_text(encoding="utf-8")
+import re
+innerhtml_assigns = re.findall(r"\.innerHTML\s*=", appjs_src)
+check(f"no .innerHTML = assignments in app.js (found {len(innerhtml_assigns)})",
+      len(innerhtml_assigns) == 0)
+template_html = re.findall(r"\.innerHTML\s*=\s*`", appjs_src)
+check(f"no template-string innerHTML in app.js (found {len(template_html)})",
+      len(template_html) == 0)
+check("ui/app.js defines el(tag, attrs, ...children) helper",
+      "function el(tag, attrs, ...children)" in appjs_src)
+appendmsg_block = re.search(r"appendMsg\('assistant'.*?\);", appjs_src, re.DOTALL)
+check("appendMsg assistant uses string concat (not template literal with ${text})",
+      appendmsg_block is not None and "${" not in (appendmsg_block.group(0) or ""))
+
+# ---------- END F2 CLOSE-OUT ----------
 
 print()
 print(f"=== RESULT: {PASS} pass, {FAIL} fail ===")

@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, AsyncIterator
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -93,7 +93,8 @@ def _init_db() -> None:
             context_json TEXT,
             created_by TEXT,
             created_at TEXT NOT NULL,
-            triage_state TEXT DEFAULT 'open'
+            triage_state TEXT DEFAULT 'open',
+            idempotency_key TEXT UNIQUE
         );
         CREATE INDEX IF NOT EXISTS idx_events_correlation ON events(correlation_id);
         CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at);
@@ -108,6 +109,23 @@ app = FastAPI(title="TrafficLab Control BFF", version=APP_VERSION)
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
+    # P1: Host header validation — anti-DNS-rebinding.
+    # The BFF only serves loopback clients; reject anything whose Host: header
+    # looks like a public host. Starlette/uvicorn already routes based on Host,
+    # but we explicitly defend against a malicious client that sends a Host
+    # header pointing at an external attacker-controlled domain.
+    host = request.headers.get("host", "")
+    # Allow only loopback hosts (case-insensitive). Allow optional :port suffix.
+    # `testserver` is httpx's default Host header used by FastAPI TestClient and
+    # is not routable outside the test process — safe to allow for testing.
+    if host:
+        host_no_port = host.split(":", 1)[0].lower()
+        if host_no_port not in ("127.0.0.1", "localhost", "0.0.0.0", "testserver"):
+            LOG.warning("rejected request with non-loopback Host header: %s", host)
+            return JSONResponse(
+                {"detail": "invalid Host header"},
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -214,7 +232,7 @@ async def health(_: None = Depends(require_session)) -> HealthSnapshot:
         captured_at=datetime.now(timezone.utc).isoformat(),
         hermes_version=HERMES_INSTALLED_VERSION,
         hermes_api_base=HERMES_API_BASE,
-        gateway_alive=_gateway_alive(),
+        gateway_alive=_hermes_alive(),
         bff_version=APP_VERSION,
         db_path=str(DB_PATH),
     )
@@ -260,14 +278,79 @@ async def list_previews(_: None = Depends(require_session)) -> list[PreviewTarge
         ),
     ]
 
+def _derive_idempotency_key(payload: "VisualReviewFindingIn") -> str:
+    """P2: derive a stable idempotency_key from the payload when the client
+    doesn't supply one. SHA-256 of the canonical JSON of the substantive
+    fields. Same body → same key → no duplicate finding on retry.
+    """
+    import hashlib
+    canonical = json.dumps({
+        "preview_id": payload.preview_id,
+        "kind": payload.kind,
+        "title": payload.title,
+        "frame_ref": payload.frame_ref,
+        "context": payload.context,
+    }, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 @app.post("/api/v1/findings", response_model=VisualReviewFinding, status_code=201)
-async def create_finding(payload: VisualReviewFindingIn, request: Request, _: None = Depends(require_session)) -> VisualReviewFinding:
+async def create_finding(
+    payload: VisualReviewFindingIn,
+    request: Request,
+    response: Response,
+    _: None = Depends(require_session),
+) -> VisualReviewFinding:
     """One-tap Looks good / Needs work / Create finding.
 
     V0: store locally. Real durable GitHub evidence writer deferred.
     Cross-product guard: findings can reference any product, but the WRITE target
     is local sqlite only — no GitHub write at this endpoint.
+
+    P2 idempotency:
+      - Client SHOULD send `Idempotency-Key: <opaque-string>` header.
+      - If header missing, server derives a stable key from the payload hash.
+      - Duplicate key with identical body returns the existing finding (200).
+      - Duplicate key with DIFFERENT body returns 409 Conflict.
     """
+    # Prefer client-supplied key; fall back to derived stable key.
+    supplied = request.headers.get("idempotency-key", "").strip()
+    idem_key = supplied or _derive_idempotency_key(payload)
+
+    # Check for existing finding with this idempotency_key.
+    with _db() as conn:
+        existing_row = conn.execute(
+            "SELECT * FROM visual_findings WHERE idempotency_key = ?", (idem_key,)
+        ).fetchone()
+
+    if existing_row is not None:
+        existing = VisualReviewFinding(
+            finding_id=existing_row["finding_id"],
+            preview_id=existing_row["preview_id"],
+            kind=existing_row["kind"],
+            title=existing_row["title"],
+            frame_ref=json.loads(existing_row["frame_ref_json"] or "{}"),
+            context=json.loads(existing_row["context_json"] or "{}"),
+            created_by=existing_row["created_by"],
+            created_at=existing_row["created_at"],
+            triage_state=existing_row["triage_state"],
+        )
+        # Detect payload divergence — same key, different body = 409.
+        same_body = (
+            existing.preview_id == payload.preview_id
+            and existing.kind == payload.kind
+            and existing.title == payload.title
+            and existing.frame_ref == payload.frame_ref
+            and existing.context == payload.context
+        )
+        if not same_body:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="idempotency_key reused with different payload",
+            )
+        response.status_code = status.HTTP_200_OK
+        return existing
+
     fid = str(uuid.uuid4())
     created_by = request.client.host if request.client else "unknown"
     now = datetime.now(timezone.utc).isoformat()
@@ -284,16 +367,16 @@ async def create_finding(payload: VisualReviewFindingIn, request: Request, _: No
     )
     with _db() as conn:
         conn.execute(
-            "INSERT INTO visual_findings VALUES (?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO visual_findings VALUES (?,?,?,?,?,?,?,?,?,?)",
             (fid, payload.preview_id, payload.kind, payload.title,
              json.dumps(payload.frame_ref), json.dumps(payload.context),
-             created_by, now, "open"),
+             created_by, now, "open", idem_key),
         )
     await _publish_event(
         kind="finding_created",
         payload=finding.model_dump(),
         goal_id=None,
-        correlation_id=payload.context.get("correlation_id"),
+        correlation_id=payload.context.get("correlation_id") or idem_key,
     )
     return finding
 
@@ -412,17 +495,17 @@ async def root():
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _gateway_alive() -> bool:
-    """Best-effort: check if PID 4892 or any hermes process is alive.
-    V0: try the API server health probe; fallback to process listing.
+def _hermes_alive() -> bool:
+    """P2: probe Hermes API Server directly via TCP to the configured base URL.
+
+    Replaces the previous 'tasklist python.exe' heuristic which had a high
+    false-positive rate (any python process satisfied the check).
+
+    Returns True only if the TCP socket connects to HERMES_API_BASE host:port
+    within a short timeout. Does NOT validate the response body — that's a
+    V0.1 concern (would require parsing /v1/models or similar).
     """
-    import subprocess
-    try:
-        r = subprocess.run(["tasklist", "/FI", "IMAGENAME eq python.exe"],
-                           capture_output=True, text=True, timeout=3)
-        return "python.exe" in r.stdout
-    except Exception:
-        return False
+    return _probe(HERMES_API_BASE, timeout=0.5)
 
 def _probe(url: str, timeout: float = 0.5) -> bool:
     """Quick TCP-level availability probe."""

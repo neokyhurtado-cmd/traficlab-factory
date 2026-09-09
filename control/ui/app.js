@@ -5,6 +5,30 @@
 (function () {
   'use strict';
 
+  /** P2: Safe DOM helper. Builds an element from a structured spec instead of
+   *  innerHTML interpolation. Every text value is set via textContent so any
+   *  attacker-controlled data (titles, preview IDs, error messages from server,
+   *  user-supplied notes) is rendered as text and never parsed as HTML. */
+  function el(tag, attrs, ...children) {
+    const node = document.createElement(tag);
+    if (attrs) {
+      for (const [k, v] of Object.entries(attrs)) {
+        if (v === null || v === undefined || v === false) continue;
+        if (k === 'class') node.className = v;
+        else if (k === 'text') node.textContent = v;
+        else if (k === 'href') node.setAttribute('href', v);
+        else if (k === 'target') node.setAttribute('target', v);
+        else if (k === 'rel') node.setAttribute('rel', v);
+        else node.setAttribute(k, v);
+      }
+    }
+    for (const c of children) {
+      if (c === null || c === undefined || c === false) continue;
+      node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    return node;
+  }
+
   /** Fetch wrapper that sends cookies for session auth (HttpOnly cookie set by BFF at /).
    *  Threat model: this file MUST NOT receive or hold Hermes bearer keys or GitHub tokens.
    *  The BFF sets `control_session` cookie HttpOnly SameSite=Strict; JS cannot read it. */
@@ -70,17 +94,20 @@
     try {
       const projects = await api('/api/v1/projects');
       const grid = document.getElementById('projects-grid');
-      grid.innerHTML = '';
+      grid.replaceChildren();
       for (const p of projects) {
-        const el = document.createElement('div');
-        el.className = 'tile';
-        el.innerHTML = `
-          <h3>${p.display_name}</h3>
-          <div class="sub">${p.repo}</div>
-          <div><span class="badge ${p.visor_alive ? 'good' : 'bad'}">${p.visor_alive ? 'visor alive' : 'visor down'}</span></div>
-          ${p.visor_endpoint ? `<div class="sub">${p.visor_endpoint}</div>` : ''}
-        `;
-        grid.appendChild(el);
+        const tile = el('div', { class: 'tile' },
+          el('h3', { text: p.display_name }),
+          el('div', { class: 'sub', text: p.repo }),
+          el('div', null,
+            el('span', {
+              class: 'badge ' + (p.visor_alive ? 'good' : 'bad'),
+              text: p.visor_alive ? 'visor alive' : 'visor down',
+            }),
+          ),
+          p.visor_endpoint ? el('div', { class: 'sub', text: p.visor_endpoint }) : null,
+        );
+        grid.appendChild(tile);
       }
     } catch (e) {
       toast('error cargando projects: ' + e.message);
@@ -93,23 +120,29 @@
       const grid = document.getElementById('previews-grid');
       const reviewGrid = document.getElementById('review-previews');
       const sel = document.getElementById('finding-preview');
-      grid.innerHTML = '';
-      reviewGrid.innerHTML = '';
-      sel.innerHTML = '';
+      grid.replaceChildren();
+      reviewGrid.replaceChildren();
+      sel.replaceChildren();
       for (const p of previews) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.innerHTML = `
-          <h3>${p.title}</h3>
-          <div class="sub">${p.project_id} · ${p.kind}</div>
-          <div><span class="badge ${p.available ? 'good' : 'warn'}">${p.available ? 'available' : 'unavailable'}</span></div>
-          <div class="sub">${p.available_reason}</div>
-          ${p.available ? `<a href="${p.endpoint}" target="_blank" rel="noopener">abrir visor ↗</a>` : ''}
-        `;
+        const tile = el('div', { class: 'tile' },
+          el('h3', { text: p.title }),
+          el('div', { class: 'sub', text: p.project_id + ' · ' + p.kind }),
+          el('div', null,
+            el('span', {
+              class: 'badge ' + (p.available ? 'good' : 'warn'),
+              text: p.available ? 'available' : 'unavailable',
+            }),
+          ),
+          el('div', { class: 'sub', text: p.available_reason }),
+          p.available ? el('a', {
+            href: p.endpoint,
+            target: '_blank',
+            rel: 'noopener',
+            text: 'abrir visor ↗',
+          }) : null,
+        );
         grid.appendChild(tile);
-
-        const reviewTile = tile.cloneNode(true);
-        reviewGrid.appendChild(reviewTile);
+        reviewGrid.appendChild(tile.cloneNode(true));
 
         const opt = document.createElement('option');
         opt.value = p.preview_id;
@@ -126,18 +159,18 @@
     try {
       const findings = await api('/api/v1/findings');
       const grid = document.getElementById('findings-grid');
-      grid.innerHTML = '';
+      grid.replaceChildren();
       for (const f of findings) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
         const kindClass = f.kind === 'looks_good' ? 'good' : (f.kind === 'needs_work' ? 'warn' : 'bad');
-        tile.innerHTML = `
-          <h3>${f.title}</h3>
-          <div><span class="badge ${kindClass}">${f.kind}</span></div>
-          <div class="sub">${f.preview_id}</div>
-          <div class="sub">${f.created_at}</div>
-          <div class="sub">by ${f.created_by} · triage: ${f.triage_state}</div>
-        `;
+        const tile = el('div', { class: 'tile' },
+          el('h3', { text: f.title }),
+          el('div', null,
+            el('span', { class: 'badge ' + kindClass, text: f.kind }),
+          ),
+          el('div', { class: 'sub', text: f.preview_id }),
+          el('div', { class: 'sub', text: f.created_at }),
+          el('div', { class: 'sub', text: 'by ' + f.created_by + ' · triage: ' + f.triage_state }),
+        );
         grid.appendChild(tile);
       }
     } catch (e) {
@@ -169,9 +202,7 @@
   // ---------- Chat (V0 stub — M3+ will connect to Hermes API Server) ----------
   const log = document.getElementById('chat-log');
   function appendMsg(role, text) {
-    const div = document.createElement('div');
-    div.className = 'msg ' + role;
-    div.textContent = text;
+    const div = el('div', { class: 'msg ' + role, text });
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
   }
@@ -182,7 +213,7 @@
     const text = input.value.trim();
     if (!text) return;
     appendMsg('user', text);
-    appendMsg('assistant', `Recibido: "${text}". [V0 stub — sin agent loop todavía.]`);
+    appendMsg('assistant', 'Recibido: "' + text + '". [V0 stub — sin agent loop todavía.]');
     input.value = '';
   });
 
