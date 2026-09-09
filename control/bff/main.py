@@ -69,6 +69,18 @@ def _db() -> sqlite3.Connection:
     return conn
 
 def _init_db() -> None:
+    """Idempotent schema bootstrap + F2.1 legacy migration.
+
+    Two phases:
+      1. CREATE TABLE IF NOT EXISTS for both events and visual_findings WITHOUT
+         any inline UNIQUE constraint on idempotency_key. This lets a pre-F2
+         table (9 columns, no idempotency_key at all) be ALTERed to add the
+         column without conflicting with a constraint that references it.
+      2. MIGRATION: detect a pre-F2 visual_findings table (no idempotency_key
+         column) and ALTER it to add the column, backfill legacy rows with a
+         stable per-row key, then create the UNIQUE index. Safe to run on
+         already-migrated databases (no-op).
+    """
     with _db() as conn:
         conn.executescript("""
         CREATE TABLE IF NOT EXISTS events (
@@ -94,11 +106,38 @@ def _init_db() -> None:
             created_by TEXT,
             created_at TEXT NOT NULL,
             triage_state TEXT DEFAULT 'open',
-            idempotency_key TEXT UNIQUE
+            idempotency_key TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_events_correlation ON events(correlation_id);
         CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at);
         """)
+        # ---- F2.1 migration: pre-F2 visual_findings (no idempotency_key column) ----
+        cols = conn.execute("PRAGMA table_info(visual_findings)").fetchall()
+        col_names = {row[1] for row in cols}
+        if "idempotency_key" not in col_names:
+            LOG.warning("migrating legacy visual_findings: adding idempotency_key column")
+            conn.execute(
+                "ALTER TABLE visual_findings ADD COLUMN idempotency_key TEXT"
+            )
+            # Backfill legacy rows with a per-row stable key. Pre-F2 rows had no
+            # concept of idempotency, so we assign finding_id-based keys. These
+            # are guaranteed unique (finding_id is PRIMARY KEY).
+            rows = conn.execute(
+                "SELECT finding_id FROM visual_findings "
+                "WHERE idempotency_key IS NULL OR idempotency_key = ''"
+            ).fetchall()
+            for r in rows:
+                fid = r["finding_id"] if isinstance(r, sqlite3.Row) else r[0]
+                conn.execute(
+                    "UPDATE visual_findings SET idempotency_key = ? WHERE finding_id = ?",
+                    (f"legacy:{fid}", fid),
+                )
+        # Unique index created AFTER the column is guaranteed to exist.
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uniq_visual_findings_idem "
+            "ON visual_findings(idempotency_key)"
+        )
+        conn.commit()
 _init_db()
 
 # ---------------------------------------------------------------------------

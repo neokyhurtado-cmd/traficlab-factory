@@ -315,6 +315,172 @@ check("appendMsg assistant uses string concat (not template literal with ${text}
 
 # ---------- END F2 CLOSE-OUT ----------
 
+# ---------- F2.1-UPGRADE-PATH: legacy DB migration (PR #6 re-audit) ----------
+
+print()
+print("=" * 60)
+print("F2.1-UPGRADE-PATH — legacy DB migration (no control.db deletion)")
+print("=" * 60)
+
+import importlib as _importlib
+import sqlite3 as _sq2
+
+LEGACY_DB = Path(__file__).resolve().parent / "_legacy_test.db"
+if LEGACY_DB.exists():
+    LEGACY_DB.unlink()
+
+print("Step 1: hand-build a pre-F2 DB with the exact 9-column schema")
+_conn = _sq2.connect(LEGACY_DB)
+_conn.executescript("""
+CREATE TABLE events (
+    event_id TEXT PRIMARY KEY,
+    correlation_id TEXT NOT NULL,
+    project_id TEXT, goal_id TEXT, run_id TEXT, source TEXT,
+    kind TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    ttl_seconds INTEGER DEFAULT 60
+);
+CREATE TABLE visual_findings (
+    finding_id TEXT PRIMARY KEY,
+    preview_id TEXT,
+    kind TEXT NOT NULL,
+    title TEXT NOT NULL,
+    frame_ref_json TEXT,
+    context_json TEXT,
+    created_by TEXT,
+    created_at TEXT NOT NULL,
+    triage_state TEXT DEFAULT 'open'
+);
+""")
+# Pre-existing data that must NOT be lost
+_conn.execute(
+    "INSERT INTO visual_findings (finding_id, preview_id, kind, title, frame_ref_json, context_json, created_by, created_at) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    ("legacy-fid-1", "ia-vision-visor", "needs_work", "pre-F2 row", "{}", "{}", "old-session", "2026-09-01T00:00:00Z"),
+)
+_conn.commit()
+_conn.close()
+
+# Verify the legacy shape: 9 cols, no idempotency_key. SQLite always creates
+# an auto-index for PRIMARY KEY, so we can't expect index_list to be empty;
+# we just verify the only index is the implicit one (origin='c' or 'pk').
+_conn = _sq2.connect(LEGACY_DB)
+_cols_before = {r[1] for r in _conn.execute("PRAGMA table_info(visual_findings)").fetchall()}
+_idx_before = _conn.execute("PRAGMA index_list(visual_findings)").fetchall()
+_conn.close()
+check("legacy DB has 9 columns (no idempotency_key)",
+      len(_cols_before) == 9 and "idempotency_key" not in _cols_before)
+# Exclude the implicit PRIMARY KEY index: every other index in this table
+# would have been created by the application. Pre-F2 should have none.
+non_pk_indexes = [ix for ix in _idx_before
+                  if ix[3] != "pk" and not ix[1].startswith("sqlite_autoindex")]
+check("legacy DB has no application indexes on visual_findings",
+      len(non_pk_indexes) == 0)
+
+print("Step 2: point BFF at legacy DB, import fresh, run _init_db()")
+os.environ["CONTROL_DB"] = str(LEGACY_DB)
+# Drop cached bff module to force re-execution
+sys.modules.pop("main", None)
+sys.modules.pop("bff", None)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "bff"))
+import main as bff_legacy  # noqa: E402
+_importlib.reload(bff_legacy)
+check("BFF imported against legacy DB without error", bff_legacy is not None)
+
+print("Step 3: verify migration result")
+_conn = _sq2.connect(LEGACY_DB)
+_cols_after = {r[1] for r in _conn.execute("PRAGMA table_info(visual_findings)").fetchall()}
+check("post-migration has idempotency_key column", "idempotency_key" in _cols_after)
+check("post-migration still has 9 original columns",
+      len(_cols_after & {"finding_id","preview_id","kind","title","frame_ref_json",
+                         "context_json","created_by","created_at","triage_state"}) == 9)
+# Legacy row survived and got a backfilled key
+row = _conn.execute(
+    "SELECT finding_id, idempotency_key FROM visual_findings WHERE finding_id = 'legacy-fid-1'"
+).fetchone()
+check("legacy row preserved", row is not None and row[0] == "legacy-fid-1")
+check("legacy row has backfilled idempotency_key",
+      row is not None and row[1] is not None and row[1].startswith("legacy:"))
+# UNIQUE index now exists
+_idx_after = _conn.execute("PRAGMA index_list(visual_findings)").fetchall()
+has_uniq = False
+for ix in _idx_after:
+    info = _conn.execute(f"PRAGMA index_info({ix[1]})").fetchall()
+    if {r[2] for r in info} == {"idempotency_key"} and ix[2]:  # ix[2] is `unique` flag
+        has_uniq = True
+check("uniq_visual_findings_idem index exists and is unique", has_uniq)
+_conn.close()
+
+print("Step 4: idempotency still works post-migration (same key -> 200, same id)")
+from fastapi.testclient import TestClient as _TC2
+_legacy_client = _TC2(bff_legacy.app)
+# Hit / to get a session cookie
+_legacy_client.get("/")
+# Get the cookie from the client
+_session_cookie = None
+for c in _legacy_client.cookies.jar:
+    if c.name == "control_session":
+        _session_cookie = c.value
+        break
+check("legacy session cookie set", _session_cookie is not None)
+_legacy_cookies = {"control_session": _session_cookie} if _session_cookie else {}
+
+payload_mig = {
+    "preview_id": "ia-vision-visor",
+    "kind": "needs_work",
+    "title": "post-migration first call",
+    "frame_ref": {"video_id": 7},
+    "context": {"note": "first call after migrate"},
+}
+r_first = _legacy_client.post("/api/v1/findings", json=payload_mig,
+                              headers={"Idempotency-Key": "post-mig-key-1"},
+                              cookies=_legacy_cookies)
+check("first POST on migrated DB -> 201", r_first.status_code == 201)
+fid_first = r_first.json()["finding_id"]
+r_dup = _legacy_client.post("/api/v1/findings", json=payload_mig,
+                            headers={"Idempotency-Key": "post-mig-key-1"},
+                            cookies=_legacy_cookies)
+check("duplicate POST same key on migrated DB -> 200", r_dup.status_code == 200)
+check("duplicate POST returns same finding_id",
+      r_dup.json()["finding_id"] == fid_first)
+
+# Verify exactly 2 rows total (1 legacy + 1 new) — no duplicate created
+_conn = _sq2.connect(LEGACY_DB)
+_n_total = _conn.execute("SELECT COUNT(*) FROM visual_findings").fetchone()[0]
+_n_legacy = _conn.execute(
+    "SELECT COUNT(*) FROM visual_findings WHERE idempotency_key LIKE 'legacy:%'"
+).fetchone()[0]
+_n_new = _conn.execute(
+    "SELECT COUNT(*) FROM visual_findings WHERE idempotency_key NOT LIKE 'legacy:%'"
+).fetchone()[0]
+check("DB total = 2 rows (1 legacy + 1 new, no duplicate)", _n_total == 2)
+check("legacy rows preserved with legacy: prefix", _n_legacy == 1)
+check("new rows have non-legacy idempotency_key", _n_new == 1)
+_conn.close()
+
+print("Step 5: re-running migration is idempotent (no errors, no data loss)")
+# Call _init_db again via reload
+sys.modules.pop("main", None)
+sys.modules.pop("bff", None)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "bff"))
+import main as bff_re
+_importlib.reload(bff_re)
+_conn = _sq2.connect(LEGACY_DB)
+_n_after_rerun = _conn.execute("SELECT COUNT(*) FROM visual_findings").fetchone()[0]
+_cols_after_rerun = {r[1] for r in _conn.execute("PRAGMA table_info(visual_findings)").fetchall()}
+check("re-running migration preserves row count (2)", _n_after_rerun == 2)
+check("re-running migration preserves schema (idempotency_key present)",
+      "idempotency_key" in _cols_after_rerun)
+_conn.close()
+
+# Restore test env
+os.environ["CONTROL_DB"] = str(Path(__file__).resolve().parent / "_test_control.db")
+# Clean up legacy DB so it doesn't pollute gitignore
+LEGACY_DB.unlink(missing_ok=True)
+
+# ---------- END F2.1-UPGRADE-PATH ----------
+
 print()
 print(f"=== RESULT: {PASS} pass, {FAIL} fail ===")
 sys.exit(0 if FAIL == 0 else 1)
