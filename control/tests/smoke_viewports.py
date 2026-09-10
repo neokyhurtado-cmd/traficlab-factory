@@ -84,6 +84,14 @@ def smoke(page, label: str, width: int) -> dict:
           "HUMAN_GO" in pr_text, pr_text[:160])
 
     # ---- product cards: honesty about what is live ----
+    # Race condition guard: loadProducts() fires in parallel with the other
+    # boot fetches. Wait up to 5s for at least one product tile to appear
+    # before reading, otherwise we read the empty pre-fetch state and the
+    # IA-VISION/SUINI/NOT_AVAILABLE_YET assertions fail spuriously.
+    try:
+        page.wait_for_selector("#product-grid .tile", timeout=5000)
+    except Exception:
+        pass
     prod_text = page.inner_text("#product-grid")
     check(f"[{label}] IA-VISION card present", "IA-VISION" in prod_text)
     check(f"[{label}] SUINI card present", "SUINI" in prod_text)
