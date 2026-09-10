@@ -207,7 +207,154 @@ def test_owner_text_inverted_order_eligible():
     assert d["eligible"] is True
 
 
+def test_utf8_owner_text_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "a" * 40,
+        "owner_text": "apruebo merge de traficlab-factory#5 🚀",
+    })
+    assert d["eligible"] is True
+
+
+def test_double_space_in_owner_text_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "b" * 40,
+        "owner_text": "apruebo PR  #5  merge de traficlab-factory",
+    })
+    assert d["eligible"] is True
+
+
+def test_tab_in_owner_text_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "c" * 40,
+        "owner_text": "apruebo PR\t#5 merge de traficlab-factory",
+    })
+    assert d["eligible"] is True
+
+
+def test_case_insensitive_repo_name_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "d" * 40,
+        "owner_text": "apruebo PR#5 merge de TRAFICLAB-FACTORY",
+    })
+    assert d["eligible"] is True
+
+
+def test_multiple_PRs_no_target_pr_rejected():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "e" * 40,
+        "owner_text": "apruebo PR#1 y PR#2 también",
+    })
+    assert d["eligible"] is False
+    assert "mismatch" in d["reason"]
+
+
+def test_pr_substring_attack_rejected():
+    """PR number 99 must not match within PR#1999 or PR#990."""
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 99,
+        "expected_head": "f" * 40,
+        "owner_text": "apruebo PR#1999 merge de traficlab-factory",
+    })
+    assert d["eligible"] is False
+    assert "mismatch" in d["reason"]
+
+
+def test_pr_substring_safe_eligible():
+    """PR number 99 must match in PR#99 but NOT PR#990."""
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 99,
+        "expected_head": "01" * 20,
+        "owner_text": "apruebo PR#99 merge de traficlab-factory",
+    })
+    assert d["eligible"] is True
+
+
+def test_repo_substring_partial_match_documented():
+    """Edge case: 'traficlab-factory' matches within 'old-traficlab-factory-backup'.
+
+    This is by design — the gate accepts any text that mentions the target
+    repo name as a substring. The caller MUST verify against GitHub that the
+    PR exists in the EXACT target repo before merging. The gate is one
+    layer of defense, not the only one.
+    """
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "10" * 20,
+        "owner_text": "apruebo PR#5 merge de old-traficlab-factory-backup",
+    })
+    # Documented behavior: substring match is accepted
+    assert d["eligible"] is True
+    assert d["reason"] == "all_gates_passed"
+
+
+def test_blank_lines_between_relevant_lines_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "11" * 20,
+        "owner_text": "consideraciones varias\n\n\napruebo PR#5 merge de traficlab-factory\n\nmás texto",
+    })
+    assert d["eligible"] is True
+
+
+def test_markdown_format_in_owner_text_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "12" * 20,
+        "owner_text": "**apruebo** `PR#5` merge de **traficlab-factory**",
+    })
+    assert d["eligible"] is True
+
+
+def test_punctuation_around_target_eligible():
+    g = _fresh_gate()
+    d = g.evaluate({
+        "action": "merge",
+        "repo": "neokyhurtado-cmd/traficlab-factory",
+        "pr_number": 5,
+        "expected_head": "13" * 20,
+        "owner_text": "Ok, apruebo merge de traficlab-factory#5. Listo.",
+    })
+    assert d["eligible"] is True
+
+
+
 if __name__ == "__main__":
+    # Original 14 tests
     test_go_informal_rejected()
     test_continua_rejected()
     test_issue_citing_merge_rejected()
@@ -222,4 +369,16 @@ if __name__ == "__main__":
     test_empty_owner_text_rejected()
     test_replay_protection()
     test_owner_text_inverted_order_eligible()
-    print("ALL 14 TESTS PASS")
+    # 11 additional adversarial tests
+    test_utf8_owner_text_eligible()
+    test_double_space_in_owner_text_eligible()
+    test_tab_in_owner_text_eligible()
+    test_case_insensitive_repo_name_eligible()
+    test_multiple_PRs_no_target_pr_rejected()
+    test_pr_substring_attack_rejected()
+    test_pr_substring_safe_eligible()
+    test_repo_substring_partial_match_documented()
+    test_blank_lines_between_relevant_lines_eligible()
+    test_markdown_format_in_owner_text_eligible()
+    test_punctuation_around_target_eligible()
+    print("ALL 25 TESTS PASS")

@@ -62,8 +62,25 @@ assert result["eligible"] is True
 
 `python tests/test_human_go_gate_v2.py`
 
-14 adversarial tests covering: informal verbs, missing target, replay, stale head,
-bad SHA, bad action, empty owner_text, current_owner_text unrelated, etc.
+**25 adversarial tests** covering:
+- 14 original: informal verbs, missing target, replay, stale head, bad SHA, bad action,
+  empty owner_text, current_owner_text unrelated, etc.
+- 11 added: UTF-8/emoji owner_text, double space / tab whitespace, case-insensitive repo
+  name, multiple PRs without target (ambiguity), PR number substring attacks (`#1999` vs `#99`),
+  documented repo substring partial-match behavior, blank lines between relevant lines,
+  markdown formatting, punctuation around target.
+
+## Edge case: repo name substring
+
+The gate accepts owner_text that mentions the target repo name as a substring of a
+longer path (e.g. `traficlab-factory` matches within `old-traficlab-factory-backup`).
+This is by design — the gate is one layer of defense, not the only one. The caller
+MUST verify against GitHub that the PR exists in the EXACT target repo before merging.
+
+## Edge case: PR number word boundary
+
+`PR#99` matches `pr_number=99`, but `PR#1999` does NOT (the trailing `9` is a word
+char that breaks the boundary). Tested in `test_pr_substring_attack_rejected`.
 
 ## Out of scope (deliberate)
 
