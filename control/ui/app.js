@@ -466,7 +466,13 @@
       const grid = document.getElementById('health-grid');
       grid.replaceChildren();
       const rows = [
-        ['Hermes', h.hermes_version, true],
+        // Hermes tile was hardcoded ok=true even when the gateway was down
+        // (the BFF returns gateway_alive=false and hermes_version='unknown'
+        // in that case). The tile then displayed "VERIFIED" while the
+        // adjacent API Server tile correctly showed NOT_AVAILABLE_YET.
+        // Mirror the API Server logic: VERIFIED only when gateway is alive
+        // and the version is a meaningful string.
+        ['Hermes', h.hermes_version, h.gateway_alive && h.hermes_version !== 'unknown'],
         ['API Server', h.hermes_api_base, h.gateway_alive],
         ['BFF', h.bff_version, true],
         ['DB', h.db_path, true],
