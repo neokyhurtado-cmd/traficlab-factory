@@ -14,3 +14,6 @@ build/
 _test_*.db
 test_*.db
 _cookies.txt
+# viewport smoke artifacts (screenshots + result json) — evidence, not source
+artifacts/
+last_run.json
