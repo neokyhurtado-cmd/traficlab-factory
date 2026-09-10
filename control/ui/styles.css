@@ -165,6 +165,17 @@ h2 { font-size: 16px; margin: 24px 0 8px; color: var(--fg-muted); font-weight: 5
   padding: 14px;
   display: grid;
   gap: 8px;
+  /* CSS-grid children default to min-width:auto, which makes the tile grow
+     past the viewport whenever a long, unbreakable token lives inside
+     (.sub.mono with a Windows path, .na.small with a URL, etc.).
+     min-width:0 lets the grid track shrink so .sub.mono's overflow-wrap
+     can take effect on mobile. Regression asserted by smoke_viewports. */
+  min-width: 0;
+}
+
+.tile .sub.mono {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .tile h3 { margin: 0; font-size: 15px; font-weight: 600; }
 .tile .sub { color: var(--fg-muted); font-size: 12px; }

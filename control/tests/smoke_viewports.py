@@ -125,10 +125,33 @@ def smoke(page, label: str, width: int) -> dict:
     page.screenshot(path=str(OUT / f"{label}-timeline.png"), full_page=True)
 
     # ---- Health ----
+    # The BFF represents external dependencies honestly. When Hermes :9119 is
+    # unreachable, the BFF returns gateway_alive=false + hermes_version='unknown'
+    # and the UI tile shows NOT_AVAILABLE_YET. When Hermes IS up, the tile shows
+    # a real version string and VERIFIED. The smoke accepts both branches.
+    # Asserting on a hardcoded version string ("v0.20") was wrong: it conflated
+    # "Hermes up with a different version" with "Hermes down".
     page.click('.tab[data-tab="health"]')
     page.wait_for_timeout(900)
-    health = page.inner_text("#panel-health")
-    check(f"[{label}] health panel shows Hermes version", "v0.20" in health, health[:160])
+    health_tiles = page.eval_on_selector_all(
+        "#health-grid .tile", "els => els.map(e => e.innerText)")
+    hermes_tile = next((t for t in health_tiles if t.startswith("Hermes")), "")
+    api_server_tile = next((t for t in health_tiles if t.startswith("API Server")), "")
+    hermes_verified_real = (
+        "VERIFIED" in hermes_tile and "unknown" not in hermes_tile
+    )
+    hermes_unavailable = "NOT_AVAILABLE_YET" in hermes_tile
+    check(f"[{label}] health panel shows Hermes tile (verified OR NOT_AVAILABLE_YET)",
+          hermes_verified_real or hermes_unavailable, hermes_tile[:160])
+    api_ok = "VERIFIED" in api_server_tile or "NOT_AVAILABLE_YET" in api_server_tile
+    check(f"[{label}] health panel shows API Server tile with explicit state",
+          api_ok, api_server_tile[:160])
+    # Cross-check: Hermes and API Server should agree on gateway state, because
+    # both are read from gateway_alive in the same payload. Inconsistency is a
+    # regression of the UI's honest-dependency contract.
+    check(f"[{label}] Hermes and API Server tiles agree on gateway state",
+          ("VERIFIED" in hermes_tile) == ("VERIFIED" in api_server_tile),
+          f"hermes={hermes_tile[:60]!r} api={api_server_tile[:60]!r}")
     page.screenshot(path=str(OUT / f"{label}-health.png"), full_page=True)
 
     # ---- layout sanity: no panel may overflow the viewport horizontally ----
