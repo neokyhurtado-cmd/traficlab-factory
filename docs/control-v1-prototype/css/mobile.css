@@ -1,0 +1,24 @@
+/* mobile-only overrides */
+
+@media (max-width: 639.98px) {
+  body { font-size: 15px; }
+  .app-header { padding: 10px 12px; }
+  .app-main { padding: 12px; padding-bottom: 96px; }
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .kpi { padding: 10px 12px; }
+  .kpi .kpi-value { font-size: 20px; }
+  .card, .identity, .finding, .wo-card { padding: 10px 12px; }
+  .command-bar {
+    flex-wrap: wrap;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    margin: 16px -12px 0;
+    padding: 10px 12px calc(env(safe-area-inset-bottom, 0) + 10px);
+  }
+  .command-bar textarea { flex: 1 1 100%; min-height: 44px; }
+  .command-bar .sel-project { flex: 0 0 auto; }
+  .command-bar button[type="submit"] { flex: 1 0 auto; }
+  .nav-item .nav-label { display: inline; }
+  .brand-sub { display: none; }
+}
