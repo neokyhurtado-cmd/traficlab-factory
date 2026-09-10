@@ -12,7 +12,10 @@ they are evidence for the WO comment, not repo content.
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -60,6 +63,17 @@ def smoke(page, label: str, width: int) -> dict:
     page.wait_for_timeout(3500)
 
     # ---- Mission Control (default tab) ----
+    # Race condition guard: loadMission() fires in parallel with other
+    # boot fetches. After 3500ms we may still see the pre-fetch
+    # "Cargando meta activa…" placeholder. Wait explicitly for the goal
+    # title or for a populated KPI strip, then read.
+    try:
+        page.wait_for_function(
+            "() => { const t = document.getElementById('goal-card')?.innerText || ''; return t.length > 40 && !t.includes('Cargando'); }",
+            timeout=10000,
+        )
+    except Exception:
+        pass
     goal_text = page.inner_text("#goal-card")
     check(f"[{label}] Mission goal card is populated",
           len(goal_text.strip()) > 40 and "Cargando" not in goal_text,
@@ -186,6 +200,15 @@ def smoke(page, label: str, width: int) -> dict:
 
     check(f"[{label}] no console errors", not console_errors, "; ".join(console_errors[:3]))
     return {"viewport": label, "width": width, "console_errors": console_errors}
+
+
+# This smoke is deterministic only when the BFF's kanban DB has a known
+# state. See control/tests/_kanban_fixture.py for a helper that snapshots
+# the real kanban, installs a fixture, runs the smoke, and restores the
+# real kanban afterwards. Without the fixture, the Mission goal / KPI
+# strip / code tiles / open PRs checks fail when the kanban has no
+# active goal or no open PRs — which is exactly the kind of brittle
+# flake we want to avoid.
 
 
 results = []
