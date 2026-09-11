@@ -1,0 +1,92 @@
+name: directive-watcher-adversarial
+
+# P0 #5 / FULL_REPO_REGRESSION_CI (Phase 3 re-audit, PR #19 comment
+# 5629796729).
+#
+# Previously the only CI workflow (directive-watcher-ci.yml) ran the
+# repo's pytest discovery AND the standalone adversarial runner. The
+# adversarial runner requires ``fastapi``, which is NOT a watcher
+# runtime dependency, so the original CI step silently SKIPed it when
+# fastapi was absent and reported a partial regression.
+#
+# This is the dedicated, dependency-coupled adversarial workflow. It
+# installs fastapi + uvicorn as part of its own dependency set (NOT
+# the watcher's — no domain coupling). It only runs the standalone
+# control/tests/test_adversarial.py runner and fails CI if the
+# runner reports any non-zero / pass:0 / fail:N. Sucess/failure is
+# reported as a separate check, so the watcher CI no longer
+# carries a silent SKIP for the adversarial side.
+
+on:
+  push:
+    branches:
+      - feat/hermes-2.0-github-directive-watcher
+      - main
+  pull_request:
+    branches:
+      - main
+      - feat/hermes-2.0-github-directive-watcher
+
+concurrency:
+  group: directive-watcher-adversarial-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  adversarial:
+    name: Adversarial (Control BFF V0) — standalone runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install OS deps (for control/tests)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3
+
+      # The adversarial runner needs fastapi + uvicorn — these are
+      # NOT the watcher's runtime dependencies; the standalone runner
+      # pulls them in for its own use. Following the re-audit's
+      # "preferred closeout: separate CI job/dependency set" rule,
+      # we install them in this workflow only.
+      - name: Install adversarial dependency set
+        run: |
+          python -m pip install --upgrade pip
+          # The adversarial runner needs fastapi + uvicorn — these are
+          # NOT the watcher's runtime dependencies; the standalone runner
+          # pulls them in for its own use. Following the re-audit's
+          # "preferred closeout: separate CI job/dependency set" rule,
+          # we install them in this workflow only.
+          #
+          # httpx is a transitive dependency of starlette.testclient
+          # which fastapi.testclient uses; installing it explicitly
+          # here avoids a noisy RuntimeError on import.
+          pip install fastapi uvicorn httpx pytest
+
+      - name: Run standalone adversarial suite
+        run: |
+          set -euo pipefail
+          python control/tests/test_adversarial.py \
+            | tee /tmp/adversarial.log
+          echo
+          echo "## Adversarial standalone summary"
+          tail -1 /tmp/adversarial.log || true
+          # Fail loudly if the runner's PASS line is not exactly the
+          # expected canonical form. The runner prints
+          # ``=== RESULT: N pass, M fail ===`` at the end — any non-zero
+          # count of fail, OR missing marker, fails this job.
+          grep -q "^=== RESULT: .* pass, 0 fail ===$" /tmp/adversarial.log
+
+      - name: Upload adversarial log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adversarial-log
+          path: /tmp/adversarial.log

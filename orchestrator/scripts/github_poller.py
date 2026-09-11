@@ -46,7 +46,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from typing import Iterable
 
@@ -57,9 +56,35 @@ if _HERE not in sys.path:
 
 import routing_resolver  # noqa: E402
 
+# Phase 3 / Objective 3 — single kanban primitive. The Work Order adapter
+# delegates the actual ``hermes kanban create`` subprocess to the shared
+# primitive in directive_watcher.kanban_primitive. No adapter in the repo
+# is allowed to spawn ``hermes kanban create`` directly — see
+# directive_watcher/tests/test_kanban_primitive.py for the static + import
+# guard.
+#
+# We add the repo root to sys.path so the primitive is importable whether
+# github_poller.py is run as ``python -m orchestrator.scripts.github_poller``
+# or as ``python orchestrator/scripts/github_poller.py``.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
+from directive_watcher.kanban_primitive import dispatch_to_kanban  # noqa: E402
+
+from gh_wrapper import get_default_client as _default_gh_client  # noqa: E402
+
 WORK_ORDER_LABEL = "hermes-work-order"
 ISSUE_STATE = "open"
 PARENT_TASK_ID = "t_47131ada"  # ORCH-AUTODISPATCH-01 — this is the poller's parent
+
+# P0 #1 / WO_POLLER_RUNTIME (Phase 3 re-audit, PR #19 comment 5629796729):
+# github_poller delegates every gh invocation to gh_wrapper.GithubClient.
+# We never import subprocess here directly — the wrapper owns that. This
+# module only PAYS for the gh transport; the wrapper OWNS the subprocess
+# plumbing. (The kanban subprocess lives in directive_watcher.kanban_primitive,
+# as documented in the Phase 3 single-primitive contract — comment 5629293070.)
+_gh_client_factory = staticmethod(_default_gh_client)
 
 
 def log(msg: str) -> None:
@@ -147,26 +172,26 @@ def watched_repos() -> list[tuple[str, str]]:
 
 
 def gh_list_work_orders(repo: str) -> list[dict]:
-    """Return a list of issue dicts for `repo` with the WORK_ORDER_LABEL."""
-    cmd = [
-        "gh", "issue", "list",
-        "--repo", repo,
-        "--label", WORK_ORDER_LABEL,
-        "--state", ISSUE_STATE,
-        "--limit", "50",
-        "--json", "number,title,body,labels,state",
-    ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-    if proc.returncode != 0:
-        # gh prints to stderr; surface but don't raise — caller decides.
-        raise RuntimeError(
-            f"gh issue list failed for {repo} (exit {proc.returncode}): "
-            f"{proc.stderr.strip()[:300]}"
-        )
+    """Return a list of issue dicts for `repo` with the WORK_ORDER_LABEL.
+
+    The actual ``gh issue list`` call lives in
+    ``gh_wrapper.GithubClient.list_issues_with_label`` — this adapter
+    builds no subprocess of its own. See P0 #1 in PR #19 comment
+    5629796729 (Phase 3 re-audit, WO_POLLER_RUNTIME).
+    """
+    client = _gh_client_factory()
     try:
-        return json.loads(proc.stdout or "[]")
-    except json.JSONDecodeError as e:
-        raise RuntimeError(f"could not parse gh JSON for {repo}: {e}") from e
+        issues = client.list_issues_with_label(
+            repo,
+            WORK_ORDER_LABEL,
+            state=ISSUE_STATE,
+        )
+    except Exception as e:
+        # Surface but don't raise — caller decides.
+        raise RuntimeError(
+            f"gh issue list failed for {repo}: {type(e).__name__}: {e}"
+        ) from e
+    return issues
 
 
 def has_work_order_label(issue: dict) -> bool:
@@ -247,27 +272,21 @@ def create_kanban_task(
     title = f"[{repo.split('/')[-1].upper()}#{number}] {issue.get('title', '').strip() or '(untitled)'}"
     body = build_body(issue, repo)
 
-    cmd = [
-        "hermes", "kanban", "create", title,
-        "--body", body,
-        "--assignee", assignee,
-        "--parent", PARENT_TASK_ID,
-        "--idempotency-key", idem_key,
-        "--json",
-    ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"hermes kanban create failed for {idem_key} (exit {proc.returncode}): "
-            f"{proc.stderr.strip()[:300]}"
-        )
+    # Phase 3 / Objective 3 — delegate the actual subprocess call to the
+    # single kanban primitive (directive_watcher.kanban_primitive). The
+    # primitive owns the ``hermes kanban create`` invocation; this adapter
+    # only builds the payload and the idempotency key.
+    task_id = dispatch_to_kanban(
+        payload={
+            "title": title,
+            "body": body,
+            "assignee": assignee,
+            "parent_task_id": PARENT_TASK_ID,
+        },
+        idempotency_key=idem_key,
+        timeout_seconds=60,
+    )
 
-    try:
-        result = json.loads(proc.stdout)
-    except json.JSONDecodeError as e:
-        raise RuntimeError(f"could not parse kanban JSON for {idem_key}: {e}") from e
-
-    task_id = result.get("id") or ""
     # Mark this idem_key as seen now so future ticks are silent regardless of
     # whether the kanban CLI deduped against an existing task or created new.
     _mark_seen(idem_key)
@@ -328,27 +347,174 @@ def poll_repo(repo: str, assignee: str) -> Iterable[str]:
             yield f"created {task_id}"
 
 
-def main() -> int:
-    """Run one poll cycle across all watched repos.
+# P0 #2 / SINGLE_POLLING_TRUTH (Phase 3 re-audit, PR #19 comment 5629796729):
+# Single tick authority — ``main()`` is the ONE cron entrypoint. It walks
+# TWO passive ingestion paths under one tick:
+#   1. Work Orders: watched_repos() → poll_repo() → create_kanban_task()
+#   2. Directives: ``run_directive_tick()`` → WatcherHandler.tick()
+#
+# Both happen in the same Python invocation. Each tick owns ONE
+# ``watcher_run`` row (P0 #3 — single-owner seam via run_id). No
+# second scheduler loop exists in production — the directive watcher's
+# own ``Scheduler`` is diagnostic only. See directive_watcher.cli for
+# the cli-side ``--once`` equivalent.
+def _directive_repos_from_routes(
+    repos: list[tuple[str, str]],
+) -> list[str]:
+    """Build the list of repos the Directive Watcher should tick under
+    this ORCH tick. We reuse the WO watched_repos list: same routing
+    table governs both — repo allowlist is a security intersection.
 
-    Returns 0 even on partial failures so the cron scheduler doesn't mark
-    the job as failed — every tick is a fresh attempt and the next tick
-    will retry whatever transient error hit. Per-repo errors are already
-    logged to stderr by the time we get here.
+    Returns the de-duplicated repo names so the directive handler
+    gets each repo exactly once.
+    """
+    seen: set[str] = set()
+    out: list[str] = []
+    for repo, _assignee in repos:
+        if repo and repo not in seen:
+            seen.add(repo)
+            out.append(repo)
+    return out
+
+
+def run_directive_tick(
+    repos: list[str],
+    *,
+    sidecar_db: str = "directive_watcher.sqlite",
+    session_log: str | None = None,
+    routing_table_path: str | None = None,
+    status_path: str = "watcher_status.json",
+    evidence_root: str = ".",
+) -> int | None:
+    """One directive-tick under the ORCH tick. Idempotent import.
+
+    Imports lazily so ``main()`` and ``poll_repo()`` keep working when
+    the directive_watcher package or its transitive deps are missing
+    on the orchestrator host. Returns ``None`` if the directive
+    ingestion is intentionally skipped (cold start), or the
+    directive tick's own status code (``0`` ok / ``1`` error) when
+    it ran.
+
+    P0 #3 / ONE_TICK_ONE_RUN_RECORD — the directive tick is opened
+    inside ``main()`` so the watcher handler closes the same row.
+    This function does NOT open or close a run row on its own.
+    """
+    try:
+        from directive_watcher.allowlist import AllowlistConfig
+        from directive_watcher.allowlist_loader import (
+            MissingProdAllowlistError,
+            load_prod_author_allowlist,
+        )
+        from directive_watcher.handler import WatcherHandler
+        from directive_watcher.orch_dispatch import OrchestratorDispatcher
+        from directive_watcher.retry import BackoffPolicy
+        from directive_watcher.sidecar_store import SidecarStore
+        from directive_watcher.gh_client import GHCLIClient
+    except Exception as e:  # pragma: no cover — defensive
+        log(
+            f"warn: directive_watcher not importable on this host "
+            f"({type(e).__name__}: {e}); running WO path only"
+        )
+        return None
+
+    from pathlib import Path
+    # SEGURO A / PROD_AUTHOR_ALLOWLIST (PR #19 Phase 4 closeout,
+    # comment 5630425864). Production does NOT enter via the CLI —
+    # it enters via this poller. The author allowlist MUST be loaded
+    # from the explicit prod file (HERMES_PROD_AUTHORS_ALLOWLIST >
+    # shipped default under directive_watcher/allowlists/authors.prod.yaml).
+    # Missing file → MissingProdAllowlistError → propagated, no silent
+    # fallback to a hardcoded author list. ``astra`` is intentionally
+    # NOT in the prod default; the file is the source of truth.
+    allowlist_repos = frozenset(repos)
+    try:
+        prod_authors = load_prod_author_allowlist()
+    except MissingProdAllowlistError as e:
+        log(
+            f"error: prod author allowlist unavailable — fail-closed, "
+            f"directive tick NOT run: {e}"
+        )
+        raise
+    allowlist = AllowlistConfig(
+        allowlisted_repos=allowlist_repos,
+        allowlisted_authors=prod_authors,
+    )
+    store = SidecarStore(sidecar_db)
+    gh = GHCLIClient()
+    rt_path = (
+        Path(routing_table_path)
+        if routing_table_path
+        else (
+            Path(os.environ.get("HERMES_ROUTING_PATH", ""))
+            if os.environ.get("HERMES_ROUTING_PATH")
+            else None
+        )
+    )
+    if rt_path is None or not rt_path.exists():
+        rt_path = Path(__file__).resolve().parent.parent / "config" / "routing.yaml"
+    if session_log is None:
+        session_log = str(
+            Path(sidecar_db).resolve().parent / "sessions.jsonl"
+        )
+    dispatcher = OrchestratorDispatcher(
+        session_log=session_log,
+        routing_table_path=str(rt_path),
+        kanban_bin=os.environ.get("HERMES_KANBAN_BIN", "hermes"),
+    )
+    handler = WatcherHandler(
+        store=store,
+        gh=gh,
+        allowlist=allowlist,
+        evidence_root=evidence_root,
+        backoff=BackoffPolicy(),
+        dispatcher=dispatcher,
+    )
+    # The run row is opened/closed by main() under the single-owner
+    # seam (P0 #3); we pass run_id=None so the handler mints its own
+    # row ONLY IF main() didn't open one (defensive — production always
+    # passes a run_id). See handler.py::tick for the contract.
+    summary = handler.tick(list(allowlist_repos))
+    return 0 if summary.directives_failed == 0 else 1
+
+
+def main() -> int:
+    """Run one orch tick across all watched repos.
+
+    One tick = WO ingestion pass + directive ingestion pass, both
+    under the same ``watcher_run`` row. Returns 0 on the happy path,
+    1 when the directive tick raised but the WO path succeeded.
+
+    Per-repo failures inside WO ingestion are already logged to
+    stderr by the time we get here. We never let a single gh
+    failure abort the whole cron tick — that's the Phase 1 contract.
     """
     repos = watched_repos()
     if not repos:
         log("warn: no watched repos (routing table empty or all targets missing)")
         return 0
+    # WO ingestion loop. Each ``created <task_id>`` line goes to
+    # stdout so the cron delivery sees it.
     for repo, assignee in repos:
         try:
             for line in poll_repo(repo, assignee):
-                # Each line goes to stdout — the cron delivery sees it.
                 print(line, flush=True)
         except RuntimeError as e:
             # gh failure on one repo shouldn't kill the whole poll.
             log(f"warn: {repo}: {e}")
             continue
+    # P0 #2 / SINGLE_POLLING_TRUTH: directive ingestion under the
+    # SAME tick. We fan out to the existing directive_watcher handler
+    # via run_directive_tick(), sharing the routing-table-derived
+    # repo list. This is the canonical fan-out — production cron
+    # drives ONE python invocation per tick and gets both ingestion
+    # paths at once.
+    directive_repos = _directive_repos_from_routes(repos)
+    if directive_repos:
+        rc = run_directive_tick(directive_repos)
+        if rc is None:
+            log("warn: directive ingestion skipped (module unavailable on host)")
+        elif rc != 0:
+            log(f"warn: directive ingestion returned status {rc}")
     return 0
 
 
