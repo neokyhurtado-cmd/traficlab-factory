@@ -66,6 +66,9 @@ def test_scheduler_runs_until_max_ticks(tmp_path, monkeypatch):
 
 def test_scheduler_writes_status_after_each_tick(tmp_path, monkeypatch):
     store = SidecarStore(tmp_path / "sidecar.db")
+    # SEGURO B / FRESH_START_WATERMARK: pre-seed so the fresh-start
+    # replay guard does not block the scheduler test fixtures.
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     gh = FakeGitHubClient()
     gh.set_branch_head(
         "neokyhurtado-cmd/traficlab-factory", "main",
@@ -101,6 +104,7 @@ def test_scheduler_writes_status_after_each_tick(tmp_path, monkeypatch):
 
 def test_scheduler_stops_on_should_stop(tmp_path, monkeypatch):
     store = SidecarStore(tmp_path / "sidecar.db")
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     gh = FakeGitHubClient()
     allowlist = AllowlistConfig(
         allowlisted_repos=frozenset({"neokyhurtado-cmd/traficlab-factory"}),

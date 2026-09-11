@@ -1,0 +1,25 @@
+# Production author allowlist — production fail-closed default.
+#
+# SEGURO A / PROD_AUTHOR_ALLOWLIST (PR #19 Phase 4 closeout).
+#
+# This file is the SINGLE source of truth for production author
+# allowlisting. Both ``directive_watcher.cli --env=prod`` AND
+# ``orchestrator/scripts/github_poller.run_directive_tick`` read from
+# here (via ``directive_watcher.allowlist_loader.load_prod_author_allowlist``).
+#
+# Contract:
+#   - If this file is MISSING → the watcher fails closed (exit code 3
+#     from the CLI; MissingProdAllowlistError raised from the poller).
+#     No fallback to a hardcoded author list. Ever.
+#   - If ``allowlisted_authors`` is empty → fail closed.
+#   - GitHub logins are matched case-insensitively.
+#
+# Default: ONLY ``neokyhurtado-cmd`` (David). ``astra`` is intentionally
+# NOT in the default prod allowlist because the production watcher must
+# only accept directives from David; Astra's re-audits come through
+# David in the governance process, not through the watcher's auto-execution
+# path. See ``authors.prod.yaml.example`` for the operator-facing notes.
+#
+# To add an author, append a new ``- <login>`` line below.
+allowlisted_authors:
+  - neokyhurtado-cmd

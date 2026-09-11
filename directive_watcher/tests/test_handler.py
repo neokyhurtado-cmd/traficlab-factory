@@ -51,6 +51,11 @@ def _directive_body(directive_id: str = "d-1", requires_hgr: bool = False) -> st
 @pytest.fixture
 def env(tmp_path):
     store = SidecarStore(tmp_path / "sidecar.db")
+    # SEGURO B / FRESH_START_WATERMARK: pre-seed the watermark to 0 so
+    # the fixture is treated as "already-seeded". Existing tests in
+    # this file assert behaviour downstream of the cutoff, not the
+    # cutoff itself; the new SEGURO B tests cover the cutoff directly.
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     gh = FakeGitHubClient()
     # Seed (repo, "main") for the legacy ``EXPECTED_HEAD = NONE`` /
     # ``TARGET_BRANCH = AUTO_FROM_ISSUE_CONTEXT`` sentinels (CONTEXT_BINDING_FAIL_CLOSED
@@ -217,6 +222,9 @@ def test_edited_body_after_ack_does_not_silently_rerun(env):
 def test_restart_does_not_re_execute_finalised_directive(tmp_path):
     db = tmp_path / "sidecar.db"
     store = SidecarStore(db)
+    # SEGURO B / FRESH_START_WATERMARK: pre-seed the watermark so the
+    # fixture does not trip the fresh-start replay guard.
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     gh = FakeGitHubClient()
     gh.set_branch_head(
         "neokyhurtado-cmd/traficlab-factory", "main",
@@ -237,8 +245,13 @@ def test_restart_does_not_re_execute_finalised_directive(tmp_path):
     h1.tick(["neokyhurtado-cmd/traficlab-factory"])
     assert len(gh.posted) == 2
     # Restart: re-open the same db file, fresh handler, same fake client.
+    store2 = SidecarStore(db)
+    # SEGURO B: keep the watermark seeded (the existing store has it,
+    # but re-open creates a new handle and we want the test to be
+    # self-contained).
+    store2.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     h2 = WatcherHandler(
-        store=SidecarStore(db),
+        store=store2,
         gh=gh,
         allowlist=allowlist,
         evidence_root=str(tmp_path),

@@ -91,6 +91,10 @@ def test_handler_tick_processes_two_repos_with_independent_cursors(
     tmp_path, monkeypatch
 ):
     store = SidecarStore(tmp_path / "sidecar.db")
+    # SEGURO B / FRESH_START_WATERMARK: pre-seed both repos so the
+    # fresh-start replay guard does not block the cursor test fixtures.
+    store.set_watermark(repo="neokyhurtado-cmd/repoA", value=0)
+    store.set_watermark(repo="neokyhurtado-cmd/repoB", value=0)
     gh = FakeGitHubClient()
     # Seed (repo, "main") for legacy sentinels.
     for r in {"neokyhurtado-cmd/repoA", "neokyhurtado-cmd/repoB"}:

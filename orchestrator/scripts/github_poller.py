@@ -401,6 +401,10 @@ def run_directive_tick(
     """
     try:
         from directive_watcher.allowlist import AllowlistConfig
+        from directive_watcher.allowlist_loader import (
+            MissingProdAllowlistError,
+            load_prod_author_allowlist,
+        )
         from directive_watcher.handler import WatcherHandler
         from directive_watcher.orch_dispatch import OrchestratorDispatcher
         from directive_watcher.retry import BackoffPolicy
@@ -414,12 +418,26 @@ def run_directive_tick(
         return None
 
     from pathlib import Path
-    # Best-effort allowlist — fall back to the routed repos (the WO
-    # path already validated them via routing_resolver).
+    # SEGURO A / PROD_AUTHOR_ALLOWLIST (PR #19 Phase 4 closeout,
+    # comment 5630425864). Production does NOT enter via the CLI —
+    # it enters via this poller. The author allowlist MUST be loaded
+    # from the explicit prod file (HERMES_PROD_AUTHORS_ALLOWLIST >
+    # shipped default under directive_watcher/allowlists/authors.prod.yaml).
+    # Missing file → MissingProdAllowlistError → propagated, no silent
+    # fallback to a hardcoded author list. ``astra`` is intentionally
+    # NOT in the prod default; the file is the source of truth.
     allowlist_repos = frozenset(repos)
+    try:
+        prod_authors = load_prod_author_allowlist()
+    except MissingProdAllowlistError as e:
+        log(
+            f"error: prod author allowlist unavailable — fail-closed, "
+            f"directive tick NOT run: {e}"
+        )
+        raise
     allowlist = AllowlistConfig(
         allowlisted_repos=allowlist_repos,
-        allowlisted_authors=frozenset({"astra", "neokyhurtado-cmd"}),
+        allowlisted_authors=prod_authors,
     )
     store = SidecarStore(sidecar_db)
     gh = GHCLIClient()

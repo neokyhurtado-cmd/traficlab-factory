@@ -188,31 +188,40 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if args.env == "prod":
-        # Production path: the author allowlist MUST be loaded from an
-        # explicit file. --config (which contains repos + authors in the
-        # test fixture shape) is NOT consulted in prod. Missing file →
-        # fail-closed, exit code != 0, clear stderr message.
-        prod_authors_path = args.author_allowlist
-        if not prod_authors_path:
+        # Production path: the author allowlist MUST be loaded via the
+        # shared loader (SEGURO A, PR #19 Phase 4 closeout). The CLI and
+        # ``orchestrator/scripts/github_poller.run_directive_tick`` both
+        # call ``load_prod_author_allowlist`` — same function, same fail-
+        # closed contract. ``--config`` only carries the repos in prod.
+        # Missing prod file → MissingProdAllowlistError → fail-closed
+        # exit code 3, never a hardcoded fallback.
+        try:
+            from directive_watcher.allowlist_loader import (
+                MissingProdAllowlistError,
+                load_prod_author_allowlist,
+            )
+        except Exception as e:  # pragma: no cover — defensive
             LOG.error(
-                "--env=prod requires --author-allowlist (fail-closed; "
-                "exiting without loading --config)"
+                "allowlist_loader not importable on this host (%s: %s); "
+                "fail-closed",
+                type(e).__name__,
+                e,
             )
             return 3
-        if not Path(prod_authors_path).is_file():
+        try:
+            prod_authors = load_prod_author_allowlist(args.author_allowlist)
+        except MissingProdAllowlistError as e:
             LOG.error(
                 "author allowlist file missing — fail-closed: %s",
-                prod_authors_path,
+                e,
             )
             return 3
-        # Load the production author allowlist and merge it into a
-        # config that also carries the repos from --config.
-        prod_allowlist, _ = load_allowlist(prod_authors_path)
-        # Read the repos from --config but use the prod author allowlist.
+        # Repos come from --config (which is the test/fixture-style
+        # combined file); the prod author allowlist overrides authors.
         repos_config, repos = load_allowlist(args.config)
         allowlist = AllowlistConfig(
             allowlisted_repos=repos_config.allowlisted_repos,
-            allowlisted_authors=prod_allowlist.allowlisted_authors,
+            allowlisted_authors=prod_authors,
         )
         if not repos:
             LOG.error("no allowlisted_repos in config — fail-closed; exiting")

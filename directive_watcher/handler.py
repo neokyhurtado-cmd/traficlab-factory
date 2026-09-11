@@ -423,6 +423,31 @@ class WatcherHandler:
                 merged.append(c)
         merged.sort(key=lambda c: c.id)
 
+        # SEGURO B / FRESH_START_WATERMARK (PR #19 Phase 4 closeout,
+        # comment 5630425864). On a brand-new sidecar (no watermark
+        # for this repo), seed the watermark to the max comment id
+        # currently visible — then DO NOT execute anything from this
+        # first batch. Every comment in this batch is, by definition,
+        # pre-watermark and would be replayed as a historical
+        # directive. The cutoff is temporal: it runs BEFORE the
+        # sentinel/binding logic so a directive written months ago
+        # with ``EXPECTED_HEAD = NONE`` cannot be replayed just
+        # because the live HEAD now equals itself.
+        if not self._store.has_watermark(repo):
+            # Compute the max id across the merged stream — we don't
+            # need a separate ``list_recent_comments`` call because
+            # the merged list already covers recent + new. If the
+            # repo has NO comments at all yet, we seed 0 and the
+            # next batch will be post-watermark.
+            seed = max((c.id for c in merged), default=0)
+            self._store.set_watermark(repo=repo, value=seed)
+            LOG.info(
+                "fresh-start watermark seeded for %s: value=%d "
+                "(first batch will be skipped as historical)",
+                repo,
+                seed,
+            )
+
         summary.comments_seen += len(merged)
         # Advance the per-repo cursor. We use the max id of ``new_comments``
         # (genuinely new) — ``recent_comments`` may contain ids older
@@ -444,6 +469,35 @@ class WatcherHandler:
     ) -> None:
         body_sha = _sha256(comment.body)
         self._store.mark_seen(comment.id, body_sha)
+        # SEGURO B / FRESH_START_WATERMARK (PR #19 Phase 4 closeout).
+        # If the comment's id is at or below the per-repo watermark,
+        # we treat it as a historical observation: mark_seen'd (so the
+        # per-repo cursor doesn't re-poll it) but NEVER parsed as a
+        # directive and NEVER executed. The cutoff runs BEFORE
+        # parse_directive so neither the sentinel resolution
+        # (``NONE`` → live HEAD) nor ``AUTO_FROM_ISSUE_CONTEXT`` can
+        # pull a historical comment into execution.
+        #
+        # The gate is ``has_watermark``, not ``wm > 0``: a watermark
+        # seeded at 0 (used by tests that want to bypass the fresh-
+        # start guard without seeding past every comment id) still
+        # counts as ``seeded`` and the cutoff is a no-op for any
+        # positive comment id.
+        if self._store.has_watermark(repo):
+            wm = self._store.get_watermark(repo)
+            if comment.id <= wm:
+                summary.directives_skipped += 1
+                summary.notes.append(
+                    f"historical_observed:comment={comment.id}:watermark={wm}"
+                )
+                LOG.info(
+                    "historical_observed (pre-watermark): repo=%s comment=%d "
+                    "watermark=%d — skipping parse + dispatch",
+                    repo,
+                    comment.id,
+                    wm,
+                )
+                return
         try:
             d = parse_directive(comment.body)
         except DirectiveParseError as e:

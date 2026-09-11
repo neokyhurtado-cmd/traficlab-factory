@@ -66,6 +66,19 @@ CREATE TABLE IF NOT EXISTS repo_cursor (
     last_seen_comment_id INTEGER NOT NULL,
     last_seen_at     INTEGER NOT NULL
 );
+
+-- SEGURO B / FRESH_START_WATERMARK (PR #19 Phase 4 closeout).
+-- A watermark per repo: the max comment id that was visible at the
+-- time of the FIRST tick after a fresh sidecar start. Comments with
+-- id <= watermark are ``historical_observed`` but never executable —
+-- the cutoff is temporal and runs BEFORE the sentinel/binding logic
+-- so a directive written months ago with ``EXPECTED_HEAD = NONE``
+-- cannot be replayed just because the live HEAD now equals itself.
+CREATE TABLE IF NOT EXISTS repo_watermark (
+    repo             TEXT PRIMARY KEY,
+    watermark        INTEGER NOT NULL,
+    set_at           INTEGER NOT NULL
+);
 """
 
 ACK_CLAIMED = "CLAIMED"
@@ -245,6 +258,82 @@ class SidecarStore:
                 "SELECT repo, last_seen_comment_id FROM repo_cursor"
             ).fetchall()
         return {repo: int(cid) for repo, cid in rows}
+
+    # --- per-repo watermark (Fix B / SEGURO B from Phase 4 re-audit) ------
+    #
+    # The re-audit (PR #19 comment 5630425864) found that the
+    # CONTEXT_BINDING_FAIL_CLOSED contracts leave a gap: directives
+    # whose ``EXPECTED_HEAD = NONE`` resolve to the live HEAD at
+    # compare time, so the comparison always passes (it compares the
+    # resolved value to itself). A historical directive written six
+    # months ago is therefore tautologically accepted today. The
+    # watermark is a temporal cutoff that runs BEFORE the sentinel:
+    # on the first tick after a fresh start we record the max
+    # comment id currently visible, then never act on comments at or
+    # below that id. Sentinels still work for comments newer than
+    # the watermark.
+    #
+    # Monotone non-decreasing: ``set_watermark`` only ever raises the
+    # value. That matches the watcher invariant: ``we never
+    # re-process a comment we've already moved past`` and the
+    # historical cutoff must never shrink.
+
+    def has_watermark(self, repo: str) -> bool:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT 1 FROM repo_watermark WHERE repo = ?", (repo,)
+            ).fetchone()
+        return row is not None
+
+    def get_watermark(self, repo: str) -> int:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT watermark FROM repo_watermark WHERE repo = ?",
+                (repo,),
+            ).fetchone()
+        return int(row[0]) if row else 0
+
+    def set_watermark(self, *, repo: str, value: int) -> None:
+        """Set (or raise) the watermark for ``repo``. Monotone: lower
+        values are ignored so the historical cutoff never shrinks.
+
+        ``value == 0`` is allowed and explicitly marks the watermark
+        as ``seeded at floor``. The handler's pre-watermark cutoff
+        uses ``has_watermark`` (not ``wm > 0``) as the gate, so a
+        floor-seeded watermark means ``no comment is pre-watermark``
+        — used by tests that need to bypass the fresh-start replay
+        guard without seeding past every comment id they will add.
+        """
+        if value < 0:
+            return
+        now = int(time.time())
+        with self._txn() as c:
+            row = c.execute(
+                "SELECT watermark FROM repo_watermark WHERE repo = ?",
+                (repo,),
+            ).fetchone()
+            if row is None:
+                c.execute(
+                    "INSERT INTO repo_watermark (repo, watermark, set_at) "
+                    "VALUES (?, ?, ?)",
+                    (repo, int(value), now),
+                )
+            else:
+                existing = int(row[0])
+                if int(value) > existing:
+                    c.execute(
+                        "UPDATE repo_watermark SET watermark = ?, set_at = ? "
+                        "WHERE repo = ?",
+                        (int(value), now, repo),
+                    )
+
+    def list_watermarks(self) -> dict[str, int]:
+        """Snapshot of every (repo → watermark) the store knows about."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT repo, watermark FROM repo_watermark"
+            ).fetchall()
+        return {repo: int(w) for repo, w in rows}
 
     # --- claim / idempotency ----------------------------------------------
 

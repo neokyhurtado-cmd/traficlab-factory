@@ -72,6 +72,9 @@ def routing_table(tmp_path: Path) -> Path:
 @pytest.fixture
 def env_with_dispatcher(tmp_path: Path, routing_table: Path):
     store = SidecarStore(tmp_path / "sidecar.db")
+    # SEGURO B / FRESH_START_WATERMARK: pre-seed so the fresh-start
+    # replay guard does not block the dispatch test fixtures.
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     gh = FakeGitHubClient()
     # Seed (repo, "main") for legacy EXPECTED_HEAD=NONE /
     # TARGET_BRANCH=AUTO_FROM_ISSUE_CONTEXT sentinels.

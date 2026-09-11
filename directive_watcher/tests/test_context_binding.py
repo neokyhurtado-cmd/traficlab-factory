@@ -75,6 +75,14 @@ def _directive_body(
 @pytest.fixture
 def env(tmp_path: Path):
     store = SidecarStore(tmp_path / "sidecar.db")
+    # SEGURO B / FRESH_START_WATERMARK (PR #19 Phase 4 closeout):
+    # pre-seed the watermark to 0 so the existing CONTEXT_BINDING_FAIL_CLOSED
+    # fixtures are treated as "already-seeded". The cutoff is the
+    # subject of the dedicated SEGURO B tests in
+    # ``test_fresh_start_watermark.py``; here we want to assert the
+    # binding behaviour independently of the temporal cutoff.
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
+    store.set_watermark(repo="neokyhurtado-cmd/IA-VISION", value=0)
     gh = FakeGitHubClient()
     allowlist = AllowlistConfig(
         allowlisted_repos=frozenset({

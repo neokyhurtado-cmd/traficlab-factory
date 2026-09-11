@@ -77,12 +77,27 @@ def test_prod_env_with_explicit_author_file_admits_allowlisted_author(
     # both and assert BOTH happen with the expected paths.
     import directive_watcher.cli as cli_mod
 
-    captured = {"calls": []}
+    captured = {"prod_loader_calls": [], "load_allowlist_calls": []}
+
+    # SEGURO A (PR #19 Phase 4 closeout): the CLI now delegates prod
+    # author allowlist loading to the shared loader
+    # ``directive_watcher.allowlist_loader.load_prod_author_allowlist``.
+    # Spy on BOTH that loader (for prod) and the legacy
+    # ``cli_mod.load_allowlist`` (for repos from --config).
+    import directive_watcher.allowlist_loader as loader_mod
+
+    orig_prod_load = loader_mod.load_prod_author_allowlist
+
+    def spy_prod_load(path=None):
+        captured["prod_loader_calls"].append(path)
+        return orig_prod_load(path)
+
+    loader_mod.load_prod_author_allowlist = spy_prod_load
 
     orig_load = cli_mod.load_allowlist
 
     def spy_load(path):
-        captured["calls"].append(path)
+        captured["load_allowlist_calls"].append(path)
         return orig_load(path)
 
     cli_mod.load_allowlist = spy_load
@@ -96,16 +111,18 @@ def test_prod_env_with_explicit_author_file_admits_allowlisted_author(
             "--once",
         ])
     finally:
+        loader_mod.load_prod_author_allowlist = orig_prod_load
         cli_mod.load_allowlist = orig_load
 
-    # Both files must have been consulted.
-    assert str(prod_file) in captured["calls"], (
-        f"--env=prod must load the prod allowlist; "
-        f"calls were {captured['calls']}"
+    # The prod file must have been consulted via the shared loader.
+    assert str(prod_file) in captured["prod_loader_calls"], (
+        f"--env=prod must call load_prod_author_allowlist with the prod "
+        f"file; calls were {captured['prod_loader_calls']}"
     )
-    assert str(config) in captured["calls"], (
+    # The config (repos) must have been consulted via load_allowlist.
+    assert str(config) in captured["load_allowlist_calls"], (
         f"--env=prod must also load --config (for repos); "
-        f"calls were {captured['calls']}"
+        f"calls were {captured['load_allowlist_calls']}"
     )
     # rc is 0 (clean tick) or 1 (error) — both acceptable; the contract is
     # about the load path.
@@ -142,6 +159,10 @@ def test_prod_env_blocks_author_not_in_prod_file(tmp_path, isolated_cli):
         allowlisted_authors=prod_allowlist.allowlisted_authors,
     )
     store = SidecarStore(tmp_path / "sidecar.db")
+    # SEGURO B / FRESH_START_WATERMARK: pre-seed the watermark so this
+    # test asserts the author-not-allowlisted gate, not the fresh-start
+    # watermark cutoff.
+    store.set_watermark(repo="neokyhurtado-cmd/traficlab-factory", value=0)
     gh = FakeGitHubClient()
     gh.set_branch_head(
         "neokyhurtado-cmd/traficlab-factory", "main",
