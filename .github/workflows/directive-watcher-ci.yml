@@ -111,8 +111,12 @@ jobs:
             echo "- \`$suite\`: $count"
           done
           echo
-          echo "control/tests/test_adversarial.py (standalone): see /tmp/adversarial.log"
-          tail -1 /tmp/adversarial.log
+          if [ -f /tmp/adversarial.log ]; then
+            echo "control/tests/test_adversarial.py (standalone): see /tmp/adversarial.log"
+            tail -1 /tmp/adversarial.log
+          else
+            echo "control/tests/test_adversarial.py (standalone): SKIPPED (no fastapi — pre-existing dep outside Phase 3 scope)"
+          fi
 
       - name: Upload pytest log
         if: always()
