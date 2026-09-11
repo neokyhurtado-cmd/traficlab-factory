@@ -502,3 +502,117 @@ Adversarial (separate CI job):                   depends on operator's fastapi i
     `EXPECTED_HEAD = NONE` envelopes must seed `(repo, "main")` in
     `FakeGitHubClient.set_branch_head()` so the resolution returns a
     real sha.
+
+
+---
+
+# Phase 4 closeout — SEGURO A + SEGURO B (PR #19 comment 5630425864)
+
+> Frozen closeout on top of `b9a4bb3` (the Phase 3 CONTEXT_BINDING_FAIL_CLOSED
+> closeout). NO merge, NO activation, NO micro-GO. Two residual gaps the
+> Phase 3 closeout did NOT cover, both biters.
+
+## The two closed gates
+
+| #  | Gate | Where | Bite test |
+|----|------|-------|-----------|
+| A  | **PROD_AUTHOR_ALLOWLIST**: production reads the author allowlist from an explicit file (`HERMES_PROD_AUTHORS_ALLOWLIST` > shipped default `directive_watcher/allowlists/authors.prod.yaml`); missing/empty file → `MissingProdAllowlistError` → propagated, no fallback to a hardcoded author list; `astra` is intentionally NOT in the default prod file. Single loader used by both the CLI and the cron poller. | `directive_watcher/allowlist_loader.py` (new); `orchestrator/scripts/github_poller.py::run_directive_tick` (no more `frozenset({"astra", "neokyhurtado-cmd"})`); `directive_watcher/cli.py` (delegates to the loader) | `orchestrator/scripts/test_prod_author_allowlist.py::test_no_hardcoded_prod_author_tuple_in_run_directive_tick` (sabotage guard) |
+| B  | **FRESH_START_WATERMARK**: per-repo `watermark` persisted in the sidecar; on first tick after fresh start the watermark is seeded to the max comment id currently visible and the entire first batch is skipped as `historical_observed`. The cutoff is temporal and runs BEFORE sentinel resolution — neither `EXPECTED_HEAD = NONE` nor `AUTO_FROM_ISSUE_CONTEXT = YES` can pull a historical comment into execution because the cutoff happens before `parse_directive`. Sentinels still work for post-watermark comments. | `directive_watcher/sidecar_store.py` (`repo_watermark` table + `set/get/has_watermark` + `list_watermarks`); `directive_watcher/handler.py::_tick_repo` (seed on fresh start); `directive_watcher/handler.py::_process_comment` (cutoff before parse) | `directive_watcher/tests/test_fresh_start_watermark.py::test_no_unconditional_skip_in_process_comment` (sabotage guard) |
+
+## TDD shape (every claim above has RED → GREEN → SABOTAGE that bites)
+
+```
+SEGURO A — orchestrator/scripts/test_prod_author_allowlist.py
+  test_run_directive_tick_loads_prod_allowlist_from_env_file         green
+  test_run_directive_tick_denies_astra_when_not_in_prod_file          green
+  test_run_directive_tick_fail_closed_when_prod_file_missing          green
+  test_run_directive_tick_fail_closed_when_env_unset                  green
+  test_load_prod_author_allowlist_reads_yaml_and_normalises            green
+  test_load_prod_author_allowlist_rejects_missing_file                 green
+  test_load_prod_author_allowlist_rejects_empty_list                   green
+  test_no_hardcoded_prod_author_tuple_in_run_directive_tick           green
+  ── sabotage: revert loader call, restore `frozenset({"astra", ...})`
+     → 5 failures with the literal 'frozenset({"astra", "neokyhurtado-cmd"})'
+     in the assert message. Restored.
+
+SEGURO B — directive_watcher/tests/test_fresh_start_watermark.py
+  test_historical_comment_with_stale_head_blocked_by_watermark         green
+  test_historical_comment_with_NONE_sentinel_blocked_by_watermark     green   <-- the biter
+  test_historical_comment_with_auto_from_ctx_blocked_by_watermark      green   <-- the biter
+  test_post_watermark_comment_with_NONE_sentinel_still_allowed         green
+  test_watermark_seeded_on_first_tick                                  green
+  test_watermark_persists_across_sidecar_close_open                    green
+  test_watermark_only_monotone_increase                                green
+  test_watermark_api_set_get_has                                       green
+  test_no_unconditional_skip_in_process_comment                        green   <-- sabotage guard
+  ── sabotage: revert the `has_watermark` cutoff
+     → 6 failures including 'WatcherHandler._process_comment lost the watermark check'.
+     Restored.
+```
+
+## Gotcha #25
+
+25. **The `EXPECTED_HEAD = NONE` and `AUTO_FROM_ISSUE_CONTEXT = YES` sentinels do NOT protect against historical replay. The temporal cutoff must run BEFORE the sentinel resolution.** This is the lesson of the Phase 4 re-audit (comment 5630425864). The sentinel pattern is: resolve at compare-time to the live branch HEAD, then compare. The resolution makes a stale `EXPECTED_HEAD = NONE` directive's effective value equal to today's HEAD, so the binding check passes by construction (`x == x` for any `x`). The Phase 3 CONTEXT_BINDING_FAIL_CLOSED contracts (#1 REPO_BINDING, #2 ISSUE_BINDING, #3 HEAD_BINDING, #4 AUTO_FROM_ISSUE_CONTEXT) only catch a directive whose envelope spells out a wrong literal — they cannot catch a directive whose envelope said "match whatever the current HEAD is" months ago. The fix is a per-repo `watermark` in the sidecar: on the first tick after a fresh start, the watcher records the max comment id currently visible and refuses to execute any comment with `id <= watermark`. The sentinels still work for post-watermark comments (a directive written today with `EXPECTED_HEAD = NONE` resolves to today's HEAD and is admitted). The watermark is monotone non-decreasing — it can only go up, never down, so the historical cutoff can never shrink. **This is the same gotcha as a fresh DB that hasn't seen any writes yet**: a `cursor = 0` does not mean "no comments to read", it means "no comments have been observed yet". The watermark pattern is the temporal counterpart: `watermark = 0` does not mean "all comments are historical", it means "no cutoff has been seeded yet — wait for the fresh-start seeding pass". Use `has_watermark`, not `wm > 0`, as the gate.
+
+## Why these are not arch changes
+
+SEGURO A is a code-organisation fix (single loader instead of two
+hardcoded sources of truth). SEGURO B is a sidecar-table addition +
+a two-line cutoff in `_process_comment`. No new products, no new
+contracts, no new dependencies. The watcher can be activated after
+this commit; the human (David) owns that activation decision.
+
+## Files changed in Phase 4 closeout
+
+```
+NEW
+  directive_watcher/allowlist_loader.py                       # SEGURO A loader
+  directive_watcher/allowlists/authors.prod.yaml               # SEGURO A default prod file (neokyhurtado-cmd only)
+  directive_watcher/tests/test_fresh_start_watermark.py        # SEGURO B tests (9)
+  orchestrator/scripts/test_prod_author_allowlist.py           # SEGURO A tests (8)
+
+MODIFIED
+  orchestrator/scripts/github_poller.py                        # SEGURO A — call loader, no hardcode
+  directive_watcher/cli.py                                     # SEGURO A — reuse shared loader
+  directive_watcher/handler.py                                 # SEGURO B — seed + cutoff in _tick_repo / _process_comment
+  directive_watcher/sidecar_store.py                           # SEGURO B — repo_watermark table + API (monotone non-decreasing)
+  directive_watcher/tests/test_cli_env_separation.py           # spy updated for the new loader; existing fixture pre-seeds watermark=0
+  directive_watcher/tests/test_context_binding.py              # env fixture pre-seeds watermark=0 for both seeded repos
+  directive_watcher/tests/test_durable_publication.py          # env fixture pre-seeds watermark=0
+  directive_watcher/tests/test_handler.py                      # env fixture pre-seeds watermark=0 (incl. restart test)
+  directive_watcher/tests/test_handler_with_dispatch.py        # env fixture pre-seeds watermark=0
+  directive_watcher/tests/test_per_repo_cursor.py              # multi-repo tick test pre-seeds both repos
+  directive_watcher/tests/test_scheduler_cli.py                # scheduler tick tests pre-seed watermark=0
+```
+
+Existing CONTEXT_BINDING_FAIL_CLOSED tests pre-seed the watermark to
+`0` so they continue to assert the **binding** behaviour
+independently of the new **temporal** cutoff — the biter tests live
+in `test_fresh_start_watermark.py` and assert the cutoff directly.
+
+## Suite enumeration — Phase 4 closeout baseline (`7b9419d`)
+
+```
+directive_watcher/tests/                          167 tests collected, 167 PASS
+                                                  (+ 9 test_fresh_start_watermark)
+orchestrator/scripts/                             108 tests collected, 108 PASS
+                                                  (+ 8 test_prod_author_allowlist)
+control/tests/test_adversarial.py (standalone)   91 pass, 0 fail (REPORTED SEPARATELY by directive-watcher-adversarial.yml)
+TOTAL_PYTEST = 275 passed (full repo, no testpaths narrowing)
+```
+
+Baseline at `b9a4bb3` was 258; +17 new tests, 0 regressions.
+
+## What did NOT change in Phase 4
+
+- No merge, no activation, no micro-GO.
+- `OrchestratorDispatcher` survives (Phase 3 domain adaptor).
+- `SessionRecord` shape unchanged from Phase 2.
+- `control/bff/main.py` and `control/tests/test_adversarial.py` left
+  dirty (pre-existing, NOT touched — documented exclusions across
+  all phases).
+- Incident provenance preserved: `b5bbcc1` (`noop`) and `b2cbbb6`
+  (`chore: remove accidental noop file`) stay on the branch.
+- Phase 3 closeout commits (`b9a4bb3`, `07d44c3`, `69201ef`,
+  `f326ecf`, `9cde16e`, `0ccc7af`, `8907a60`) NOT rewritten.
+- Phase 2 commits (`d730a0b`, ...) NOT rewritten.
