@@ -119,7 +119,7 @@ def test_handler_wired_to_dispatcher_emits_dispatched_with_session_bind(
 
     fake_kanban = '{"id": "t_e2e_real", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban, stderr=""),
     ) as m_run:
         summary = handler.tick(["neokyhurtado-cmd/traficlab-factory"])
@@ -156,7 +156,7 @@ def test_handler_when_dispatcher_fails_emits_blocked(
     gh.add(_make_comment(102, _directive_body("d-fail")))
 
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=1, stdout="", stderr="kanban: boom"),
     ):
         summary = handler.tick(["neokyhurtado-cmd/traficlab-factory"])
@@ -178,7 +178,7 @@ def test_handler_does_not_redispatch_already_claimed(env_with_dispatcher):
 
     fake_kanban = '{"id": "t_idem", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban, stderr=""),
     ) as m_run:
         handler.tick(["neokyhurtado-cmd/traficlab-factory"])

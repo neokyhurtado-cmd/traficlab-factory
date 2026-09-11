@@ -72,8 +72,23 @@ def build_status(
     last_result_status = last_result[1] if last_result else (
         finalised[0]["result_status"] if finalised else None
     )
+    # Phase 3 / Objective 5 — fail-honest status. Watcher status MUST
+    # be derived from the last run, never hardcoded. See Astra re-audit
+    # review 5174697532 + the Phase 3 directive (comment 5629246987):
+    #   - last_run_status == "ok"   → "healthy"
+    #   - last_run_status == "error"→ "degraded"
+    #   - last_run_status is None   → "unknown" (we have never run)
+    # The previous version always returned "healthy" and let failed
+    # ticks look healthy on the War Room panel — exactly the lie the
+    # directive forbids.
+    if last_run_status == "ok":
+        derived_status = "healthy"
+    elif last_run_status == "error":
+        derived_status = "degraded"
+    else:
+        derived_status = "unknown"
     return WatcherStatus(
-        watcher_status="healthy",
+        watcher_status=derived_status,
         last_poll_at=int(time.time()),
         last_seen_comment_id=store.last_seen_comment_id(),
         active_execution=None,

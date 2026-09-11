@@ -24,6 +24,15 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
+# Phase 3 / Objective 3 — the github_poller adapter delegates the
+# ``hermes kanban create`` subprocess to the single kanban primitive.
+# Tests patch the primitive's subprocess, so we need to import it here.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
+import directive_watcher.kanban_primitive  # noqa: E402
+
 import github_poller  # noqa: E402
 import routing_resolver  # noqa: E402
 
@@ -202,7 +211,7 @@ def test_create_kanban_task_succeeds_when_resolver_allows(
             )
         return _FakeProc(stdout="[]", returncode=0)
 
-    monkeypatch.setattr(github_poller.subprocess, "run", fake_run)
+    monkeypatch.setattr(directive_watcher.kanban_primitive.subprocess, "run", fake_run)
 
     task_id, was_created = github_poller.create_kanban_task(
         issue_sample, "neokyhurtado-cmd/suini", "suini"
@@ -237,7 +246,7 @@ def test_create_kanban_task_skips_when_already_seen(
         invoked["count"] += 1
         return _FakeProc(stdout="[]", returncode=0)
 
-    monkeypatch.setattr(github_poller.subprocess, "run", fake_run)
+    monkeypatch.setattr(directive_watcher.kanban_primitive.subprocess, "run", fake_run)
 
     task_id, was_created = github_poller.create_kanban_task(
         issue_sample, "neokyhurtado-cmd/suini", "suini"
@@ -262,7 +271,7 @@ def test_create_kanban_task_skips_when_resolver_denies(
         invoked["count"] += 1
         return _FakeProc(stdout="[]", returncode=0)
 
-    monkeypatch.setattr(github_poller.subprocess, "run", fake_run)
+    monkeypatch.setattr(directive_watcher.kanban_primitive.subprocess, "run", fake_run)
 
     # Repo that's NOT in the routing table → resolver denies.
     task_id, was_created = github_poller.create_kanban_task(
@@ -289,7 +298,7 @@ def test_create_kanban_task_skips_when_routing_table_assignee_drifts(
         invoked["count"] += 1
         return _FakeProc(stdout="[]", returncode=0)
 
-    monkeypatch.setattr(github_poller.subprocess, "run", fake_run)
+    monkeypatch.setattr(directive_watcher.kanban_primitive.subprocess, "run", fake_run)
 
     # The poller thinks the assignee is `orchestrator`, but the routing
     # table says `suini`. Without the guard, the kanban CLI would create
@@ -314,7 +323,7 @@ def test_create_kanban_task_marks_seen_after_creation(
     def fake_run(cmd, *args, **kwargs):
         return _FakeProc(stdout=json.dumps({"id": "t_x"}), returncode=0)
 
-    monkeypatch.setattr(github_poller.subprocess, "run", fake_run)
+    monkeypatch.setattr(directive_watcher.kanban_primitive.subprocess, "run", fake_run)
 
     github_poller.create_kanban_task(
         issue_sample, "neokyhurtado-cmd/suini", "suini"
@@ -341,7 +350,7 @@ def test_create_kanban_task_second_call_same_idem_key_is_silent(
             return _FakeProc(stdout=json.dumps({"id": "t_x"}), returncode=0)
         return _FakeProc(stdout="[]", returncode=0)
 
-    monkeypatch.setattr(github_poller.subprocess, "run", fake_run)
+    monkeypatch.setattr(directive_watcher.kanban_primitive.subprocess, "run", fake_run)
 
     github_poller.create_kanban_task(
         issue_sample, "neokyhurtado-cmd/suini", "suini"

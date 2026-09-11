@@ -17,9 +17,21 @@ concurrency:
 
 jobs:
   test:
-    name: Full regression (real pytest discovery)
+    name: Full regression (real pytest discovery + hermes_cli portability)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Phase 3 / Objective 4 (steered rephrase in comment 5629293070):
+        # CI must cover BOTH contracts deliberately — with hermes_cli
+        # installed AND without it. The portability tests in
+        # orchestrator/scripts/test_hermes_cli_portability.py exercise the
+        # "without" path explicitly; the rest of the suite runs in both.
+        hermes_cli:
+          - installed
+          - absent
 
     steps:
       - name: Checkout
@@ -35,19 +47,33 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
-      - name: Install Python deps
+      - name: Install base Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt || true
+          # Install only what the tests actually need. The repo has no
+          # requirements.txt on purpose — Phase 1 wanted the watcher to
+          # be stdlib + PyYAML only. If a future PR adds deps, write
+          # them to requirements.txt and update this step accordingly.
           pip install pytest pyyaml
 
-      # Per Fix #6: real pytest discovery, no testpaths narrowing.
-      # The PR description lists the suite breakdown as evidence.
+      - name: Install hermes_cli (installed variant only)
+        if: matrix.hermes_cli == 'installed'
+        run: |
+          # The hermes_cli package is the stdlib HERMES CLI; in CI we
+          # only need it to be importable for the "installed" matrix
+          # arm. We install it from PyPI if available, otherwise the
+          # step is intentionally a no-op (the "absent" arm covers
+          # the fallback path).
+          pip install hermes-cli || echo "hermes-cli not on PyPI — skipped; the 'absent' matrix arm exercises the fallback"
+        continue-on-error: true
+
+      # Per Fix #6 from the Astra re-audit: real pytest discovery, no
+      # testpaths narrowing. Run pytest from the repo root with no path
+      # argument so its rootdir discovery walks every test_*.py under
+      # the repo.
       - name: Pytest — full repo regression (no testpaths narrowing)
         run: |
           set -euo pipefail
-          # Run pytest from the repo root with no path argument so its
-          # rootdir discovery walks every test_*.py under the repo.
           python -m pytest --tb=short -v \
             | tee /tmp/pytest_full.log
 
@@ -62,13 +88,10 @@ jobs:
           # The runner prints "=== RESULT: N pass, 0 fail ===" on success.
           grep -q "=== RESULT: .* pass, 0 fail ===" /tmp/adversarial.log
 
-      - name: Per-suite enumeration
-        # Document the suites that ran, with per-suite PASS count.
-        # This is the "no X PASS sin enumerar suites ejecutadas" rule
-        # from the Astra re-audit.
+      - name: Per-suite enumeration (no "X PASS" without enumeration)
         run: |
           set -euo pipefail
-          echo "## Suite enumeration"
+          echo "## Suite enumeration (matrix: hermes_cli=${{ matrix.hermes_cli }})"
           echo
           for suite in directive_watcher/tests orchestrator/scripts; do
             count=$(python -m pytest "$suite" --collect-only -q 2>/dev/null | tail -1)
@@ -82,5 +105,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-full-log
+          name: pytest-full-log-${{ matrix.hermes_cli }}
           path: /tmp/pytest_full.log

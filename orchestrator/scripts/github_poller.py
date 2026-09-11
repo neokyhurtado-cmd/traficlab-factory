@@ -46,7 +46,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from typing import Iterable
 
@@ -56,6 +55,22 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 import routing_resolver  # noqa: E402
+
+# Phase 3 / Objective 3 — single kanban primitive. The Work Order adapter
+# delegates the actual ``hermes kanban create`` subprocess to the shared
+# primitive in directive_watcher.kanban_primitive. No adapter in the repo
+# is allowed to spawn ``hermes kanban create`` directly — see
+# directive_watcher/tests/test_kanban_primitive.py for the static + import
+# guard.
+#
+# We add the repo root to sys.path so the primitive is importable whether
+# github_poller.py is run as ``python -m orchestrator.scripts.github_poller``
+# or as ``python orchestrator/scripts/github_poller.py``.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
+from directive_watcher.kanban_primitive import dispatch_to_kanban  # noqa: E402
 
 WORK_ORDER_LABEL = "hermes-work-order"
 ISSUE_STATE = "open"
@@ -247,27 +262,21 @@ def create_kanban_task(
     title = f"[{repo.split('/')[-1].upper()}#{number}] {issue.get('title', '').strip() or '(untitled)'}"
     body = build_body(issue, repo)
 
-    cmd = [
-        "hermes", "kanban", "create", title,
-        "--body", body,
-        "--assignee", assignee,
-        "--parent", PARENT_TASK_ID,
-        "--idempotency-key", idem_key,
-        "--json",
-    ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"hermes kanban create failed for {idem_key} (exit {proc.returncode}): "
-            f"{proc.stderr.strip()[:300]}"
-        )
+    # Phase 3 / Objective 3 — delegate the actual subprocess call to the
+    # single kanban primitive (directive_watcher.kanban_primitive). The
+    # primitive owns the ``hermes kanban create`` invocation; this adapter
+    # only builds the payload and the idempotency key.
+    task_id = dispatch_to_kanban(
+        payload={
+            "title": title,
+            "body": body,
+            "assignee": assignee,
+            "parent_task_id": PARENT_TASK_ID,
+        },
+        idempotency_key=idem_key,
+        timeout_seconds=60,
+    )
 
-    try:
-        result = json.loads(proc.stdout)
-    except json.JSONDecodeError as e:
-        raise RuntimeError(f"could not parse kanban JSON for {idem_key}: {e}") from e
-
-    task_id = result.get("id") or ""
     # Mark this idem_key as seen now so future ticks are silent regardless of
     # whether the kanban CLI deduped against an existing task or created new.
     _mark_seen(idem_key)

@@ -49,7 +49,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 import time
 import uuid
@@ -65,6 +64,7 @@ if str(_ORCH_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_ORCH_SCRIPTS))
 
 from directive_watcher.directive_parser import Directive  # noqa: E402
+from directive_watcher.kanban_primitive import dispatch_to_kanban  # noqa: E402
 
 
 # --- Session Registry model --------------------------------------------------
@@ -343,17 +343,26 @@ class OrchestratorDispatcher:
         return decision.assignee or "hermes-director"
 
     # ---- Kanban dispatch --------------------------------------------------
+    #
+    # Phase 3 / Objective 3 — single kanban primitive. This adapter is a
+    # domain adaptor: it builds the kanban payload from a Directive and
+    # delegates the actual ``hermes kanban create`` subprocess to
+    # ``directive_watcher.kanban_primitive.dispatch_to_kanban``. No
+    # adapter in the repo is allowed to spawn ``hermes kanban create``
+    # directly — see ``directive_watcher/tests/test_kanban_primitive.py``
+    # for the static + import guard.
 
     def _invoke_kanban(
         self,
         directive: Directive,
         assignee: str,
     ) -> str:
-        """Invoke the hermes kanban create CLI and return the task_id.
+        """Build the kanban payload from the directive and delegate to
+        the single primitive. Returns the kanban task_id.
 
-        Reuses the same idempotency-key convention as github_poller.py:
-        ``directive:<DIRECTIVE_ID>`` so a second invocation dedupes
-        naturally via the kanban CLI.
+        The idempotency_key convention (``directive:<DIRECTIVE_ID>``) is
+        preserved so re-runs dedupe naturally through the kanban CLI's
+        own --idempotency-key handling.
         """
         idem_key = f"directive:{directive.directive_id}"
         title = (
@@ -372,29 +381,26 @@ class OrchestratorDispatcher:
             f"---\n\n"
             f"{directive.scope}\n"
         )
-        cmd = [
-            self._kanban_bin, "kanban", "create", title,
-            "--body", body,
-            "--assignee", assignee,
-            "--parent", self._parent_task_id,
-            "--idempotency-key", idem_key,
-            "--json",
-        ]
-        proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=self._timeout_seconds
-        )
-        if proc.returncode != 0:
-            raise DispatchError(
-                f"hermes kanban create failed for {directive.directive_id} "
-                f"(exit {proc.returncode}): {proc.stderr.strip()[:300]}"
-            )
+        payload = {
+            "title": title,
+            "body": body,
+            "assignee": assignee,
+            "parent_task_id": self._parent_task_id,
+        }
         try:
-            result = json.loads(proc.stdout or "{}")
-        except json.JSONDecodeError as e:
+            return dispatch_to_kanban(
+                payload,
+                idem_key,
+                kanban_bin=self._kanban_bin,
+                timeout_seconds=self._timeout_seconds,
+            )
+        except (ValueError, RuntimeError) as exc:
+            # Re-raise as DispatchError so the handler maps it to
+            # BLOCKED_EXTERNAL_REAL without leaking primitive details.
             raise DispatchError(
-                f"could not parse kanban JSON: {e}"
-            ) from e
-        return str(result.get("id") or "")
+                f"kanban dispatch failed for {directive.directive_id}: "
+                f"{type(exc).__name__}: {exc}"
+            ) from exc
 
     # ---- Public dispatch entry point -------------------------------------
 

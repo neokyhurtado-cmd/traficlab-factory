@@ -95,7 +95,7 @@ def test_dispatch_creates_real_session_record(tmp_path: Path, routing_table: Pat
 
     fake_kanban_output = '{"id": "t_fake_001", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         result = dispatcher.dispatch(
@@ -135,7 +135,7 @@ def test_dispatch_failure_raises(tmp_path: Path, routing_table: Path):
     d = parse_directive(_directive_body(directive_id="d-002"))
 
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=1, stdout="", stderr="kanban: boom"),
     ):
         with pytest.raises(DispatchError):
@@ -157,7 +157,7 @@ def test_dispatch_is_idempotent_per_directive_id(
 
     fake_kanban_output = '{"id": "t_fake_003", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ) as m_run:
         first = dispatcher.dispatch(
@@ -181,7 +181,7 @@ def test_sessions_survive_restart(tmp_path: Path, routing_table: Path):
 
     fake_kanban_output = '{"id": "t_fake_004", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         dispatcher_a.dispatch(
@@ -204,7 +204,7 @@ def test_concurrent_directives_create_independent_sessions(
 
     fake_kanban_output = '{"id": "t_fake_X", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         r1 = dispatcher.dispatch(DispatchRequest(d1, 101, "exec-A"))
@@ -224,7 +224,7 @@ def test_same_directive_different_execution_conflicts(
 
     fake_kanban_output = '{"id": "t_fake_Y", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         dispatcher.dispatch(
@@ -243,7 +243,7 @@ def test_session_state_transitions(tmp_path: Path, routing_table: Path):
 
     fake_kanban_output = '{"id": "t_fake_T", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         r = dispatcher.dispatch(
@@ -276,7 +276,7 @@ def test_invalid_session_state_rejected(tmp_path: Path, routing_table: Path):
 
     fake_kanban_output = '{"id": "t_bad", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         r = dispatcher.dispatch(
@@ -318,7 +318,7 @@ def test_active_sessions_json_shape(tmp_path: Path, routing_table: Path):
 
     fake_kanban_output = '{"id": "t_shape", "created_at": 1700000000}'
     with mock.patch(
-        "directive_watcher.orch_dispatch.subprocess.run",
+        "directive_watcher.kanban_primitive.subprocess.run",
         return_value=mock.Mock(returncode=0, stdout=fake_kanban_output, stderr=""),
     ):
         dispatcher.dispatch(
