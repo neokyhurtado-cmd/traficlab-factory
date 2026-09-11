@@ -20,6 +20,7 @@ import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from contextlib import contextmanager
 from typing import Any, AsyncIterator
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -30,7 +31,17 @@ from pydantic import BaseModel, Field
 LOG = logging.getLogger("control.bff")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-APP_VERSION = "control-v0.0.1"
+# `readmodels`/`sources` are sibling modules. The BFF is started both as
+# `uvicorn control.bff.main:app` (package context) and imported flat by the test
+# suite via `sys.path.insert(.../bff)` + `import main`. Putting this directory on
+# sys.path makes the plain `import readmodels` below work identically in both.
+_BFF_DIR = str(Path(__file__).resolve().parent)
+if _BFF_DIR not in sys.path:
+    sys.path.insert(0, _BFF_DIR)
+
+import readmodels  # noqa: E402  (must follow the sys.path bootstrap above)
+
+APP_VERSION = "control-v0.1.0"
 SCHEMA_VERSION_READ = "control-read-model/v1.0.0"
 SCHEMA_VERSION_EVENT = "control-event/v1.0.0"
 
@@ -68,6 +79,30 @@ def _db() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     return conn
 
+@contextmanager
+def _db_conn():
+    """Transactional connection that is actually CLOSED on exit.
+
+    P1 fix: `with sqlite3.connect(...) as conn` commits the transaction but does
+    NOT close the connection — that is documented sqlite3 behaviour and a
+    long-standing footgun. Every request through this BFF therefore leaked one
+    OS file handle, relying on GC to eventually reclaim it.
+
+    On Windows the leak is not merely untidy: a live handle blocks `os.unlink`,
+    so the upgrade-path test's teardown hit `PermissionError [WinError 32]` as
+    soon as import timing shifted enough to delay collection. The leak was
+    always there; it only became visible now.
+
+    This wrapper preserves the commit-on-success / rollback-on-exception
+    semantics callers already depend on, and adds the missing close().
+    """
+    conn = _db()
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
+
 def _init_db() -> None:
     """Idempotent schema bootstrap + F2.1 legacy migration.
 
@@ -81,7 +116,7 @@ def _init_db() -> None:
          stable per-row key, then create the UNIQUE index. Safe to run on
          already-migrated databases (no-op).
     """
-    with _db() as conn:
+    with _db_conn() as conn:
         conn.executescript("""
         CREATE TABLE IF NOT EXISTS events (
             event_id TEXT PRIMARY KEY,
@@ -357,7 +392,7 @@ async def create_finding(
     idem_key = supplied or _derive_idempotency_key(payload)
 
     # Check for existing finding with this idempotency_key.
-    with _db() as conn:
+    with _db_conn() as conn:
         existing_row = conn.execute(
             "SELECT * FROM visual_findings WHERE idempotency_key = ?", (idem_key,)
         ).fetchone()
@@ -404,7 +439,7 @@ async def create_finding(
         created_at=now,
         triage_state="open",
     )
-    with _db() as conn:
+    with _db_conn() as conn:
         conn.execute(
             "INSERT INTO visual_findings VALUES (?,?,?,?,?,?,?,?,?,?)",
             (fid, payload.preview_id, payload.kind, payload.title,
@@ -419,9 +454,53 @@ async def create_finding(
     )
     return finding
 
+# ---------------------------------------------------------------------------
+# V0.1 panel surfaces — Mission Control / Evidence Timeline / Human-Go Inbox
+# ---------------------------------------------------------------------------
+# These are strictly read-only projections over real sources (kanban.db opened
+# ?mode=ro, git read-only verbs, gh api GETs, TCP probes). Every field carries
+# its own provenance + state so the UI can render NOT_AVAILABLE_YET visibly
+# instead of an empty box that reads as "everything is fine".
+#
+# No endpoint below writes anything, anywhere — least of all to IA-VISION or
+# SUINI, whose repos/DBs/runtimes stay untouched per suini#54 hard boundaries.
+
+@app.get("/api/v1/mission")
+async def mission(_: None = Depends(require_session)) -> dict[str, Any]:
+    """Mission Control: active goal, gate, owner, repo/branch/SHA, CI, PRs, queue."""
+    return readmodels.mission_control()
+
+
+@app.get("/api/v1/timeline")
+async def timeline(
+    request: Request,
+    _: None = Depends(require_session),
+) -> dict[str, Any]:
+    """Evidence Timeline over real kanban lifecycle events."""
+    raw_limit = request.query_params.get("limit", "40")
+    try:
+        limit = max(1, min(200, int(raw_limit)))
+    except ValueError:
+        limit = 40
+    include_hb = request.query_params.get("heartbeats", "0") in ("1", "true", "yes")
+    return readmodels.evidence_timeline(limit=limit, include_heartbeats=include_hb)
+
+
+@app.get("/api/v1/human-go")
+async def human_go(_: None = Depends(require_session)) -> dict[str, Any]:
+    """Human-Go Inbox: only what genuinely needs David (blocked tasks + merge gates)."""
+    return readmodels.human_go_inbox()
+
+
+@app.get("/api/v1/products")
+async def products(_: None = Depends(require_session)) -> dict[str, Any]:
+    """IA-VISION / SUINI cards with probed targets; unproven targets say so."""
+    return readmodels.product_cards()
+
+
 @app.get("/api/v1/findings", response_model=list[VisualReviewFinding])
 async def list_findings(_: None = Depends(require_session)) -> list[VisualReviewFinding]:
-    with _db() as conn:
+    with _db_conn() as conn:
         rows = conn.execute("SELECT * FROM visual_findings ORDER BY created_at DESC").fetchall()
     out = []
     for r in rows:
@@ -466,7 +545,7 @@ async def _publish_event(kind: str, payload: dict[str, Any], goal_id: str | None
         "payload": payload,
     }
     try:
-        with _db() as conn:
+        with _db_conn() as conn:
             conn.execute(
                 "INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (event_id, correlation, envelope["project_id"], goal_id, None, "control-bff",

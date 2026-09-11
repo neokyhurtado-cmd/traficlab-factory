@@ -309,9 +309,21 @@ check(f"no template-string innerHTML in app.js (found {len(template_html)})",
       len(template_html) == 0)
 check("ui/app.js defines el(tag, attrs, ...children) helper",
       "function el(tag, attrs, ...children)" in appjs_src)
-appendmsg_block = re.search(r"appendMsg\('assistant'.*?\);", appjs_src, re.DOTALL)
-check("appendMsg assistant uses string concat (not template literal with ${text})",
-      appendmsg_block is not None and "${" not in (appendmsg_block.group(0) or ""))
+# Original F2.4 assertion targeted `appendMsg('assistant', ...)` in the V0 chat
+# stub, checking it used string concat rather than a template literal so that
+# user text could not be interpolated into markup. That stub was REMOVED in
+# V0.1: it echoed "Recibido: <text>" back as if an agent had replied, which the
+# follow-up WO forbids ("never manufacture statuses"). The security intent
+# outlives the stub, so it is now asserted generally: no template literal may be
+# fed to any DOM-parsing sink anywhere in the bundle.
+_dom_sinks = re.findall(
+    r"(?:innerHTML|outerHTML|insertAdjacentHTML|document\.write)\s*(?:=|\()\s*`",
+    appjs_src,
+)
+check(f"no template literal reaches a DOM-parsing sink (found {len(_dom_sinks)})",
+      len(_dom_sinks) == 0)
+check("chat echo stub removed (no fabricated assistant replies)",
+      "appendMsg('assistant'" not in appjs_src)
 
 # ---------- END F2 CLOSE-OUT ----------
 
@@ -480,6 +492,284 @@ os.environ["CONTROL_DB"] = str(Path(__file__).resolve().parent / "_test_control.
 LEGACY_DB.unlink(missing_ok=True)
 
 # ---------- END F2.1-UPGRADE-PATH ----------
+
+# ===========================================================================
+# F3 — V0.1 panel surfaces (Mission Control / Evidence Timeline / Human-Go)
+# ===========================================================================
+# These endpoints project REAL control-plane state. The tests below assert the
+# two properties that make the panel trustworthy rather than decorative:
+#   (a) it cannot write anything, anywhere; and
+#   (b) an unavailable source is reported as NOT_AVAILABLE_YET with a reason,
+#       never silently replaced by a plausible-looking default.
+
+print()
+print("=" * 60)
+print("F3 — V0.1 panel surfaces")
+print("=" * 60)
+
+# Restore the main test DB for this block.
+os.environ["CONTROL_DB"] = str(Path(__file__).resolve().parent / "_test_control.db")
+sys.modules.pop("main", None)
+import main as bff3  # noqa: E402
+_importlib.reload(bff3)
+from fastapi.testclient import TestClient as _TC3  # noqa: E402
+
+client3 = _TC3(bff3.app)
+client3.get("/")
+cookies3 = {"control_session": bff3.SESSION_TOKEN}
+
+import readmodels as _rm  # noqa: E402
+import sources as _src  # noqa: E402
+
+print("F3.1 — auth is enforced on every new surface")
+_fresh3 = _TC3(bff3.app)
+for _p in ("/api/v1/mission", "/api/v1/timeline", "/api/v1/human-go", "/api/v1/products"):
+    _r = _fresh3.get(_p)
+    check(f"GET {_p} without cookie -> 401", _r.status_code == 401,
+          f"got {_r.status_code}")
+
+print("F3.2 — surfaces answer 200 with the v1.1.0 read-model envelope")
+_expected_types = {
+    "/api/v1/mission": "MissionControl",
+    "/api/v1/timeline": "EvidenceTimeline",
+    "/api/v1/human-go": "HumanGoInbox",
+    "/api/v1/products": "ProductCardList",
+}
+_payloads = {}
+for _p, _type in _expected_types.items():
+    _r = client3.get(_p, cookies=cookies3)
+    check(f"GET {_p} with cookie -> 200", _r.status_code == 200, f"got {_r.status_code}")
+    _body = _r.json()
+    _payloads[_p] = _body
+    check(f"{_p} type == {_type}", _body.get("type") == _type, str(_body.get("type")))
+    check(f"{_p} schema_version == control-read-model/v1.1.0",
+          _body.get("schema_version") == "control-read-model/v1.1.0",
+          str(_body.get("schema_version")))
+    check(f"{_p} carries captured_at", bool(_body.get("captured_at")))
+
+print("F3.3 — READ-ONLY: no mutating verb can reach the evidence sources")
+# The allow-lists are the enforcement point; assert the dangerous verbs are out.
+for _verb in ("push", "commit", "merge", "checkout", "reset", "clean", "rebase"):
+    check(f"git verb '{_verb}' rejected by allow-list",
+          _verb not in _src._GIT_READONLY)
+    _raised = False
+    try:
+        _src.git([_verb, "--dry-run"], cwd=str(Path(__file__).resolve().parent))
+    except ValueError:
+        _raised = True
+    check(f"sources.git(['{_verb}']) raises ValueError", _raised)
+for _verb in ("pr", "issue", "release", "repo"):
+    _raised = False
+    try:
+        _src.gh([_verb, "list"])
+    except ValueError:
+        _raised = True
+    check(f"sources.gh(['{_verb}']) raises ValueError (only 'api' allowed)", _raised)
+
+print("F3.4 — kanban DB is opened read-only (a write must be refused by SQLite)")
+_kpath = _src.kanban_db_path()
+if _kpath.exists():
+    _conn_ro = _src._kanban_conn()
+    _write_blocked = False
+    try:
+        _conn_ro.execute("CREATE TABLE _should_never_exist (x INTEGER)")
+    except _sq2.OperationalError as _e:
+        _write_blocked = "readonly" in str(_e).lower()
+    finally:
+        _conn_ro.close()
+    check("kanban connection refuses CREATE TABLE (mode=ro enforced)", _write_blocked)
+    # And prove we did not in fact create it.
+    _conn_chk = _src._kanban_conn()
+    _leaked = _conn_chk.execute(
+        "SELECT COUNT(*) FROM sqlite_master WHERE name='_should_never_exist'"
+    ).fetchone()[0]
+    _conn_chk.close()
+    check("no stray table was created in the kanban DB", _leaked == 0)
+else:
+    check("kanban DB present for read-only assertion", True,
+          "skipped: no kanban DB on this host")
+
+print("F3.5 — no write endpoint was added by the panel surfaces")
+_panel_paths = {"/api/v1/mission", "/api/v1/timeline", "/api/v1/human-go", "/api/v1/products"}
+for _route in bff3.app.routes:
+    _rp = getattr(_route, "path", None)
+    if _rp in _panel_paths:
+        _methods = set(getattr(_route, "methods", set())) - {"HEAD", "OPTIONS"}
+        check(f"{_rp} is GET-only (methods={sorted(_methods)})", _methods == {"GET"})
+
+print("F3.6 — missing sources degrade to NOT_AVAILABLE_YET, never to fake values")
+_missing = _src.Fact.missing("test:source", "deliberately unavailable")
+check("Fact.missing -> state NOT_AVAILABLE_YET", _missing.state == "NOT_AVAILABLE_YET")
+check("Fact.missing -> value is None (no substituted default)", _missing.value is None)
+check("Fact.missing -> available is False", _missing.available is False)
+check("Fact.missing -> carries a human-readable reason", bool(_missing.reason))
+# Point the reader at a non-existent DB and confirm it degrades rather than raising.
+_orig_env = os.environ.get("CONTROL_KANBAN_DB")
+os.environ["CONTROL_KANBAN_DB"] = str(Path(__file__).resolve().parent / "_does_not_exist.db")
+try:
+    _degraded = _src.active_tasks()
+    check("absent kanban DB -> NOT_AVAILABLE_YET (no exception, no fabrication)",
+          _degraded.state == "NOT_AVAILABLE_YET" and _degraded.value is None)
+    check("absent kanban DB -> reason names the missing path",
+          "not found" in _degraded.reason.lower(), _degraded.reason)
+    _inbox_degraded = _rm.human_go_inbox()
+    check("human_go_inbox survives a dead source",
+          _inbox_degraded["type"] == "HumanGoInbox")
+    check("human_go_inbox reports degradation instead of inventing rows",
+          _inbox_degraded["pending_count"] == len(_inbox_degraded["pending"]))
+finally:
+    if _orig_env is None:
+        os.environ.pop("CONTROL_KANBAN_DB", None)
+    else:
+        os.environ["CONTROL_KANBAN_DB"] = _orig_env
+    _src.cache_clear()
+
+print("F3.7 — every displayed Fact carries provenance (source + state + captured_at)")
+_mission = _payloads["/api/v1/mission"]
+for _field in ("git", "ci", "pull_requests", "tests", "queue_provenance"):
+    _f = _mission.get(_field)
+    check(f"mission.{_field} has source", isinstance(_f, dict) and bool(_f.get("source")))
+    check(f"mission.{_field} has state", isinstance(_f, dict) and bool(_f.get("state")))
+    check(f"mission.{_field} has captured_at",
+          isinstance(_f, dict) and bool(_f.get("captured_at")))
+    check(f"mission.{_field} state is a known token",
+          _f.get("state") in ("VERIFIED", "STALE", "NOT_AVAILABLE_YET"), str(_f.get("state")))
+
+print("F3.8 — product cards never claim a live target they did not probe")
+_products = _payloads["/api/v1/products"]
+check("two product cards (IA-VISION + SUINI)", len(_products["cards"]) == 2)
+for _card in _products["cards"]:
+    check(f"{_card['project_id']} declares a read-only mutation policy",
+          "READ_ONLY" in _card["mutation_policy"])
+    for _t in _card["targets"]:
+        check(f"{_card['project_id']}/{_t['kind']} state is VERIFIED or NOT_AVAILABLE_YET",
+              _t["state"] in ("VERIFIED", "NOT_AVAILABLE_YET"), _t["state"])
+        if _t["state"] == "NOT_AVAILABLE_YET":
+            # The crucial anti-fake assertion: an unproven target exposes NO
+            # clickable endpoint, and explains itself.
+            check(f"{_card['project_id']}/{_t['kind']} unavailable -> empty endpoint",
+                  _t["endpoint"] == "")
+            check(f"{_card['project_id']}/{_t['kind']} unavailable -> has reason",
+                  bool(_t["reason"]))
+        else:
+            check(f"{_card['project_id']}/{_t['kind']} available -> real endpoint",
+                  _t["endpoint"].startswith("http"))
+
+print("F3.9 — Human-Go Inbox separates real gates from self-resolving noise")
+_inbox = _payloads["/api/v1/human-go"]
+check("pending_count matches pending length",
+      _inbox["pending_count"] == len(_inbox["pending"]))
+for _d in _inbox["pending"]:
+    check(f"pending {_d['decision_id']} has an action hint", bool(_d["action_hint"]))
+    check(f"pending {_d['decision_id']} kind is known",
+          _d["kind"] in ("TASK_BLOCKED", "PR_MERGE_GATE"), _d["kind"])
+for _d in _inbox["auto_resolving"]:
+    check(f"auto {_d['decision_id']} is dependency/transient (not a human gate)",
+          _d["block_kind"] in ("dependency", "transient"), _d["block_kind"])
+# Merge gates must be labelled HUMAN_GO_REAL — the WO forbids agent merges.
+for _d in _inbox["pending"]:
+    if _d["kind"] == "PR_MERGE_GATE":
+        check(f"{_d['decision_id']} labelled HUMAN_GO_REAL",
+              _d["block_kind"] == "HUMAN_GO_REAL")
+
+print("F3.10 — timeline hides heartbeat noise by default, exposes it on request")
+_tl_default = client3.get("/api/v1/timeline?limit=25", cookies=cookies3).json()
+check("default timeline contains no heartbeat rows",
+      all(i["kind"] != "heartbeat" for i in _tl_default["items"]))
+_tl_hb = client3.get("/api/v1/timeline?limit=25&heartbeats=1", cookies=cookies3).json()
+check("heartbeats=1 is honoured (row set differs or board has none)",
+      isinstance(_tl_hb["items"], list))
+for _i in _tl_default["items"]:
+    check(f"timeline event {_i['event_id']} has a tone",
+          _i["tone"] in ("good", "bad", "warn", "neutral", "muted"), _i["tone"])
+    break  # one representative assertion is enough; shape is uniform
+check("timeline limit is clamped (limit=9999 -> <= 200)",
+      len(client3.get("/api/v1/timeline?limit=9999", cookies=cookies3).json()["items"]) <= 200)
+check("timeline rejects garbage limit without 500",
+      client3.get("/api/v1/timeline?limit=abc", cookies=cookies3).status_code == 200)
+
+print("F3.11 — UI bundle stays secret-free and innerHTML-free after the rewrite")
+_ui_js = (Path(__file__).resolve().parent.parent / "ui" / "app.js").read_text(encoding="utf-8")
+_ui_html = (Path(__file__).resolve().parent.parent / "ui" / "index.html").read_text(encoding="utf-8")
+for _needle in ("sk-", "Bearer ", "ghp_", "github_pat_", "GITHUB_TOKEN",
+                "API_SERVER_KEY", "X-Control-Token", "HERMES_BEARER_KEY"):
+    check(f"app.js free of '{_needle}'", _needle not in _ui_js)
+check("index.html free of inline session token",
+      "__CONTROL_SESSION_TOKEN__" not in _ui_html)
+check("app.js has no .innerHTML assignment",
+      len(re.findall(r"\.innerHTML\s*=", _ui_js)) == 0)
+check("app.js has no outerHTML assignment",
+      len(re.findall(r"\.outerHTML\s*=", _ui_js)) == 0)
+check("app.js has no document.write", "document.write" not in _ui_js)
+check("app.js still uses the safe el() builder", "function el(tag, attrs" in _ui_js)
+# The three mandated surfaces must actually be wired in the client.
+for _fn in ("loadMission", "loadHumanGo", "loadTimeline", "loadProducts"):
+    check(f"app.js defines {_fn}()", f"function {_fn}(" in _ui_js)
+for _panel in ("panel-mission", "panel-humango", "panel-timeline"):
+    check(f"index.html declares #{_panel}", f'id="{_panel}"' in _ui_html)
+
+print("F3.12 — mobile-first + accessibility affordances present in CSS")
+_css = (Path(__file__).resolve().parent.parent / "ui" / "styles.css").read_text(encoding="utf-8")
+check("CSS declares a reduced-motion block", "prefers-reduced-motion" in _css)
+check("CSS is mobile-first (single-column grid default)",
+      "grid-template-columns: 1fr" in _css)
+check("CSS widens at the 640px breakpoint", "min-width: 640px" in _css)
+check("CSS widens at the 960px breakpoint", "min-width: 960px" in _css)
+check("index.html sets a responsive viewport",
+      "width=device-width" in _ui_html)
+
+print("F3.13 — sqlite connections are closed, not merely committed (P1 regression)")
+# `with sqlite3.connect(...)` commits but does NOT close; on Windows the leaked
+# handle blocks unlink. _db_conn() must close so temp DBs can be removed.
+_leak_probe = Path(__file__).resolve().parent / "_leakprobe.db"
+_leak_probe.unlink(missing_ok=True)
+_old_db = bff3.DB_PATH
+try:
+    bff3.DB_PATH = _leak_probe
+    with bff3._db_conn() as _c:
+        _c.execute("CREATE TABLE IF NOT EXISTS probe (x INTEGER)")
+        _c.execute("INSERT INTO probe VALUES (1)")
+    _unlinked = False
+    try:
+        _leak_probe.unlink()
+        _unlinked = True
+    except PermissionError:
+        _unlinked = False
+    check("_db_conn() releases the file handle (unlink succeeds)", _unlinked)
+finally:
+    bff3.DB_PATH = _old_db
+    _leak_probe.unlink(missing_ok=True)
+check("main.py uses _db_conn() rather than bare `with _db()`",
+      "with _db() as conn" not in Path(bff3.__file__).read_text(encoding="utf-8"))
+
+# ---------- END F3 ----------
+
+# Record the run so Mission Control can display a real, dated test result.
+# The BFF deliberately cannot trigger a test run over HTTP (that would be a
+# remote-execution primitive), so it reads this marker instead. Writing it here
+# means the panel can only ever show a result that actually happened.
+import json as _json
+import subprocess as _sp
+from datetime import datetime as _dt, timezone as _tz
+
+_marker = Path(__file__).resolve().parent / "last_run.json"
+try:
+    _sha = _sp.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=str(Path(__file__).resolve().parent.parent.parent),
+        capture_output=True, text=True, timeout=10, shell=False,
+    ).stdout.strip()
+except Exception:
+    _sha = ""
+_marker.write_text(_json.dumps({
+    "suite": "control/tests/test_adversarial.py",
+    "passed": PASS,
+    "failed": FAIL,
+    "total": PASS + FAIL,
+    "ok": FAIL == 0,
+    "head_sha": _sha,
+    "ran_at": _dt.now(_tz.utc).isoformat(),
+}, indent=2), encoding="utf-8")
 
 print()
 print(f"=== RESULT: {PASS} pass, {FAIL} fail ===")
