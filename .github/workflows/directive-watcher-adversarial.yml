@@ -59,7 +59,16 @@ jobs:
       - name: Install adversarial dependency set
         run: |
           python -m pip install --upgrade pip
-          pip install fastapi uvicorn pytest
+          # The adversarial runner needs fastapi + uvicorn — these are
+          # NOT the watcher's runtime dependencies; the standalone runner
+          # pulls them in for its own use. Following the re-audit's
+          # "preferred closeout: separate CI job/dependency set" rule,
+          # we install them in this workflow only.
+          #
+          # httpx is a transitive dependency of starlette.testclient
+          # which fastapi.testclient uses; installing it explicitly
+          # here avoids a noisy RuntimeError on import.
+          pip install fastapi uvicorn httpx pytest
 
       - name: Run standalone adversarial suite
         run: |
