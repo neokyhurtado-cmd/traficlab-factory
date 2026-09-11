@@ -185,10 +185,19 @@ def test_load_allowlist_rejects_non_list(tmp_path):
         load_allowlist(str(p))
 
 
-def test_parse_args_default_interval_is_5_minutes(tmp_path):
+def test_parse_args_requires_once_flag(tmp_path):
+    """`--once` is the ONLY mode the CLI supports (P0 #2 / SINGLE_POLLING_TRUTH).
+
+    The Phase 3 re-audit (PR #19 comment 5629796729) explicitly required
+    that the cli not be a production-reachable scheduling authority —
+    the Scheduler loop was removed from this module. Operators who want
+    a single diagnostic tick must pass ``--once``; running the cli with
+    no scheduler flag is rejected with exit 2 + argparse usage error.
+    """
     config_path = _write_config(tmp_path)
-    args = parse_args(["--config", config_path])
-    assert args.interval_seconds == 300
+    # No --once → argparse rejects with SystemExit(2).
+    with pytest.raises(SystemExit):
+        parse_args(["--config", config_path])
 
 
 def test_parse_args_once_flag(tmp_path):
@@ -249,9 +258,11 @@ def test_cli_once_wires_dispatcher_to_handler(tmp_path, monkeypatch):
     # The real handler would call SidecarStore.list_pending_publications
     # in tick(). We don't want to run the real tick — we just want to
     # confirm the wiring. Patch the constructed handler's tick to raise
-    # BEFORE any side effects.
-    def fake_tick(self, repos):
+    # BEFORE any side effects. P0 #3 (ONE_TICK_ONE_RUN_RECORD): the cli
+    # now passes run_id to handler.tick(), so the fake must accept it.
+    def fake_tick(self, repos, *, run_id=None):
         captured["repos_polled"] = list(repos)
+        captured["run_id_passed"] = run_id
         raise RuntimeError("stop-after-wiring")
 
     monkeypatch.setattr(

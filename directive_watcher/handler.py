@@ -267,22 +267,56 @@ class WatcherHandler:
 
         self._execution_fn = _wrapped
 
-    def tick(self, repos: list[str]) -> TickSummary:
-        summary = TickSummary(polled_repos=list(repos))
-        run_id = self._store.record_run_start(notes=f"repos={len(repos)}")
-        try:
-            # Fix #4: publish-durable recovery. Before polling, drain
-            # any rows that owe a GitHub publication (ACK or RESULT)
-            # from a previous tick. We do this FIRST so a transient
-            # outage at tick N doesn't drop the message permanently.
-            self._republish_pending_publications(summary)
-            for repo in repos:
-                self._tick_repo(repo, summary)
-            self._store.record_run_finish(run_id, status="ok")
-        except Exception as e:  # noqa: BLE001
-            self._store.record_run_finish(run_id, status="error", notes=str(e)[:200])
-            raise
-        return summary
+    def tick(
+            self,
+            repos: list[str],
+            *,
+            run_id: int | None = None,
+        ) -> TickSummary:
+            """One poll tick.
+
+            ``run_id`` is the single-owner seam for run accounting
+            (P0 #3 from the Phase 3 re-audit, PR #19 comment 5629796729):
+
+              - When the caller passes a concrete ``run_id``, the handler
+                treats the run row as already-opened and only calls
+                ``record_run_finish(run_id, ...)``. This is the canonical
+                cron-driven production path: the orchestrator opens one
+                ``watcher_run`` row per logical tick and the handler closes
+                it. One tick = one row. No duplication.
+              - When ``run_id`` is None, the handler falls back to the
+                legacy self-owned behaviour (open + close) so that the
+                diagnostic Scheduler path and existing tests keep working.
+
+            The duplicate-row bug only happens when BOTH caller and handler
+            open the row. Passing ``run_id`` and inheriting ownership is
+            the contract that closes it.
+            """
+            summary = TickSummary(polled_repos=list(repos))
+            owner_owned = run_id is not None
+            if owner_owned:
+                # Caller already opened watcher_run for this tick; we only close.
+                local_run_id = run_id
+            else:
+                # Legacy self-owned path: handler opens and closes its own row.
+                local_run_id = self._store.record_run_start(
+                    notes=f"repos={len(repos)}"
+                )
+            try:
+                # Fix #4: publish-durable recovery. Before polling, drain
+                # any rows that owe a GitHub publication (ACK or RESULT)
+                # from a previous tick. We do this FIRST so a transient
+                # outage at tick N doesn't drop the message permanently.
+                self._republish_pending_publications(summary)
+                for repo in repos:
+                    self._tick_repo(repo, summary)
+                self._store.record_run_finish(local_run_id, status="ok")
+            except Exception as e:  # noqa: BLE001
+                self._store.record_run_finish(
+                    local_run_id, status="error", notes=str(e)[:200]
+                )
+                raise
+            return summary
 
     def _republish_pending_publications(self, summary: TickSummary) -> None:
         """Re-post ACK / RESULT for any directive whose previous attempt failed.

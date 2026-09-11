@@ -17,6 +17,36 @@ the "doorbell but no one opens" failure the re-audit flagged.
 Additionally, ``--once`` writes the same ``watcher_status.json`` that
 the scheduler loop writes. Same snapshot, same source of truth — the
 cron-driven path no longer skips the War Room status surface.
+
+P0 #3 / ONE_TICK_ONE_RUN_RECORD (PR #19 comment 5629796729)
+-----------------------------------------------------------
+The cli opens the run row, hands ``run_id`` to ``handler.tick()``, and
+closes it. The handler does NOT call ``record_run_start`` itself when
+``run_id`` is passed in. Single owner → single ``watcher_run`` row per
+logical tick. The duplicate-row bug (cli + handler both opening the
+row) is gone.
+
+P0 #2 / SINGLE_POLLING_TRUTH (PR #19 comment 5629796729)
+---------------------------------------------------------
+The cron-driven production entrypoint is
+``orchestrator/scripts/github_poller.py::main`` (the existing
+orchestrator tick). It runs both the WO ingestion AND the directive
+ingestion under one tick.
+
+The CLI in this module has NO production scheduling loop. ``--once``
+runs a single tick and exits; that is the only cron-wrapped entry
+the operator needs. The legacy ``Scheduler.run_forever()`` was
+removed as a production-reachable scheduling authority — the Phase 3
+re-audit (comment 5629796729) explicitly forbidden "two
+independently runnable polling authorities". The ``Scheduler`` class
+itself stays in ``directive_watcher.scheduler`` (reusable status
+helpers + diagnostic loop support) but the CLI no longer wires it.
+
+If a future operator wants to run the watcher inline on a workstation
+in a loop, they construct the ``Scheduler`` class directly from
+Python (tests do this; see ``test_scheduler_cli.py``). The CLI does
+not expose that path because a copy-pasted cron row pointing here
+must NOT silently start a second ticking authority.
 """
 from __future__ import annotations
 
@@ -32,12 +62,7 @@ from directive_watcher.gh_client import GHCLIClient
 from directive_watcher.handler import WatcherHandler
 from directive_watcher.orch_dispatch import OrchestratorDispatcher
 from directive_watcher.retry import BackoffPolicy
-from directive_watcher.scheduler import (
-    Scheduler,
-    SchedulerConfig,
-    build_status,
-    watch_repos_from_config,
-)
+from directive_watcher.scheduler import build_status  # reused for status shape
 from directive_watcher.sidecar_store import SidecarStore
 
 LOG = logging.getLogger("directive_watcher.cli")
@@ -46,13 +71,9 @@ LOG = logging.getLogger("directive_watcher.cli")
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         prog="directive_watcher",
-        description="Phase 1 GitHub Directive Watcher (poll, claim, ACK/RESULT).",
+        description="Phase 1 GitHub Directive Watcher — single-tick diagnostic CLI.",
     )
     p.add_argument("--config", required=True, help="Path to YAML allowlist config.")
-    p.add_argument(
-        "--interval-seconds", type=int, default=5 * 60,
-        help="Polling interval. Default 300 (5 minutes).",
-    )
     p.add_argument(
         "--sidecar-db", default="directive_watcher.sqlite",
         help="Path to the durable sidecar SQLite file.",
@@ -82,12 +103,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     p.add_argument(
-        "--max-ticks", type=int, default=None,
-        help="If set, exit after N ticks (useful for cron-driven runs).",
-    )
-    p.add_argument(
-        "--once", action="store_true",
-        help="Run a single tick and exit (no scheduler loop).",
+        "--once", action="store_true", required=True,
+        help=(
+            "Run a single tick and exit. This flag is REQUIRED — the CLI "
+            "has no production-loop mode (P0 #2 / SINGLE_POLLING_TRUTH). "
+            "The orchestrator cron drives github_poller.main, which fans "
+            "out to WO + Directive ingestion under one tick."
+        ),
     )
     p.add_argument(
         "--log-level", default="INFO",
@@ -178,56 +200,43 @@ def main(argv: list[str] | None = None) -> int:
         dispatcher=dispatcher,
     )
 
-    if args.once:
-        # Phase 3 / Objective 1 (continued) — `--once` must write the
-        # same `watcher_status.json` the scheduler loop writes. The
-        # documented cron path is the most common production entry, so
-        # it cannot bypass the War Room status surface.
-        last_run_status: str | None = None
-        last_run_finished_at: int | None = None
-        last_tick = None
-        last_result: tuple[str, str] | None = None
-        run_id = store.record_run_start(notes=f"once:repos={len(repos)}")
-        try:
-            last_tick = handler.tick(repos)
-            store.record_run_finish(run_id, status="ok")
-            last_run_status = "ok"
-        except Exception as e:  # noqa: BLE001
-            LOG.exception("--once tick failed: %s", e)
-            store.record_run_finish(run_id, status="error", notes=str(e)[:200])
-            last_run_status = "error"
-        last_run_finished_at = int(__import__("time").time())
-        finalised = store.list_finalised()
-        if finalised:
-            f = finalised[0]
-            last_result = (f["directive_id"], f["result_status"])
-        status = build_status(
-            store=store,
-            last_tick=last_tick,
-            last_result=last_result,
-            last_run_status=last_run_status,
-            last_run_finished_at=last_run_finished_at,
-        )
-        from directive_watcher.status import write_status
-        write_status(args.status_path, status)
-        # Stdout still gets the structured tick summary so cron delivery
-        # is unaffected — we ADD the status file, we don't replace the
-        # stdout contract.
-        if last_tick is not None:
-            sys.stdout.write(json.dumps(last_tick.as_dict(), indent=2) + "\n")
-        return 0 if last_run_status == "ok" else 1
-
-    scheduler = Scheduler(
-        config=SchedulerConfig(
-            interval_seconds=args.interval_seconds,
-            max_ticks=args.max_ticks,
-            status_path=args.status_path,
-        ),
-        handler=handler,
-        repos=repos,
+    # P0 #3 / ONE_TICK_ONE_RUN_RECORD (PR #19 comment 5629796729):
+    # cli opens the run row, hands run_id to handler.tick(), and
+    # closes it. The handler does NOT call record_run_start itself
+    # when run_id is passed in — single owner, single row per tick.
+    last_run_status: str | None = None
+    last_run_finished_at: int | None = None
+    last_tick = None
+    last_result: tuple[str, str] | None = None
+    run_id = store.record_run_start(notes=f"once:repos={len(repos)}")
+    try:
+        last_tick = handler.tick(repos, run_id=run_id)
+        store.record_run_finish(run_id, status="ok")
+        last_run_status = "ok"
+    except Exception as e:  # noqa: BLE001
+        LOG.exception("--once tick failed: %s", e)
+        store.record_run_finish(run_id, status="error", notes=str(e)[:200])
+        last_run_status = "error"
+    last_run_finished_at = int(__import__("time").time())
+    finalised = store.list_finalised()
+    if finalised:
+        f = finalised[0]
+        last_result = (f["directive_id"], f["result_status"])
+    status = build_status(
+        store=store,
+        last_tick=last_tick,
+        last_result=last_result,
+        last_run_status=last_run_status,
+        last_run_finished_at=last_run_finished_at,
     )
-    scheduler.run_forever()
-    return 0
+    from directive_watcher.status import write_status
+    write_status(args.status_path, status)
+    # Stdout still gets the structured tick summary so cron delivery
+    # is unaffected — we ADD the status file, we don't replace the
+    # stdout contract.
+    if last_tick is not None:
+        sys.stdout.write(json.dumps(last_tick.as_dict(), indent=2) + "\n")
+    return 0 if last_run_status == "ok" else 1
 
 
 if __name__ == "__main__":

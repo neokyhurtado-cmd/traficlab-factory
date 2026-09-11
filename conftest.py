@@ -21,13 +21,14 @@ FULL repo (no ``testpaths`` narrowing). The suites that execute are:
 """
 from __future__ import annotations
 
+import importlib.util
 import sys
 import types
 
 pytest_plugins = []
 
 
-# Phase 3 / Objective 4 — CI portability.
+# P0 #4 — hermes_cli detection that does NOT shadow real installs.
 #
 # The pre-existing fixture ``fixture_profiles`` in
 # orchestrator/scripts/test_github_poller.py calls
@@ -38,12 +39,29 @@ pytest_plugins = []
 # hermes_cli is not installed) the fixture errors out at collection time.
 #
 # The fix: register a stub ``hermes_cli`` package in ``sys.modules`` at
-# conftest import time. We do this via a top-level constant that runs
-# before any test module is loaded. When the real ``hermes_cli`` is
-# installed (developer machines), the stub registration is a no-op
-# because the real package is already in ``sys.modules``.
+# conftest import time.
+#
+# Astra re-audit (PR #19 comment 5629796729) flagged the previous gate
+# ``"hermes_cli" not in sys.modules`` as WRONG: that gate asks the
+# IMPORT HISTORY, not the installation state. On an operator host where
+# hermes_cli is installed but pytest loads conftest BEFORE anything
+# imports hermes_cli, the broken gate registers the stub anyway —
+# shadowing the real package for the entire pytest session, so every
+# later ``import hermes_cli.foo`` resolves to a fake.
+#
+# The correct gate is importlib.util.find_spec, which asks the import
+# system whether the module is on disk (i.e. installable) regardless of
+# whether anything has imported it yet. Behaviour:
+#
+#   hermes_cli installed  → find_spec returns a real spec → no stub.
+#   hermes_cli absent     → find_spec returns None        → register stub.
+#
+# This keeps the pre-existing fixture_profiles path working on stock CI
+# (where hermes_cli is absent) without shadowing real installs on
+# operator hosts (where hermes_cli is present). Behaviour is exercised
+# by test_hermes_cli_detection.py.
 
-if "hermes_cli" not in sys.modules:
+if importlib.util.find_spec("hermes_cli") is None:
     _profiles = types.ModuleType("hermes_cli.profiles")
 
     def list_profile_names():

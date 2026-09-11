@@ -64,42 +64,25 @@ jobs:
           # stdlib + PyYAML only. If a future PR adds deps, write them
           # to requirements.txt and update this step accordingly.
           pip install pytest pyyaml
-          # The hermes_cli stub for missing-package scenarios is loaded
-          # automatically by conftest.py at collection time. See
-          # conftest.py::_ensure_hermes_cli_stub for details.
 
       # Per Fix #6 from the Astra re-audit: real pytest discovery, no
       # testpaths narrowing. Run pytest from the repo root with no path
       # argument so its rootdir discovery walks every test_*.py under
       # the repo.
+      #
+      # P0 #5 / FULL_REPO_REGRESSION_CI (PR #19 comment 5629796729):
+      # pytest discovery EXCLUDES the standalone adversarial runner by
+      # design (``control/tests/conftest.py`` has collect_ignore). The
+      # adversarial runner lives in a DEDICATED workflow
+      # (``directive-watcher-adversarial.yml``) with its own dependency
+      # set including fastapi — see that workflow for the adversarial
+      # check. We do NOT install fastapi here; domain coupling was the
+      # exact failure mode the re-audit forbade.
       - name: Pytest — full repo regression (no testpaths narrowing)
         run: |
           set -euo pipefail
           python -m pytest --tb=short -v \
             | tee /tmp/pytest_full.log
-
-      - name: Standalone adversarial (Control BFF V0)
-        run: |
-          set -euo pipefail
-          # control/tests/test_adversarial.py is a standalone runner
-          # (it does sys.exit(0)) and is therefore excluded from
-          # pytest discovery. It depends on `fastapi` which is not in
-          # the watcher's dependency tree (Phase 1 was stdlib + PyYAML
-          # only). Skip the runner cleanly if the import fails — this
-          # is NOT a || true: we explicitly report the skip with the
-          # reason so the matrix log is honest. The adversarial suite
-          # remains a runnable local check for operators who have
-          # fastapi installed; in stock CI without fastapi it is not
-          # part of the watcher regression.
-          if ! python -c "import fastapi" 2>/dev/null; then
-            echo "SKIP: control/tests/test_adversarial.py — fastapi not installed"
-            echo "This is a pre-existing standalone runner outside Phase 3 scope."
-            echo "Run locally with: pip install fastapi && python control/tests/test_adversarial.py"
-          else
-            python control/tests/test_adversarial.py \
-              | tee /tmp/adversarial.log
-            grep -q "=== RESULT: .* pass, 0 fail ===" /tmp/adversarial.log
-          fi
 
       - name: Per-suite enumeration (no "X PASS" without enumeration)
         run: |
@@ -111,12 +94,11 @@ jobs:
             echo "- \`$suite\`: $count"
           done
           echo
-          if [ -f /tmp/adversarial.log ]; then
-            echo "control/tests/test_adversarial.py (standalone): see /tmp/adversarial.log"
-            tail -1 /tmp/adversarial.log
-          else
-            echo "control/tests/test_adversarial.py (standalone): SKIPPED (no fastapi — pre-existing dep outside Phase 3 scope)"
-          fi
+          # P0 #5 / FULL_REPO_REGRESSION_CI: the adversarial runner is
+          # NOT this job's scope. We declare that explicitly here and
+          # in ``directive-watcher-adversarial.yml`` so neither
+          # workflow runs the suite by accident.
+          echo "- \`control/tests/test_adversarial.py\`: REPORTED SEPARATELY by directive-watcher-adversarial.yml"
 
       - name: Upload pytest log
         if: always()
