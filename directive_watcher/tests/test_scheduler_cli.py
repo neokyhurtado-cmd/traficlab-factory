@@ -89,7 +89,10 @@ def test_scheduler_writes_status_after_each_tick(tmp_path, monkeypatch):
     assert data["watcher_status"] == "healthy"
     assert data["last_seen_comment_id"] == 101
     assert data["last_result"] == "d-sched"
-    assert data["last_result_status"] == "READY_FOR_ASTRA_REAUDIT"
+    # Without a dispatcher, the handler surfaces BLOCKED_EXTERNAL_REAL
+    # (Fix #1 from the re-audit). The "DISPATCHED" status is asserted in
+    # test_handler_with_dispatch.py.
+    assert data["last_result_status"] == "BLOCKED_EXTERNAL_REAL"
 
 
 def test_scheduler_stops_on_should_stop(tmp_path, monkeypatch):

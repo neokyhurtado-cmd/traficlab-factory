@@ -43,7 +43,10 @@ CREATE TABLE IF NOT EXISTS directive_processed (
     head_before     TEXT,
     head_after      TEXT,
     ack_status      TEXT NOT NULL,
+    ack_posted      INTEGER NOT NULL DEFAULT 0,
     result_status   TEXT,
+    result_posted   INTEGER NOT NULL DEFAULT 0,
+    last_post_error TEXT,
     processed_at    INTEGER NOT NULL,
     updated_at      INTEGER NOT NULL,
     last_body_sha256 TEXT NOT NULL,
@@ -57,6 +60,12 @@ CREATE TABLE IF NOT EXISTS watcher_run (
     status          TEXT NOT NULL,
     notes           TEXT
 );
+
+CREATE TABLE IF NOT EXISTS repo_cursor (
+    repo             TEXT PRIMARY KEY,
+    last_seen_comment_id INTEGER NOT NULL,
+    last_seen_at     INTEGER NOT NULL
+);
 """
 
 ACK_CLAIMED = "CLAIMED"
@@ -64,12 +73,14 @@ RESULT_READY = "READY_FOR_ASTRA_REAUDIT"
 RESULT_BLOCKED = "BLOCKED_EXTERNAL_REAL"
 RESULT_SCIENTIFIC = "SCIENTIFIC_DECISION_REQUIRED"
 RESULT_HUMAN_GO = "HUMAN_GO_REAL_REQUIRED"
+RESULT_DISPATCHED = "DISPATCHED"
 
 RESULT_STATUSES = frozenset({
     RESULT_READY,
     RESULT_BLOCKED,
     RESULT_SCIENTIFIC,
     RESULT_HUMAN_GO,
+    RESULT_DISPATCHED,
 })
 
 
@@ -177,6 +188,64 @@ class SidecarStore:
             ).fetchone()
             return int(row[0]) if row else 0
 
+    # --- per-repo cursor (Fix #2 from Astra re-audit) --------------------
+    #
+    # Phase 1 used a single global MAX(comment_id) — that silently
+    # skipped directives in repo B when the cursor had advanced past
+    # them on a poll of repo A. The re-audit flagged this as P0.
+    # Per-repo cursors are the durable answer.
+
+    def upsert_cursor(self, *, repo: str, last_seen_comment_id: int) -> None:
+        """Persist the cursor for a single repo. Idempotent.
+
+        We keep ``max(new, stored)`` semantics: the cursor never moves
+        backwards, even if a stale call accidentally tries to. That
+        matches the watcher invariant: "we never re-process a comment
+        we've already moved past".
+        """
+        now = int(time.time())
+        with self._txn() as c:
+            row = c.execute(
+                "SELECT last_seen_comment_id FROM repo_cursor WHERE repo = ?",
+                (repo,),
+            ).fetchone()
+            if row is None:
+                c.execute(
+                    "INSERT INTO repo_cursor (repo, last_seen_comment_id, last_seen_at) "
+                    "VALUES (?, ?, ?)",
+                    (repo, last_seen_comment_id, now),
+                )
+            else:
+                existing = int(row[0])
+                if last_seen_comment_id > existing:
+                    c.execute(
+                        "UPDATE repo_cursor SET last_seen_comment_id = ?, last_seen_at = ? "
+                        "WHERE repo = ?",
+                        (last_seen_comment_id, now, repo),
+                    )
+                else:
+                    c.execute(
+                        "UPDATE repo_cursor SET last_seen_at = ? WHERE repo = ?",
+                        (now, repo),
+                    )
+
+    def get_cursor(self, repo: str) -> int:
+        """Return the persisted cursor for ``repo``, or 0 if none."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT last_seen_comment_id FROM repo_cursor WHERE repo = ?",
+                (repo,),
+            ).fetchone()
+            return int(row[0]) if row else 0
+
+    def list_cursors(self) -> dict[str, int]:
+        """Snapshot of every (repo → cursor) the store knows about."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT repo, last_seen_comment_id FROM repo_cursor"
+            ).fetchall()
+        return {repo: int(cid) for repo, cid in rows}
+
     # --- claim / idempotency ----------------------------------------------
 
     def claim(
@@ -258,6 +327,74 @@ class SidecarStore:
                     f"directive {directive_id} has no open claim"
                 )
 
+    # --- delivery state (Fix #4 from Astra re-audit) ----------------------
+    #
+    # Phase 1 finalised ``record_result`` BEFORE the GitHub RESULT post
+    # landed. If the post raised, the row was already terminal — the next
+    # poll would skip it forever and the user would never see the
+    # outcome. The re-audit explicitly called this out: business result
+    # and publication delivery are separate states.
+    #
+    # The contract now is:
+    #   - ``result_status`` flips to a non-NULL value only when the local
+    #     work is done; ``result_posted=0`` means we still owe a
+    #     publication to GitHub.
+    #   - On the next tick, ``claim_pending_publication()`` returns the
+    #     rows that owe delivery and the scheduler re-posts them.
+
+    def mark_ack_posted(self, directive_id: str) -> None:
+        """Flip ``ack_posted=1`` once the ACK comment has been published."""
+        with self._txn() as c:
+            c.execute(
+                "UPDATE directive_processed SET ack_posted = 1, "
+                "last_post_error = NULL, updated_at = ? "
+                "WHERE directive_id = ?",
+                (int(time.time()), directive_id),
+            )
+
+    def mark_result_posted(self, directive_id: str) -> None:
+        with self._txn() as c:
+            c.execute(
+                "UPDATE directive_processed SET result_posted = 1, "
+                "last_post_error = NULL, updated_at = ? "
+                "WHERE directive_id = ?",
+                (int(time.time()), directive_id),
+            )
+
+    def mark_post_failed(self, directive_id: str, error: str) -> None:
+        """Persist the last publish failure so an operator can diagnose.
+
+        The row stays in ``result_posted=0`` so the next tick retries.
+        """
+        with self._txn() as c:
+            c.execute(
+                "UPDATE directive_processed SET last_post_error = ?, "
+                "updated_at = ? WHERE directive_id = ?",
+                (error[:500], int(time.time()), directive_id),
+            )
+
+    def list_pending_publications(self) -> list[dict]:
+        """Return rows that owe a GitHub publication (ACK or RESULT).
+
+        These are the rows the scheduler must republish on the next tick
+        to recover from transient publication failures.
+        """
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT directive_id, source_comment_id, execution_id, "
+                "       ack_status, ack_posted, result_status, result_posted, "
+                "       last_post_error "
+                "FROM directive_processed "
+                "WHERE ack_posted = 0 OR (result_status IS NOT NULL AND result_posted = 0) "
+                "ORDER BY updated_at ASC"
+            ).fetchall()
+        keys = (
+            "directive_id", "source_comment_id", "execution_id",
+            "ack_status", "ack_posted", "result_status", "result_posted",
+            "last_post_error",
+        )
+        return [dict(zip(keys, r)) for r in rows]
+
     def detect_body_edit_after_ack(self, directive_id: str, body_sha256: str) -> bool:
         """Returns True if the comment body SHA256 has changed since the ACK
         was issued for this directive. The watcher must NOT silently
@@ -293,7 +430,8 @@ class SidecarStore:
         with self._lock:
             row = self._conn.execute(
                 "SELECT directive_id, source_comment_id, execution_id, "
-                "       head_before, head_after, ack_status, result_status, "
+                "       head_before, head_after, ack_status, ack_posted, "
+                "       result_status, result_posted, last_post_error, "
                 "       processed_at, updated_at, last_body_sha256, body_edited "
                 "FROM directive_processed WHERE directive_id = ?",
                 (directive_id,),
@@ -302,7 +440,8 @@ class SidecarStore:
             return None
         keys = (
             "directive_id", "source_comment_id", "execution_id",
-            "head_before", "head_after", "ack_status", "result_status",
+            "head_before", "head_after", "ack_status", "ack_posted",
+            "result_status", "result_posted", "last_post_error",
             "processed_at", "updated_at", "last_body_sha256", "body_edited",
         )
         return dict(zip(keys, row))

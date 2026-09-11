@@ -1,0 +1,86 @@
+name: directive-watcher-ci
+
+on:
+  push:
+    branches:
+      - feat/hermes-2.0-github-directive-watcher
+      - main
+  pull_request:
+    branches:
+      - main
+      - feat/hermes-2.0-github-directive-watcher
+
+# Cancel in-flight runs when a new commit lands on the same branch.
+concurrency:
+  group: directive-watcher-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Full regression (real pytest discovery)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install OS deps (for control/tests)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || true
+          pip install pytest pyyaml
+
+      # Per Fix #6: real pytest discovery, no testpaths narrowing.
+      # The PR description lists the suite breakdown as evidence.
+      - name: Pytest — full repo regression (no testpaths narrowing)
+        run: |
+          set -euo pipefail
+          # Run pytest from the repo root with no path argument so its
+          # rootdir discovery walks every test_*.py under the repo.
+          python -m pytest --tb=short -v \
+            | tee /tmp/pytest_full.log
+
+      - name: Standalone adversarial (Control BFF V0)
+        run: |
+          set -euo pipefail
+          # control/tests/test_adversarial.py is a standalone runner
+          # (it does sys.exit(0)) and is therefore excluded from
+          # pytest discovery. Run it explicitly and require zero fail.
+          python control/tests/test_adversarial.py \
+            | tee /tmp/adversarial.log
+          # The runner prints "=== RESULT: N pass, 0 fail ===" on success.
+          grep -q "=== RESULT: .* pass, 0 fail ===" /tmp/adversarial.log
+
+      - name: Per-suite enumeration
+        # Document the suites that ran, with per-suite PASS count.
+        # This is the "no X PASS sin enumerar suites ejecutadas" rule
+        # from the Astra re-audit.
+        run: |
+          set -euo pipefail
+          echo "## Suite enumeration"
+          echo
+          for suite in directive_watcher/tests orchestrator/scripts; do
+            count=$(python -m pytest "$suite" --collect-only -q 2>/dev/null | tail -1)
+            echo "- \`$suite\`: $count"
+          done
+          echo
+          echo "control/tests/test_adversarial.py (standalone): see /tmp/adversarial.log"
+          tail -1 /tmp/adversarial.log
+
+      - name: Upload pytest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-full-log
+          path: /tmp/pytest_full.log

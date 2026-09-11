@@ -87,7 +87,12 @@ def test_authorized_directive_results_in_ack_and_result(env):
     assert "[HERMES_ACK:v1]" in ack_body
     assert "DIRECTIVE_ID = d-1" in ack_body
     assert "[HERMES_RESULT:v1]" in result_body
-    assert "STATUS = READY_FOR_ASTRA_REAUDIT" in result_body
+    # Per the Astra re-audit (Fix #1): without a dispatcher injected, the
+    # handler must NOT emit READY_FOR_ASTRA_REAUDIT — it emits
+    # BLOCKED_EXTERNAL_REAL because no real session was bound. The
+    # handler-level "dispatch wired up" path is exercised separately
+    # in test_orch_dispatch.py + test_handler_with_dispatch.py.
+    assert "STATUS = BLOCKED_EXTERNAL_REAL" in result_body
     # Source comment / directive / execution all linked in the RESULT.
     assert "SOURCE_COMMENT_ID = 101" in result_body
     assert "DIRECTIVE_ID = d-1" in result_body
@@ -161,6 +166,19 @@ def test_duplicate_directive_id_on_two_comments_executes_once(env):
 
 # 7. edited directive after ACK → no silent re-run
 def test_edited_body_after_ack_does_not_silently_rerun(env):
+    """Fix #3: edit detection must work WITHOUT manually rewinding the cursor.
+
+    The Phase 1 test for this path cheated by resetting the comment_id
+    in the seen table. Astra's re-audit explicitly flagged that as a
+    "trap" — the production watcher must detect edits via the
+    list_recent_comments window, not by hacking the cursor.
+
+    This test simulates an edit by replacing the comment body in the
+    FakeGitHubClient (GitHub edits don't bump the id). The watcher's
+    edit-detection window (list_recent_comments) must re-observe the
+    comment, see that the body_sha changed, and surface it as
+    ``denied:body_edited_after_ack`` — without any cursor manipulation.
+    """
     gh = env["gh"]
     cid = 101
     gh.add(_make_comment(cid, _directive_body("d-edit")))
@@ -169,31 +187,21 @@ def test_edited_body_after_ack_does_not_silently_rerun(env):
     assert s1.directives_claimed == 1
     # First tick produced one ACK + one RESULT.
     assert len(gh.posted) == 2
-    # Now simulate an edit to the same comment: GitHub's REST API represents
-    # edits by re-writing the comment with the same id but a new body. Our
-    # gh_client list_comments_since filters by id > since, so we model this
-    # by resetting the watcher's cursor via a second instance of the comment
-    # post — but with a higher id (101 → 101 is the same logical comment;
-    # edits don't get a new id, they update the body in place).
-    #
-    # To exercise the body-edit detection in the watcher, we drop the
-    # last_seen_comment_id cursor so the (logically edited) comment is
-    # observed again. This matches the real watcher's behaviour: any edit
-    # on an already-seen comment triggers a fresh observation via mark_seen
-    # updating the body_sha inside the seen row.
-    store = env["store"]
-    # Force the watcher's cursor backwards so it re-sees the (edited)
-    # comment.
-    store._conn.execute(
-        "UPDATE directive_seen SET comment_id = 0 WHERE comment_id = 101"
-    )
-    store._conn.commit()
-    gh._comments[0] = _make_comment(cid, _directive_body("d-edit") + "\n# edited")
+
+    # Simulate an edit: same comment id, new body. The cursor stays put —
+    # that's the whole point. The watcher's edit window re-scans the
+    # last N comments and catches the sha mismatch on its own.
+    edited_body = _directive_body("d-edit") + "\n# edited by author"
+    gh._comments[0] = _make_comment(cid, edited_body)
+
     s2 = handler.tick(["neokyhurtado-cmd/traficlab-factory"])
-    # Second tick MUST NOT claim again — body changed after ACK is forbidden.
+    # The directive MUST NOT be claimed again — body change after ACK is
+    # the canonical "do not silently re-run" case.
     assert s2.directives_claimed == 0
-    # Second tick sees the body change → flags it and skips.
-    assert any("body_edited_after_ack" in n for n in s2.notes), s2.notes
+    # The watcher must surface the edit via its notes.
+    assert any("body_edited_after_ack" in n for n in s2.notes), (
+        f"expected edit-detection note; got: {s2.notes}"
+    )
     # Still only one ACK + one RESULT on the wire.
     assert len(gh.posted) == 2
 

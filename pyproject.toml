@@ -12,11 +12,15 @@ dependencies = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["directive_watcher/tests"]
+# Per Fix #6 from the Astra re-audit: do NOT narrow pytest discovery
+# to a single directory. The previous ``testpaths = ["directive_watcher/tests"]``
+# masked the ``control/tests`` + ``orchestrator/scripts`` suites, making
+# the watcher report "83 PASS" while leaving the rest of the repo's
+# regression unverified. Letting pytest's default rootdir discovery run
+# is the honest answer.
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-ra --strict-markers"
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]

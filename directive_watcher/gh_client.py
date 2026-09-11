@@ -25,6 +25,19 @@ class GitHubClient(Protocol):
     def list_comments_since(self, repo: str, since_id: int) -> list["RemoteComment"]:
         ...
 
+    def list_recent_comments(self, repo: str, limit: int = 50) -> list["RemoteComment"]:
+        """Return the most recent N comments for the repo, in id-ascending
+        order. Used by the edit-detection window (Fix #3): we re-fetch the
+        last N comments each tick and compare body_sha against the seen
+        table — any mismatch is an edit that must be surfaced, NOT
+        silently re-executed.
+
+        Production callers should keep ``limit`` small (e.g. 50) to bound
+        the per-tick cost; the production gh CLI uses ``gh api
+        /repos/.../comments --paginate`` already.
+        """
+        ...
+
     def post_comment(self, repo: str, issue_number: int, body: str) -> int:
         ...
 
@@ -42,7 +55,63 @@ class RemoteComment:
 
 
 class GHCLIError(RuntimeError):
-    """Raised when the underlying ``gh`` invocation fails."""
+    """Raised when the underlying ``gh`` invocation fails.
+
+    Subclasses carry the exit code + the last ~300 chars of stderr so the
+    retry classifier can decide whether to retry without parsing the
+    error string.
+    """
+
+    def __init__(self, message: str, *, exit_code: int = -1, stderr: str = ""):
+        super().__init__(message)
+        self.exit_code = exit_code
+        self.stderr = stderr
+
+    @property
+    def is_retryable(self) -> bool:
+        """True if the underlying gh error is transient and worth retrying.
+
+        Rules (per Fix #5 from the Astra re-audit):
+          - 5xx HTTP errors → retryable (gh surfaces them as exit != 0
+            with the status code in stderr)
+          - 429 (rate limit) → retryable
+          - 4xx (auth, not found, bad request) → NOT retryable
+          - ConnectionError / TimeoutError → retryable
+          - JSONDecodeError → NOT retryable (don't loop on bad response)
+          - exit code 0 with garbled stdout → NOT retryable
+          - any other non-zero exit → retryable (best-effort)
+        """
+        # Subprocess.TimeoutExpired is handled at the call site (separate
+        # flow that subclasses this or wraps it).
+        code = self.exit_code
+        if code == 0:
+            return False
+        # Look for an HTTP status in stderr.
+        for token in ("429", "500", "502", "503", "504"):
+            if token in self.stderr:
+                return True
+        # Auth / 4xx → don't retry.
+        for token in ("401", "403", "404", "422"):
+            if token in self.stderr:
+                return False
+        # Default: non-zero exit codes that we can't classify get a
+        # retry budget. The retry wrapper has its own max_attempts so
+        # this never loops forever.
+        return True
+
+
+class GHCLIRateLimitError(GHCLIError):
+    """Specific exception for HTTP 429 from gh. Always retryable."""
+    pass
+
+
+class GHCLINonRetryableError(GHCLIError):
+    """Specific exception for 4xx errors that must NOT be retried.
+
+    Retrying them is wasteful — same auth/permission state will just
+    produce the same 4xx again.
+    """
+    pass
 
 
 class GHCLIClient:
@@ -105,6 +174,54 @@ class GHCLIClient:
         out.sort(key=lambda c: c.id)
         return out
 
+    def list_recent_comments(self, repo: str, limit: int = 50) -> list[RemoteComment]:
+        """Production list-recent — uses gh api and returns the latest ``limit``
+        comments. We rely on GitHub's default order (newest first) and
+        then sort ascending by id for stable iteration.
+
+        This is the production seam for edit-detection (Fix #3). Each
+        tick the handler compares the sha256 of every returned comment
+        against ``directive_seen``; a mismatch is an edit. We deliberately
+        do NOT narrow by ``since_id`` here — the point is to revisit the
+        last window of already-seen comments.
+        """
+        cmd = [
+            self._gh, "api",
+            f"/repos/{repo}/issues/comments",
+            "-q", ".[] | {id: .id, user: .user.login, body: .body, html_url: .html_url, issue_url: .issue_url, updated_at: .updated_at}",
+            "--paginate",
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=self._timeout)
+        if proc.returncode != 0:
+            raise GHCLIError(
+                f"gh api list comments (recent) failed for {repo} "
+                f"(exit {proc.returncode}): {proc.stderr.strip()[:300]}"
+            )
+        out: list[RemoteComment] = []
+        for line in (proc.stdout or "").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError as e:
+                raise GHCLIError(f"could not parse gh comment JSON: {e}") from e
+            cid = int(obj["id"])
+            issue_url = obj.get("issue_url", "")
+            try:
+                issue_number = int(issue_url.rsplit("/", 1)[-1])
+            except (ValueError, IndexError):
+                continue
+            out.append(RemoteComment(
+                id=cid,
+                author=obj.get("user") or "",
+                body=obj.get("body") or "",
+                url=obj.get("html_url") or "",
+                issue_number=issue_number,
+            ))
+        out.sort(key=lambda c: c.id)
+        return out[-limit:] if len(out) > limit else out
+
     def post_comment(self, repo: str, issue_number: int, body: str) -> int:
         cmd = [
             self._gh, "issue", "comment",
@@ -141,6 +258,10 @@ class FakeGitHubClient:
     def list_comments_since(self, repo: str, since_id: int) -> list[RemoteComment]:
         # The repo arg is ignored by the fake — tests scope their fixtures.
         return [c for c in self._comments if c.id > since_id]
+
+    def list_recent_comments(self, repo: str, limit: int = 50) -> list[RemoteComment]:
+        # The fake returns the last ``limit`` comments regardless of repo arg.
+        return self._comments[-limit:] if len(self._comments) > limit else list(self._comments)
 
     def post_comment(self, repo: str, issue_number: int, body: str) -> int:
         self.posted.append((repo, issue_number, body))
