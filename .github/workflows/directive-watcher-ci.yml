@@ -64,6 +64,9 @@ jobs:
           # stdlib + PyYAML only. If a future PR adds deps, write them
           # to requirements.txt and update this step accordingly.
           pip install pytest pyyaml
+          # The hermes_cli stub for missing-package scenarios is loaded
+          # automatically by conftest.py at collection time. See
+          # conftest.py::_ensure_hermes_cli_stub for details.
 
       # Per Fix #6 from the Astra re-audit: real pytest discovery, no
       # testpaths narrowing. Run pytest from the repo root with no path
