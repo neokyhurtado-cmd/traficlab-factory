@@ -67,6 +67,10 @@ def test_scheduler_runs_until_max_ticks(tmp_path, monkeypatch):
 def test_scheduler_writes_status_after_each_tick(tmp_path, monkeypatch):
     store = SidecarStore(tmp_path / "sidecar.db")
     gh = FakeGitHubClient()
+    gh.set_branch_head(
+        "neokyhurtado-cmd/traficlab-factory", "main",
+        "1111111111111111111111111111111111111111",
+    )
     gh.add(_make_comment(101, _directive_body("d-sched")))
     allowlist = AllowlistConfig(
         allowlisted_repos=frozenset({"neokyhurtado-cmd/traficlab-factory"}),
@@ -273,6 +277,7 @@ def test_cli_once_wires_dispatcher_to_handler(tmp_path, monkeypatch):
         "--config", config_path,
         "--sidecar-db", str(sidecar),
         "--status-path", str(status_path),
+        "--env", "test",
         "--once",
     ])
     # tick was rigged to raise — main() catches and returns 1, that's OK.
@@ -334,6 +339,7 @@ def test_cli_once_writes_watcher_status_json(tmp_path, monkeypatch):
         "--config", config_path,
         "--sidecar-db", str(sidecar),
         "--status-path", str(status_path),
+        "--env", "test",
         "--once",
     ])
     assert rc == 0

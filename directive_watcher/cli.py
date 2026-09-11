@@ -112,8 +112,25 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     p.add_argument(
-        "--log-level", default="INFO",
-        help="Python logging level.",
+    "--log-level", default="INFO",
+    help="Python logging level.",
+    )
+    p.add_argument(
+    "--env", default="prod", choices=("prod", "test"),
+    help=(
+        "Environment selector. prod=load the production author "
+        "allowlist from --author-allowlist (fail-closed if missing); "
+        "test=use --config as the combined fixture (test/dev only). "
+        "Default: prod — fail-closed by default."
+    ),
+    )
+    p.add_argument(
+    "--author-allowlist", default=None,
+    help=(
+        "Path to the PRODUCTION author allowlist YAML. Required "
+        "when --env=prod. The file MUST exist; missing file → "
+        "fail-closed exit code != 0. Only consulted when --env=prod."
+    ),
     )
     return p.parse_args(argv)
 
@@ -170,10 +187,42 @@ def main(argv: list[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
 
-    allowlist, repos = load_allowlist(args.config)
-    if not repos:
-        LOG.error("no allowlisted_repos in config — fail-closed; exiting")
-        return 2
+    if args.env == "prod":
+        # Production path: the author allowlist MUST be loaded from an
+        # explicit file. --config (which contains repos + authors in the
+        # test fixture shape) is NOT consulted in prod. Missing file →
+        # fail-closed, exit code != 0, clear stderr message.
+        prod_authors_path = args.author_allowlist
+        if not prod_authors_path:
+            LOG.error(
+                "--env=prod requires --author-allowlist (fail-closed; "
+                "exiting without loading --config)"
+            )
+            return 3
+        if not Path(prod_authors_path).is_file():
+            LOG.error(
+                "author allowlist file missing — fail-closed: %s",
+                prod_authors_path,
+            )
+            return 3
+        # Load the production author allowlist and merge it into a
+        # config that also carries the repos from --config.
+        prod_allowlist, _ = load_allowlist(prod_authors_path)
+        # Read the repos from --config but use the prod author allowlist.
+        repos_config, repos = load_allowlist(args.config)
+        allowlist = AllowlistConfig(
+            allowlisted_repos=repos_config.allowlisted_repos,
+            allowlisted_authors=prod_allowlist.allowlisted_authors,
+        )
+        if not repos:
+            LOG.error("no allowlisted_repos in config — fail-closed; exiting")
+            return 2
+    else:
+        # Test/dev path: --config carries both repos and authors.
+        allowlist, repos = load_allowlist(args.config)
+        if not repos:
+            LOG.error("no allowlisted_repos in config — fail-closed; exiting")
+            return 2
 
     store = SidecarStore(args.sidecar_db)
     gh = GHCLIClient()

@@ -1,10 +1,13 @@
 """Thin GitHub client abstraction.
 
-The watcher talks to GitHub through two operations:
+The watcher talks to GitHub through three operations:
 
   - ``list_comments_since(repo, since_id)`` — pull comments newer than a
     previously seen id.
   - ``post_comment(repo, issue_number, body)`` — post an ACK or a RESULT.
+  - ``get_branch_head(repo, branch)`` — resolve the HEAD sha of a branch
+    for the EXPECTED_HEAD_BINDING contract (CONTEXT_BINDING_FAIL_CLOSED,
+    PR #19 closeout).
 
 We deliberately wrap both behind a small interface so the rest of the
 watcher is test-defined and never imports ``gh`` directly. The production
@@ -16,7 +19,7 @@ from __future__ import annotations
 import json
 import subprocess
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Optional, Protocol
 
 
 class GitHubClient(Protocol):
@@ -39,6 +42,16 @@ class GitHubClient(Protocol):
         ...
 
     def post_comment(self, repo: str, issue_number: int, body: str) -> int:
+        ...
+
+    def get_branch_head(self, repo: str, branch: str) -> Optional[str]:
+        """Resolve the current HEAD sha of ``repo``'s ``branch``.
+
+        Contract: CONTEXT_BINDING_FAIL_CLOSED / HEAD_BINDING (PR #19
+        closeout). Returns ``None`` if the branch cannot be resolved
+        (404, network error, missing repo). The watcher treats
+        ``None`` as a fail-closed BLOCK — no silent default, no dispatch.
+        """
         ...
 
 
@@ -241,19 +254,66 @@ class GHCLIClient:
         # humans reading logs.
         return 0
 
+    def get_branch_head(self, repo: str, branch: str) -> Optional[str]:
+        """Resolve HEAD sha for ``repo``'s ``branch`` via ``gh api``.
+
+        Production path: ``gh api /repos/{repo}/git/ref/heads/{branch}``
+        returns JSON with the ``object.sha``. We pass through ``None``
+        on any non-zero exit so the watcher can BLOCK fail-closed
+        (CONTEXT_BINDING_FAIL_CLOSED / HEAD_BINDING).
+        """
+        cmd = [
+            self._gh, "api",
+            f"/repos/{repo}/git/ref/heads/{branch}",
+            "-q", ".object.sha",
+        ]
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=self._timeout)
+        except subprocess.TimeoutExpired:
+            return None
+        if proc.returncode != 0:
+            return None
+        sha = (proc.stdout or "").strip()
+        return sha or None
+
 
 class FakeGitHubClient:
     """In-memory client for tests. Records every post_comment() call."""
 
+    DEFAULT_TEST_HEAD = "1111111111111111111111111111111111111111"
+
     def __init__(
         self,
         initial_comments: list[RemoteComment] | None = None,
+        branch_heads: dict[tuple[str, str], str] | None = None,
+        seed_default_branch: bool = True,
     ) -> None:
         self._comments: list[RemoteComment] = list(initial_comments or [])
         self.posted: list[tuple[str, int, str]] = []
+        # (repo, branch) → head sha. Tests seed this via set_branch_head.
+        self._branch_heads: dict[tuple[str, str], str] = dict(branch_heads or {})
+        if seed_default_branch:
+            # Seed (repo, "main") for every repo that already has any
+            # branch_head seeded AND for every repo that shows up in
+            # ``_comments``. Tests that need stricter control can pass
+            # ``seed_default_branch=False`` and set everything explicitly.
+            for (r, _b), sha in list(self._branch_heads.items()):
+                self._branch_heads.setdefault((r, "main"), sha)
+            seen_repos = {c.url.split("/issues/")[0].split("github.com/")[-1]
+                          for c in self._comments if "github.com/" in c.url}
+            for r in seen_repos:
+                self._branch_heads.setdefault((r, "main"), self.DEFAULT_TEST_HEAD)
 
     def add(self, c: RemoteComment) -> None:
         self._comments.append(c)
+        # New comment → new repo to consider for the auto-seed.
+        if "github.com/" in c.url:
+            r = c.url.split("/issues/")[0].split("github.com/")[-1]
+            self._branch_heads.setdefault((r, "main"), self.DEFAULT_TEST_HEAD)
+
+    def set_branch_head(self, repo: str, branch: str, sha: str) -> None:
+        """Seed the fake gh client's view of HEAD for ``repo``'s ``branch``."""
+        self._branch_heads[(repo, branch)] = sha
 
     def list_comments_since(self, repo: str, since_id: int) -> list[RemoteComment]:
         # The repo arg is ignored by the fake — tests scope their fixtures.
@@ -275,3 +335,6 @@ class FakeGitHubClient:
             issue_number=issue_number,
         ))
         return new_id
+
+    def get_branch_head(self, repo: str, branch: str) -> Optional[str]:
+        return self._branch_heads.get((repo, branch))

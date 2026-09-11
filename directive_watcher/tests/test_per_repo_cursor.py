@@ -92,6 +92,12 @@ def test_handler_tick_processes_two_repos_with_independent_cursors(
 ):
     store = SidecarStore(tmp_path / "sidecar.db")
     gh = FakeGitHubClient()
+    # Seed (repo, "main") for legacy sentinels.
+    for r in {"neokyhurtado-cmd/repoA", "neokyhurtado-cmd/repoB"}:
+        gh.set_branch_head(
+            r, "main",
+            "1111111111111111111111111111111111111111",
+        )
 
     # FakeGHClient returns ALL comments regardless of repo arg (it's a
     # test fake). We segregate by author comment body to simulate the

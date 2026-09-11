@@ -25,6 +25,10 @@ VALID_ACTIONS = frozenset({
     "OPEN_PR",
 })
 
+# All required keys must be PRESENT at parse time. Empty values for the
+# bindable fields (REPOSITORY, ISSUE, EXPECTED_HEAD, ...) are forwarded
+# to the handler, which enforces the per-field fail-closed rule per
+# CONTEXT_BINDING_FAIL_CLOSED (PR #19 closeout).
 _REQUIRED_KEYS = (
     "ACTION",
     "REPOSITORY",
@@ -47,6 +51,15 @@ class Directive:
 
     The watcher treats ``directive_id`` as the durable idempotency key:
     two comments with the same ``directive_id`` are the same directive.
+
+    ``auto_from_issue_context`` (CONTEXT_BINDING_FAIL_CLOSED /
+    AUTO_FROM_ISSUE_CONTEXT, PR #19 closeout) is an OPTIONAL field. The
+    parser initialises it to ``False`` when the directive author chose
+    to spell the envelope literally (REPOSITORY / ISSUE / EXPECTED_HEAD
+    must match the actual context). When the author sets it to ``True``
+    the handler resolves REPOSITORY / ISSUE / EXPECTED_HEAD from the
+    comment's context (the repo being polled, comment.issue_number,
+    gh.get_branch_head(repo, branch)).
     """
 
     action: str
@@ -58,6 +71,7 @@ class Directive:
     auto_next_safe_gate: bool
     requires_human_go_real: bool
     directive_id: str
+    auto_from_issue_context: bool = False
 
 
 class DirectiveParseError(ValueError):
@@ -150,10 +164,23 @@ def parse_directive(body: str) -> Optional[Directive]:
         return None
     fields = _parse_envelope(envelope)
 
-    missing = [k for k in _REQUIRED_KEYS if k not in fields or not fields[k]]
+    missing = [k for k in _REQUIRED_KEYS if k not in fields]
     if missing:
         raise DirectiveParseError(
             f"missing required directive fields: {', '.join(missing)}"
+        )
+    # The handler enforces the "non-empty value" rule per-field
+    # (CONTEXT_BINDING_FAIL_CLOSED / HEAD_BINDING, PR #19 closeout):
+    # EXPECTED_HEAD="" must reach the handler so it can surface the
+    # specific fail-closed note. The parser therefore only complains
+    # when a KEY is literally absent, not when the value is empty.
+    # DIRECTIVE_ID is the durable idempotency key and MUST be non-empty
+    # at parse time — a missing/blank idempotency key would silently
+    # collapse two distinct directives into one. All other empty
+    # values are forwarded to the handler, which decides per-field.
+    if not fields.get("DIRECTIVE_ID", "").strip():
+        raise DirectiveParseError(
+            "DIRECTIVE_ID must be non-empty (it is the durable idempotency key)"
         )
 
     action = fields["ACTION"].strip().upper()
@@ -169,6 +196,23 @@ def parse_directive(body: str) -> Optional[Directive]:
             f"ISSUE must be an integer, got {fields['ISSUE']!r}"
         ) from e
 
+    # Optional field — default False. Treated as False when absent OR
+    # when the value cannot be coerced to a known boolean.
+    auto_from_ctx_raw = fields.get("AUTO_FROM_ISSUE_CONTEXT", "NO").strip()
+    auto_from_ctx = False
+    if auto_from_ctx_raw.upper() in _TRUE_TOKENS:
+        auto_from_ctx = True
+    elif auto_from_ctx_raw.upper() in _FALSE_TOKENS:
+        auto_from_ctx = False
+    else:
+        # Unrecognised value → fail-closed at the parser level (the
+        # directive author explicitly invoked the field but spelled it
+        # wrong). We do NOT default-silence here.
+        raise DirectiveParseError(
+            f"AUTO_FROM_ISSUE_CONTEXT must be YES/NO/true/false/1/0, "
+            f"got {auto_from_ctx_raw!r}"
+        )
+
     return Directive(
         action=action,
         repository=fields["REPOSITORY"].strip(),
@@ -179,4 +223,5 @@ def parse_directive(body: str) -> Optional[Directive]:
         auto_next_safe_gate=_coerce_bool(fields["AUTO_NEXT_SAFE_GATE"], "AUTO_NEXT_SAFE_GATE"),
         requires_human_go_real=_coerce_bool(fields["REQUIRES_HUMAN_GO_REAL"], "REQUIRES_HUMAN_GO_REAL"),
         directive_id=fields["DIRECTIVE_ID"].strip(),
+        auto_from_issue_context=auto_from_ctx,
     )

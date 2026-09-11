@@ -57,6 +57,10 @@ from directive_watcher.sidecar_store import (
     AlreadyProcessed,
     SidecarStore,
 )
+from directive_watcher.sentinels import (
+    is_sentinel as _is_sentinel,
+    resolve_branch_name as _resolve_branch_name,
+)
 
 LOG = logging.getLogger("directive_watcher.handler")
 
@@ -461,7 +465,117 @@ class WatcherHandler:
             summary.directives_skipped += 1
             return
 
-        # 4. Trust gates.
+        # 4. CONTEXT_BINDING_FAIL_CLOSED — PR #19 closeout.
+        #
+        # AUTO_FROM_ISSUE_CONTEXT=YES means the directive author chose
+        # to derive REPOSITORY / ISSUE / EXPECTED_HEAD from the actual
+        # context (the repo we're polling, the comment's issue_number,
+        # and the branch's current HEAD sha). We resolve those fields
+        # BEFORE the per-field binding checks so a stale or wrong
+        # envelope value cannot shadow the real context.
+        #
+        # AUTO_FROM_ISSUE_CONTEXT=NO (or absent — the default) keeps
+        # the envelope values literal. Every binding check below then
+        # compares the envelope's spelling against the actual context.
+        #
+        # In either branch, when the actual context is insufficient
+        # (e.g. comment.issue_number == 0 for a PR review comment with
+        # AUTO_FROM_ISSUE_CONTEXT=YES), we BLOCK fail-closed — no
+        # silent default, no dispatch.
+        import dataclasses
+
+        repo_bound = repo
+        issue_bound = comment.issue_number
+        head_bound: Optional[str] = None
+
+        if d.auto_from_issue_context:
+            # Sufficient context: the comment must come from an issue
+            # (issue_number != 0). A PR review comment (issue_number=0)
+            # is insufficient — we BLOCK fail-closed.
+            if comment.issue_number <= 0:
+                summary.directives_failed += 1
+                summary.notes.append(
+                    f"context binding fail-closed: "
+                    f"AUTO_FROM_ISSUE_CONTEXT=YES but comment has no "
+                    f"issue_number (likely a PR review comment):"
+                    f"directive={d.directive_id}:comment={comment.id}"
+                )
+                return
+            # Resolve the current branch HEAD via the gh wrapper.
+            head_bound = self._gh.get_branch_head(repo_bound, d.target_branch)
+            if head_bound is None:
+                summary.directives_failed += 1
+                summary.notes.append(
+                    f"context binding fail-closed: cannot resolve branch "
+                    f"head {repo_bound}@{d.target_branch}:"
+                    f"directive={d.directive_id}:comment={comment.id}"
+                )
+                return
+            # Overwrite the envelope's spelling with the resolved context.
+            d = dataclasses.replace(
+                d,
+                repository=repo_bound,
+                issue=issue_bound,
+                expected_head=head_bound,
+            )
+        else:
+            # Envelope is literal. Validate the per-field bindings
+            # BEFORE the allowlist check so a hostile cross-repo
+            # directive is rejected on the binding, not on the allowlist.
+            if d.repository != repo:
+                summary.directives_skipped += 1
+                summary.notes.append(
+                    f"context binding fail-closed: directive repo "
+                    f"{d.repository!r} != actual repo {repo!r}:"
+                    f"comment={comment.id}"
+                )
+                return
+            if d.issue != comment.issue_number:
+                summary.directives_skipped += 1
+                summary.notes.append(
+                    f"context binding fail-closed: directive issue "
+                    f"{d.issue} != comment issue "
+                    f"{comment.issue_number}:comment={comment.id}"
+                )
+                return
+            if not d.expected_head and not _is_sentinel(d.expected_head):
+                summary.directives_skipped += 1
+                summary.notes.append(
+                    f"context binding fail-closed: EXPECTED_HEAD "
+                    f"missing:directive={d.directive_id}:"
+                    f"comment={comment.id}"
+                )
+                return
+            # Resolve the legacy Phase 1 sentinels (NONE /
+            # AUTO_FROM_ISSUE_CONTEXT) to the actual branch HEAD before
+            # the binding check. A literal sha is compared verbatim.
+            resolved_target_branch = _resolve_branch_name(d.target_branch)
+            actual_head = self._gh.get_branch_head(repo, resolved_target_branch)
+            if actual_head is None:
+                summary.directives_failed += 1
+                summary.notes.append(
+                    f"context binding fail-closed: cannot resolve branch "
+                    f"head {repo}@{resolved_target_branch}:"
+                    f"directive={d.directive_id}:comment={comment.id}"
+                )
+                return
+            # If expected_head is a sentinela, resolve it to the live
+            # HEAD (it always matches itself). Otherwise compare literal.
+            if _is_sentinel(d.expected_head):
+                resolved_expected_head = actual_head
+            else:
+                resolved_expected_head = d.expected_head
+            if resolved_expected_head.lower() != actual_head.lower():
+                summary.directives_skipped += 1
+                summary.notes.append(
+                    f"context binding fail-closed: EXPECTED_HEAD "
+                    f"mismatch (expected {resolved_expected_head[:12]}, "
+                    f"got {actual_head[:12]}):"
+                    f"directive={d.directive_id}:comment={comment.id}"
+                )
+                return
+
+        # 5. Trust gates.
         if not repo_in_allowlist(d, self._allowlist):
             summary.directives_skipped += 1
             summary.notes.append(

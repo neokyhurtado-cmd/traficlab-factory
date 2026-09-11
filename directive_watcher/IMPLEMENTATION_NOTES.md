@@ -423,3 +423,82 @@ Adversarial (separate CI job):                   depends on operator's fastapi i
 - No merge, no activation, no micro-GO, no HUMAN_GO_REAL.
 - The new commit is the single closeout pass on the frozen
   contracts. No new architecture, no new product features.
+
+
+---
+
+# Phase 4 closeout — CONTEXT_BINDING_FAIL_CLOSED (PR #19 comment 5629796729)
+
+> Frozen contract closeout on top of `07d44c33` (the Phase 3 closeout
+> pass). NO merge, NO activation, NO micro-GO. Five binding contracts
+> closed with TDD strict, sabotage runs that bite, and explicit
+> PROD/TEST env separation.
+
+## The five closed CONTEXT_BINDING_FAIL_CLOSED contracts
+
+| # | Contract | Where | Bite test |
+|---|----------|-------|-----------|
+| 1 | REPO_BINDING: `directive.repository == actual_repo` | `handler._process_comment` (envelope-vs-actual-context check before allowlist) | `test_context_binding.py::test_repo_binding_blocks_directive_whose_repo_differs` |
+| 2 | ISSUE_BINDING: `directive.issue == comment.issue_number` | `handler._process_comment` (same seam as #1) | `test_context_binding.py::test_issue_binding_blocks_directive_whose_issue_differs` |
+| 3 | HEAD_BINDING: `directive.expected_head == gh.get_branch_head(repo, branch)` | `handler._process_comment` + `gh_client.GitHubClient.get_branch_head` (Protocol + Fake + Production) | `test_context_binding.py::test_head_binding_blocks_when_expected_head_is_stale` |
+| 4 | AUTO_FROM_ISSUE_CONTEXT: YES → derive from context; YES + insufficient context → BLOCK | `directive_parser.Directive.auto_from_issue_context` + `handler._process_comment` | `test_context_binding.py::test_auto_from_ctx_yes_without_issue_number_blocks_fail_closed` |
+| 5 | FRESH_START_NO_HISTORY_REPLAY: empty sidecar + historical comment with stale HEAD → BLOCKED | `handler._process_comment` HEAD_BINDING + per-repo cursor advance | `test_context_binding.py::test_fresh_start_does_not_claim_historical_directive_with_stale_head` |
+
+## The closed PROD/TEST ENV SEPARATION contract
+
+| # | Contract | Where | Bite test |
+|---|----------|-------|-----------|
+| 6 | PROD author allowlist is read from an explicit `--author-allowlist` path; missing file → fail-closed (rc != 0) + clear stderr message; default = `--env=prod`; only `neokyhurtado-cmd` ships in the template | `cli.py` argparse + `cli.main()` branch + `directive_watcher/allowlists/authors.prod.yaml.example` | `test_cli_env_separation.py::test_prod_env_missing_author_file_is_fail_closed` |
+
+## The closed documentation contract
+
+| # | Contract | Where | Bite test |
+|---|----------|-------|-----------|
+| 7 | README says ONE CRON, ONE TICK — `orchestrator/scripts/github_poller.py::main()` is the only scheduling authority; `--once` is diagnostic only; `Scheduler` survives for diagnostic use but is NOT wired to the CLI | `directive_watcher/README.md` (full rewrite) | (doc-only; bite confirmed by inspection of the diff) |
+
+## Gotcha #22
+
+22. **The CONTEXT_BINDING_FAIL_CLOSED pattern is "validate envelope
+    against actual context BEFORE the allowlist".** A hostile or stale
+    directive is rejected on the binding contract (which is the cheap
+    check), not on the allowlist (which is the broader check). Putting
+    the binding checks first is the fail-closed shape: a misspelled
+    repo in the envelope can never reach the allowlist, can never
+    reach the dispatcher, can never produce a session bind. The
+    `notes.append(...)` line is the durable audit trail — every
+    BLOCKED directive leaves a specific, parseable message that names
+    the offending field, the actual value, and the expected value.
+    The test for each contract reads `summary.notes` to confirm the
+    specific message landed; that is how the sabotage run bites.
+    `AUTO_FROM_ISSUE_CONTEXT=YES` is the escape hatch for legitimate
+    directives that don't want to spell out the binding fields
+    explicitly — the handler resolves them from the actual context
+    and the binding check still runs (with the resolved values).
+    Insufficient context (e.g. PR review comment with `issue_number=0`)
+    is BLOCKED fail-closed because there is no honest default to fall
+    back to.
+
+23. **The PROD/TEST env separation is a CLI-shape contract, not a
+    runtime toggle.** `--env=prod` is the default; production
+    deployments MUST NOT need to remember to set a flag. The shape:
+    `--env=prod` requires `--author-allowlist <` (separate from
+    `--config`); `--env=test` uses `--config` as the combined
+    fixture. The fail-closed behaviour for missing `--author-allowlist`
+    is at the CLI gate (exit code 3 + stderr), not deep in the
+    handler. The shipped template `authors.prod.yaml.example` contains
+    ONLY `neokyhurtado-cmd` so a copy-pasted enable cannot silently
+    grant production access to `astra` (who authors re-audits but
+    does not author execution-bound directives).
+
+24. **The Phase 1 sentinels `EXPECTED_HEAD = NONE` and
+    `TARGET_BRANCH = AUTO_FROM_ISSUE_CONTEXT` are not removed by the
+    CONTEXT_BINDING_FAIL_CLOSED contracts.** They are still valid
+    envelope values, resolved to the live branch HEAD by
+    `directive_watcher/sentinels.py::resolve_expected_head` /
+    `resolve_branch_name`. A literal sha is compared verbatim. The
+    sentinel-vs-empty distinction matters: empty `EXPECTED_HEAD` is a
+    fail-closed BLOCK ("EXPECTED_HEAD missing"); a sentinel is a
+    pass-through to the resolved HEAD. Tests for legacy
+    `EXPECTED_HEAD = NONE` envelopes must seed `(repo, "main")` in
+    `FakeGitHubClient.set_branch_head()` so the resolution returns a
+    real sha.

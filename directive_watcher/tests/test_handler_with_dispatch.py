@@ -73,6 +73,12 @@ def routing_table(tmp_path: Path) -> Path:
 def env_with_dispatcher(tmp_path: Path, routing_table: Path):
     store = SidecarStore(tmp_path / "sidecar.db")
     gh = FakeGitHubClient()
+    # Seed (repo, "main") for legacy EXPECTED_HEAD=NONE /
+    # TARGET_BRANCH=AUTO_FROM_ISSUE_CONTEXT sentinels.
+    gh.set_branch_head(
+        "neokyhurtado-cmd/traficlab-factory", "main",
+        "1111111111111111111111111111111111111111",
+    )
     allowlist = AllowlistConfig(
         allowlisted_repos=frozenset({"neokyhurtado-cmd/traficlab-factory"}),
         allowlisted_authors=frozenset({"astra"}),

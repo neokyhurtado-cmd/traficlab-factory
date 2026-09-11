@@ -52,6 +52,13 @@ def _directive_body(directive_id: str = "d-1", requires_hgr: bool = False) -> st
 def env(tmp_path):
     store = SidecarStore(tmp_path / "sidecar.db")
     gh = FakeGitHubClient()
+    # Seed (repo, "main") for the legacy ``EXPECTED_HEAD = NONE`` /
+    # ``TARGET_BRANCH = AUTO_FROM_ISSUE_CONTEXT`` sentinels (CONTEXT_BINDING_FAIL_CLOSED
+    # contract — legacy compatibility path).
+    gh.set_branch_head(
+        "neokyhurtado-cmd/traficlab-factory", "main",
+        "1111111111111111111111111111111111111111",
+    )
     allowlist = AllowlistConfig(
         allowlisted_repos=frozenset({"neokyhurtado-cmd/traficlab-factory"}),
         allowlisted_authors=frozenset({"astra"}),
@@ -211,6 +218,10 @@ def test_restart_does_not_re_execute_finalised_directive(tmp_path):
     db = tmp_path / "sidecar.db"
     store = SidecarStore(db)
     gh = FakeGitHubClient()
+    gh.set_branch_head(
+        "neokyhurtado-cmd/traficlab-factory", "main",
+        "1111111111111111111111111111111111111111",
+    )
     gh.add(_make_comment(101, _directive_body("d-restart")))
     allowlist = AllowlistConfig(
         allowlisted_repos=frozenset({"neokyhurtado-cmd/traficlab-factory"}),

@@ -84,6 +84,7 @@ def test_cli_once_records_exactly_one_run(tmp_path, monkeypatch, _isolated_impor
         "--config", str(config_path),
         "--sidecar-db", str(sidecar),
         "--status-path", str(status_path),
+        "--env", "test",
         "--once",
     ])
     assert rc == 0
