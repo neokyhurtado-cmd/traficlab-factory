@@ -1,19 +1,20 @@
 # JUPITER Canonical Operating Model
 
-**Policy ID:** `JUPITER-COM-1.1`  
-**Status:** PROPOSED VERSIONED CANONICAL SOURCE; OWNER policy effective via `traficlab-factory#18` comments `5643135371` and `5643225198`  
+**Policy ID:** `JUPITER-COM-1.2`  
+**Status:** PROPOSED VERSIONED CANONICAL SOURCE; OWNER policy effective via `traficlab-factory#18` comments `5643135371`, `5643225198`, and `5643242448`  
 **Scope:** projects registered in `orchestrator/config/routing.yaml`  
-**Normative owner decisions:** `traficlab-factory#18#issuecomment-5643135371`, `traficlab-factory#18#issuecomment-5643225198`
+**Normative owner decisions:** `traficlab-factory#18#issuecomment-5643135371`, `traficlab-factory#18#issuecomment-5643225198`, `traficlab-factory#18#issuecomment-5643242448`
 
 ## 1. Purpose
 
-This document removes an ambiguity that existed between three already-documented truths:
+This document removes ambiguities between already-documented orchestration truths:
 
 1. `traficlab-factory#18` defines `[ASTRA_DIRECTIVE:v1]` as a fail-closed trusted ingress that wakes/dispatches Hermes Director and produces durable ACK/RESULT evidence.
 2. `orchestrator/README.md` and `orchestrator/config/routing.yaml` define HERMES-ORCH as the single routing/polling authority for registered repositories.
 3. Product-level workflows such as `SUINI#40` allow reversible same-scope review/fix iterations to continue without a new human micro-GO.
+4. Existing SUINI governance already separated writer from consultant/reviewer (`MiniMax` writes; `Codex`/Director Shadow consults/reviews), allowed multiple specialist consultants, and already defined an Astra consultation path through `ask_astra`.
 
-The missing rule was whether such continuation remains inside JUPITER ownership or bypasses JUPITER. `JUPITER-COM-1` resolved that explicitly. `JUPITER-COM-1.1` further freezes the operating posture of Hermes Director: conversational director first, multi-task delegation through JUPITER, mandatory Mission Control alignment, and active supervision of dispatched agents.
+`JUPITER-COM-1` resolved whether same-scope continuation remains inside JUPITER ownership. `JUPITER-COM-1.1` froze the operating posture of Hermes Director: conversational director first, multi-task delegation through JUPITER, mandatory Mission Control alignment, and active supervision of dispatched agents. `JUPITER-COM-1.2` restores the consultant-team layer as an explicit first-class part of that operating model.
 
 ## 2. Audit classification
 
@@ -28,6 +29,9 @@ The missing rule was whether such continuation remains inside JUPITER ownership 
 - SUINI is registered in the canonical routing table.
 - Protected boundaries require `HUMAN_GO_REAL`; a directive cannot manufacture authorization.
 - Same directive/restart/race handling is expected to be idempotent and exactly-once.
+- SUINI #40 defines MiniMax as writer/executor and Codex as independent read-only consultant/reviewer when useful.
+- Existing SUINI committee rules allow Director Shadow to consult multiple specialists and explicitly reject decision by vote/average.
+- `traficlab-factory#11` defines the Hermes -> `ask_astra` -> Astra consultant -> structured decision -> Hermes continuation path.
 
 ### INFERRED before JUPITER-COM-1
 
@@ -66,11 +70,18 @@ DIRECTOR_SELF_EXECUTION_MAX = 1_ATOMIC_TASK
 MULTI_TASK_WORK = MUST_DELEGATE_THROUGH_JUPITER
 MISSION_CONTROL_VISIBILITY = REQUIRED
 DIRECTOR_IDLE_MODE = ACTIVE_AGENT_SUPERVISION
+CONSULTANT_TEAM = REQUIRED_CAPABILITY
+CONSULTANT_TEAM_UNDER_JUPITER = YES
+CONSULTANTS_DEFAULT_MODE = READ_ONLY
+CONSULTANTS_CONSUME_WRITER_SLOT = NO
+CONSULTANT_DECISION_BY_VOTE = NO
+CONSULTANT_SYNTHESIS_MUST_BE_EVIDENCE_BASED = YES
+MISSION_CONTROL_SHOWS_CONSULTANTS = YES
 ```
 
-For every registered project, all technical execution belongs logically to a JUPITER execution context. A worker may act locally or on another host, but it is a worker **under** the orchestration plane, not a replacement for it.
+For every registered project, all technical execution belongs logically to a JUPITER execution context. A worker, consultant or reviewer may act locally or on another host, but each acts **under** the orchestration plane, not as a replacement for it.
 
-`JUPITER_ALWAYS_IN_EXECUTION_PATH = YES` does **not** mean every file edit must trigger a fresh dispatch. It means execution ownership, lifecycle, single-writer state and durable evidence remain attributable to JUPITER.
+`JUPITER_ALWAYS_IN_EXECUTION_PATH = YES` does **not** mean every file edit or consultation must trigger a fresh dispatch. It means execution ownership, lifecycle, single-writer state, consultant/reviewer participation and durable evidence remain attributable to JUPITER.
 
 ## 4. Orchestration plane
 
@@ -80,6 +91,7 @@ The orchestration plane owns:
 execution ownership
 single-writer arbitration
 worker dispatch
+consultant/reviewer dispatch
 execution lifecycle
 run/session identity
 gate state
@@ -115,7 +127,7 @@ Authorization includes:
 - merge/main/release/deploy/destructive boundaries;
 - secrets, credentials, providers, runtime/global configuration and other protected changes.
 
-A route or active JUPITER session is not authorization to cross those boundaries.
+A route, active JUPITER session or consultant recommendation is not authorization to cross those boundaries.
 
 ## 6. Standing execution and continuation semantics
 
@@ -141,7 +153,7 @@ NEW_WRITER = NO
 JUPITER_OWNERSHIP_CONTINUES = YES
 ```
 
-The worker may be `HERMES-ASHLEY-01`, MiniMax, Director Shadow/Codex or another assigned execution/review worker. Their identity does not replace the orchestration plane.
+The single writer may be MiniMax or another explicitly assigned executor. Consultants/reviewers remain read-only by default and therefore do not consume the writer slot. Their identities do not replace the orchestration plane.
 
 ## 7. Review/fix semantics
 
@@ -195,7 +207,8 @@ No fresh directive is required for ordinary reversible work already inside an au
 - rerunning tests/evidence;
 - pushing a new SHA on the same authorized feature branch;
 - requesting independent re-review;
-- repeating the review/fix loop until the current gate resolves.
+- repeating the review/fix loop until the current gate resolves;
+- consulting read-only specialists inside the same execution group.
 
 These are continuation events, not new authorization events.
 
@@ -218,6 +231,8 @@ Rules:
 3. New overlapping directives are denied, queued, or marked superseded until ownership is released.
 4. `EXPECTED_HEAD` binding remains fail-closed. A stale directive must never be used to claim a newer head.
 5. Ownership can transfer only through an explicit durable handoff/recovery state.
+6. Read-only consultants may work in parallel and do not consume the writer slot.
+7. A consultant may become a writer only through an explicit JUPITER assignment that transfers or grants the single writer role without overlap.
 
 ## 11. Durable evidence minimum
 
@@ -229,6 +244,10 @@ EXECUTION_GROUP = <stable logical group>
 EXECUTION_ID = <claim/execution id>
 JUPITER_RUN_OR_SESSION_ID = <physical/logical run or session id>
 ACTIVE_WORKER = <current writer/executor>
+ACTIVE_CONSULTANTS = <zero or more read-only consultant sessions>
+ACTIVE_REVIEWER = <current independent reviewer/verifier if any>
+CONSULTATION_STATUS = <NONE|ACTIVE|RESOLVED|CONFLICT>
+LATEST_RECOMMENDATION = <durable reference when material>
 CURRENT_GATE = <gate name>
 CURRENT_BRANCH = <branch>
 START_HEAD = <sha>
@@ -245,6 +264,7 @@ GitHub callbacks are required for material lifecycle events, not every micro-act
 
 - first claim/start of execution group;
 - worker ownership transfer;
+- material consultant/reviewer assignment or unresolved consultant conflict;
 - gate transition;
 - protected-boundary stop;
 - blocked external/scientific decision;
@@ -252,7 +272,7 @@ GitHub callbacks are required for material lifecycle events, not every micro-act
 - recovery from stale/failed execution;
 - terminal PASS/DONE/result.
 
-Ordinary edits, individual test runs and local substeps should remain in commits, PR evidence and execution logs unless they materially change state.
+Ordinary edits, individual test runs, consultant scratch work and local substeps should remain in commits, PR evidence and execution logs unless they materially change state.
 
 ## 12. ACK/RESULT semantics
 
@@ -260,11 +280,11 @@ Ordinary edits, individual test runs and local substeps should remain in commits
 
 They are not required to be re-issued for every same-scope micro-iteration inside one active execution group.
 
-A long-lived execution may therefore contain many SHAs/reviews while retaining one logical execution group. A new ACK/RESULT pair is required when a new directive claim creates a new execution/recovery/route-proof round-trip.
+A long-lived execution may therefore contain many SHAs/reviews/consultations while retaining one logical execution group. A new ACK/RESULT pair is required when a new directive claim creates a new execution/recovery/route-proof round-trip.
 
 ## 13. HUMAN_GO_REAL boundaries
 
-JUPITER-COM-1.1 does not loosen protected-boundary policy.
+JUPITER-COM-1.2 does not loosen protected-boundary policy.
 
 Unless separately and explicitly authorized by the governing product contract, stop for HUMAN_GO_REAL before:
 
@@ -275,7 +295,7 @@ Unless separately and explicitly authorized by the governing product contract, s
 - destructive filesystem/data operations;
 - other irreversible or owner-reserved decisions.
 
-A reviewer may request reversible fixes without HUMAN_GO_REAL. A worker may execute them automatically while remaining inside the active JUPITER context.
+A reviewer may request reversible fixes without HUMAN_GO_REAL. A worker may execute them automatically while remaining inside the active JUPITER context. Consultants may recommend but cannot manufacture owner authority.
 
 ## 14. Cross-host behavior
 
@@ -283,7 +303,7 @@ A new cross-host dispatch requires a fresh trusted dispatch event **when no vali
 
 If the current execution already owns and tracks that worker/session, same-scope continuation does not require another directive merely because another host is involved.
 
-Every physical handoff must preserve the execution group, current head, owner scope and single-writer identity.
+Every physical handoff must preserve the execution group, current head, owner scope and single-writer identity. Read-only consultant sessions on other hosts must preserve the same execution-group identity and remain non-writers unless explicitly reassigned.
 
 ## 15. Recovery and stale-HEAD behavior
 
@@ -322,6 +342,10 @@ REVIEW_FIX_REQUIRES_NEW_HUMAN_GO = NO
 REVIEW_FIX_REMAINS_UNDER_JUPITER_OWNERSHIP = YES
 JUPITER_ROUTE_PROOF_BEFORE_F2 = YES
 CURRENT_F1_REMEDIATION_CONTINUES = YES
+SUINI_WRITER_DEFAULT = MINIMAX
+SUINI_CONSULTANT_LEAD = CODEX / DIRECTOR_SHADOW
+SUINI_SPECIALIST_CONSULTANTS = JUPITER_DELEGATED_READ_ONLY
+SUINI_ASTRA_ESCALATION = ASK_ASTRA_WHEN_MATERIAL
 ```
 
 The four F1 findings already authorized by review `5184860576` remain authorized for remediation. Governance clarification must not stop that work unless a real concurrent-writer conflict, protected boundary or material owner contradiction appears.
@@ -330,7 +354,9 @@ Earlier SUINI interpretations are reconciled as follows:
 
 - comments requiring JUPITER as the real orchestration surface remain valid;
 - the comment allowing direct same-scope remediation remains valid **as authorization semantics**;
-- any reading that turns that remediation into an execution outside JUPITER is superseded;
+- the pre-existing MiniMax writer / Codex consultant-reviewer separation remains valid;
+- the pre-existing multi-specialist consultant committee remains valid and is now visible in the global protocol;
+- any reading that turns remediation into an execution outside JUPITER is superseded;
 - any reading that requires a fresh directive for every review/fix iteration is also superseded.
 
 ## 18. Industrialization guard
@@ -354,9 +380,13 @@ INV-11 Hermes Director self-executes at most one atomic task
 INV-12 multi-task work is decomposed and delegated through JUPITER
 INV-13 Mission Control reflects every active execution group and material task state
 INV-14 Hermes enters active supervision while delegated workers are active
+INV-15 consultant team is a first-class JUPITER capability
+INV-16 consultants are read-only by default and do not consume the single-writer slot
+INV-17 consultant recommendations are evidence-based, never majority-vote decisions
+INV-18 Mission Control distinguishes director, writer, consultants and reviewer
 ```
 
-Do not create a second architecture, scheduler, router, directive protocol or shadow execution registry to enforce these rules. Extend the existing HERMES-ORCH / Directive Watcher / session-state mechanisms.
+Do not create a second architecture, scheduler, router, directive protocol, consultant control-plane or shadow execution registry to enforce these rules. Extend the existing HERMES-ORCH / Directive Watcher / session-state mechanisms.
 
 ## 19. Canonical route diagram
 
@@ -369,21 +399,31 @@ HERMES DIRECTOR                           <- CONVERSATIONAL DIRECTOR
         |
         +--> exactly one atomic task? ---- YES ---> may execute directly
         |
-        +--> multiple/separable tasks ---- YES ---> JUPITER decomposition + dispatch
-                                                    |
-                                                    v
-                                             worker(s) / reviewer(s)
-                                                    ^
-                                                    |
-                                             ACTIVE SUPERVISION
-                                                    ^
-                                                    |
-JUPITER / HERMES-ORCH -------------------- MISSION CONTROL
+        +--> non-trivial / multi-task work
+        |                 |
+        |                 v
+        |          JUPITER / HERMES-ORCH
+        |            /              \
+        |           /                \
+        |          v                  v
+        |   CONSULTANT CELL        WORKER CELL
+        |   - Codex/Shadow lead    - MiniMax / writer
+        |   - specialist(s)        - task workers
+        |   - ask_astra escalation - verifier/reviewer
+        |   - read-only default       as gate requires
+        |          |                  |
+        |          +---- advice ------+
+        |                 |
+        +<----------------+
         |
         v
-active EXECUTION_GROUP
+ACTIVE SUPERVISION / INTEGRATION
+        |
+        v
+MISSION CONTROL <----> active EXECUTION_GROUP
         |
         +--> fix / build / test / evidence
+        +--> consult / synthesize / replan when needed
         +--> review -> CHANGES_REQUESTED -> fix -> re-review
         +--> same-scope reversible loops continue automatically
         |
@@ -402,6 +442,9 @@ HERMES DIRECTOR STAYS CONVERSATIONALLY AVAILABLE
 MULTI-TASK WORK IS DELEGATED THROUGH JUPITER
 MISSION CONTROL MUST MATCH REAL EXECUTION STATE
 NO PASSIVE IDLE WHILE DISPATCHED AGENTS ARE ACTIVE
+CONSULTANTS ARE AVAILABLE UNDER JUPITER
+CONSULTANTS ARE READ-ONLY BY DEFAULT
+NO DECISION BY MODEL VOTE
 ```
 
 ## 20. Hermes Director operating posture — JUPITER-COM-1.1
@@ -436,11 +479,14 @@ EXECUTION_GROUP
 CURRENT_GOAL
 CURRENT_GATE
 ACTIVE_WORKERS
+ACTIVE_CONSULTANTS
+ACTIVE_REVIEWER
 TASKS_DISPATCHED
 TASK_OWNER
 CURRENT_BRANCH
 CURRENT_HEAD
 CURRENT_STATE
+CONSULTATION_STATUS
 LAST_RESULT_OR_REVIEW
 BLOCKERS
 NEXT_ACTION
@@ -452,15 +498,15 @@ HIDDEN_ACTIVE_TASKS = FORBIDDEN
 STATE_DRIFT_BETWEEN_JUPITER_AND_MISSION_CONTROL = DEFECT
 ```
 
-Local worker logs are allowed, but material lifecycle/state must reconcile back to Mission Control/JUPITER.
+Local worker/consultant logs are allowed, but material lifecycle/state must reconcile back to Mission Control/JUPITER.
 
 ### Rule 3 — active supervision instead of idle
 
-If Hermes has no new owner-facing task to dispatch while workers or reviewers from its execution group remain active, Hermes enters `ACTIVE_SUPERVISION`.
+If Hermes has no new owner-facing task to dispatch while workers, consultants or reviewers from its execution group remain active, Hermes enters `ACTIVE_SUPERVISION`.
 
 ```text
-NO_NEW_TASK + ACTIVE_WORKERS = ACTIVE_SUPERVISION
-PASSIVE_IDLE_WHILE_WORKERS_ACTIVE = NO
+NO_NEW_TASK + ACTIVE_AGENTS = ACTIVE_SUPERVISION
+PASSIVE_IDLE_WHILE_AGENTS_ACTIVE = NO
 SUPERVISION_DOES_NOT_MEAN_SECOND_WRITER = YES
 ```
 
@@ -470,8 +516,82 @@ Active supervision includes:
 - resolving context/questions that do not require OWNER decisions;
 - ensuring tests and evidence are real, non-vacuous and tied to the right SHA;
 - detecting duplicated work, stalled agents, stale HEAD, scope drift or single-writer conflicts;
-- coordinating worker/reviewer handoffs;
+- coordinating worker/consultant/reviewer handoffs;
 - requesting correction before bad work propagates;
 - keeping Mission Control/JUPITER state aligned with material progress.
 
 Hermes must not use supervision time to invent unrelated work, become a second writer, or cross protected boundaries.
+
+## 21. Consultant team operating model — JUPITER-COM-1.2
+
+### Purpose
+
+The consultant team exists so Hermes Director can remain a director rather than becoming the technical specialist for every difficult question. It is a read-only reasoning/review capability under the same JUPITER execution group.
+
+### Canonical roles
+
+```text
+CONSULTANT_LEAD = Director Shadow / Codex-equivalent
+SPECIALIST_CONSULTANTS = one or more JUPITER-delegated read-only specialists
+ASTRA_CONSULT = architecture/adversarial/escalation consultant via ask_astra
+WRITER_EXECUTOR = MiniMax or explicitly assigned single writer
+INDEPENDENT_REVIEWER = separate verifier/reviewer as required by gate
+```
+
+Provider/model names are role bindings, not architectural dependencies. If a named model is unavailable, JUPITER may bind an equivalent consultant or worker while preserving the role contract.
+
+### Committee rule
+
+Multiple consultants may investigate in parallel because they are read-only by default. Their result is not a vote.
+
+A recommendation must be synthesized against:
+
+```text
+GOAL
++ CURRENT REALITY
++ FROZEN CONTRACTS
++ TESTS
++ RUNTIME / SCIENTIFIC EVIDENCE
++ RISK / ROLLBACK
+```
+
+Disagreement must be surfaced as a reasoned evidence conflict. Do not choose a plan because two of three models agree.
+
+### When Hermes should consult
+
+Use the consultant team before interrupting David for a reversible technical question when the issue is materially non-trivial, especially:
+
+- architecture/design ambiguity;
+- science/modeling methodology;
+- security/reliability concern;
+- difficult root-cause analysis;
+- materially different implementation alternatives;
+- adversarial review of a plan or a claimed PASS.
+
+Do not create consultant spam for trivial atomic work.
+
+### Consultant vs writer boundary
+
+```text
+CONSULTANTS_DEFAULT_MODE = READ_ONLY
+CONSULTANTS_CONSUME_WRITER_SLOT = NO
+CONSULTANTS_MAY_WRITE_PRODUCT = NO
+```
+
+A consultant may write product code only after an explicit JUPITER role transition that makes that agent the single authorized writer and releases any prior writer. Consultant advice alone never grants write authority.
+
+### Mission Control visibility
+
+Mission Control must distinguish:
+
+```text
+DIRECTOR
+ACTIVE_WRITER
+ACTIVE_CONSULTANTS[]
+ACTIVE_REVIEWER
+CONSULTATION_STATUS
+LATEST_RECOMMENDATION
+UNRESOLVED_CONSULTANT_CONFLICT
+```
+
+Consultant sessions belong to the existing execution group. Do not create a separate consultant scheduler, registry or orchestration truth.
