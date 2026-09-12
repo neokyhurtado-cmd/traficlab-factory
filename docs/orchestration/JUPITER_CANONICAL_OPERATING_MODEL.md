@@ -1,9 +1,9 @@
 # JUPITER Canonical Operating Model
 
-**Policy ID:** `JUPITER-COM-1`  
-**Status:** PROPOSED VERSIONED CANONICAL SOURCE; OWNER policy effective via `traficlab-factory#18` comment `5643135371`  
+**Policy ID:** `JUPITER-COM-1.1`  
+**Status:** PROPOSED VERSIONED CANONICAL SOURCE; OWNER policy effective via `traficlab-factory#18` comments `5643135371` and `5643225198`  
 **Scope:** projects registered in `orchestrator/config/routing.yaml`  
-**Normative owner decision:** `traficlab-factory#18#issuecomment-5643135371`
+**Normative owner decisions:** `traficlab-factory#18#issuecomment-5643135371`, `traficlab-factory#18#issuecomment-5643225198`
 
 ## 1. Purpose
 
@@ -13,7 +13,7 @@ This document removes an ambiguity that existed between three already-documented
 2. `orchestrator/README.md` and `orchestrator/config/routing.yaml` define HERMES-ORCH as the single routing/polling authority for registered repositories.
 3. Product-level workflows such as `SUINI#40` allow reversible same-scope review/fix iterations to continue without a new human micro-GO.
 
-The missing rule was whether such continuation remains inside JUPITER ownership or bypasses JUPITER. `JUPITER-COM-1` resolves that explicitly.
+The missing rule was whether such continuation remains inside JUPITER ownership or bypasses JUPITER. `JUPITER-COM-1` resolved that explicitly. `JUPITER-COM-1.1` further freezes the operating posture of Hermes Director: conversational director first, multi-task delegation through JUPITER, mandatory Mission Control alignment, and active supervision of dispatched agents.
 
 ## 2. Audit classification
 
@@ -61,6 +61,11 @@ ORCHESTRATION_PLANE = JUPITER / HERMES-ORCH
 ROUTING_IS_AUTHORIZATION = NO
 ONE_ACTIVE_WRITER_PER_SCOPE = YES
 DIRECT_PARALLEL_HERMES_WRITER = NO
+HERMES_ROLE = CONVERSATIONAL_DIRECTOR
+DIRECTOR_SELF_EXECUTION_MAX = 1_ATOMIC_TASK
+MULTI_TASK_WORK = MUST_DELEGATE_THROUGH_JUPITER
+MISSION_CONTROL_VISIBILITY = REQUIRED
+DIRECTOR_IDLE_MODE = ACTIVE_AGENT_SUPERVISION
 ```
 
 For every registered project, all technical execution belongs logically to a JUPITER execution context. A worker may act locally or on another host, but it is a worker **under** the orchestration plane, not a replacement for it.
@@ -259,7 +264,7 @@ A long-lived execution may therefore contain many SHAs/reviews while retaining o
 
 ## 13. HUMAN_GO_REAL boundaries
 
-JUPITER-COM-1 does not loosen protected-boundary policy.
+JUPITER-COM-1.1 does not loosen protected-boundary policy.
 
 Unless separately and explicitly authorized by the governing product contract, stop for HUMAN_GO_REAL before:
 
@@ -345,6 +350,10 @@ INV-7  stale HEAD fails closed
 INV-8  durable execution identity survives review/fix iterations
 INV-9  GitHub records material state transitions without micro-step spam
 INV-10 unknown/unregistered repos fail closed
+INV-11 Hermes Director self-executes at most one atomic task
+INV-12 multi-task work is decomposed and delegated through JUPITER
+INV-13 Mission Control reflects every active execution group and material task state
+INV-14 Hermes enters active supervision while delegated workers are active
 ```
 
 Do not create a second architecture, scheduler, router, directive protocol or shadow execution registry to enforce these rules. Extend the existing HERMES-ORCH / Directive Watcher / session-state mechanisms.
@@ -356,16 +365,27 @@ OWNER / ASHLEY product decision
         |
         | approved scope / directive when required
         v
-JUPITER / HERMES-ORCH                     <- ORCHESTRATION PLANE
+HERMES DIRECTOR                           <- CONVERSATIONAL DIRECTOR
+        |
+        +--> exactly one atomic task? ---- YES ---> may execute directly
+        |
+        +--> multiple/separable tasks ---- YES ---> JUPITER decomposition + dispatch
+                                                    |
+                                                    v
+                                             worker(s) / reviewer(s)
+                                                    ^
+                                                    |
+                                             ACTIVE SUPERVISION
+                                                    ^
+                                                    |
+JUPITER / HERMES-ORCH -------------------- MISSION CONTROL
         |
         v
 active EXECUTION_GROUP
         |
-        +--> single active worker/executor
-        |       |
-        |       +--> fix / build / test / evidence
-        |       +--> review -> CHANGES_REQUESTED -> fix -> re-review
-        |       +--> same-scope reversible loops continue automatically
+        +--> fix / build / test / evidence
+        +--> review -> CHANGES_REQUESTED -> fix -> re-review
+        +--> same-scope reversible loops continue automatically
         |
         v
 JUPITER durable state / evidence
@@ -378,4 +398,80 @@ OWNER / independent review at required gates
 NO MICRO-GO FOR REVERSIBLE SAME-SCOPE WORK
 NO NEW ASTRA_DIRECTIVE FOR ORDINARY REVIEW/FIX CONTINUATION
 NO DIRECT PARALLEL HERMES WRITER OUTSIDE JUPITER
+HERMES DIRECTOR STAYS CONVERSATIONALLY AVAILABLE
+MULTI-TASK WORK IS DELEGATED THROUGH JUPITER
+MISSION CONTROL MUST MATCH REAL EXECUTION STATE
+NO PASSIVE IDLE WHILE DISPATCHED AGENTS ARE ACTIVE
 ```
+
+## 20. Hermes Director operating posture — JUPITER-COM-1.1
+
+### Rule 1 — conversational director, not primary builder
+
+Hermes Director must remain primarily conversational, supervisory and available to David/Ashley.
+
+```text
+DIRECTOR_SELF_EXECUTION_MAX = 1_ATOMIC_TASK
+```
+
+Hermes may personally execute one bounded atomic task when that task is the entire current unit of work. If the work contains two or more separable tasks, a multi-step implementation, parallelizable investigation/build/review, or would occupy Hermes as a long-running worker, Hermes must decompose and delegate through JUPITER.
+
+```text
+ONE_ATOMIC_TASK = DIRECTOR_MAY_EXECUTE
+TWO_OR_MORE_TASKS = JUPITER_DELEGATION_REQUIRED
+DIRECTOR_LONG_RUNNING_BUILD_WORKER = NO
+DIRECTOR_MUST_REMAIN_CONVERSATIONALLY_AVAILABLE = YES
+```
+
+Delegation does not remove Hermes accountability. The Director remains responsible for decomposition, dispatch, supervision, integration, evidence quality and return of the result.
+
+### Rule 2 — mandatory Mission Control alignment
+
+Every active execution group must be represented in Mission Control or its canonical successor state surface. David, Ashley, Astra and Hermes must be able to reconstruct what is happening without asking individual workers.
+
+Minimum shared state:
+
+```text
+EXECUTION_GROUP
+CURRENT_GOAL
+CURRENT_GATE
+ACTIVE_WORKERS
+TASKS_DISPATCHED
+TASK_OWNER
+CURRENT_BRANCH
+CURRENT_HEAD
+CURRENT_STATE
+LAST_RESULT_OR_REVIEW
+BLOCKERS
+NEXT_ACTION
+```
+
+```text
+MISSION_CONTROL_ALIGNED = REQUIRED
+HIDDEN_ACTIVE_TASKS = FORBIDDEN
+STATE_DRIFT_BETWEEN_JUPITER_AND_MISSION_CONTROL = DEFECT
+```
+
+Local worker logs are allowed, but material lifecycle/state must reconcile back to Mission Control/JUPITER.
+
+### Rule 3 — active supervision instead of idle
+
+If Hermes has no new owner-facing task to dispatch while workers or reviewers from its execution group remain active, Hermes enters `ACTIVE_SUPERVISION`.
+
+```text
+NO_NEW_TASK + ACTIVE_WORKERS = ACTIVE_SUPERVISION
+PASSIVE_IDLE_WHILE_WORKERS_ACTIVE = NO
+SUPERVISION_DOES_NOT_MEAN_SECOND_WRITER = YES
+```
+
+Active supervision includes:
+
+- checking progress and scope adherence;
+- resolving context/questions that do not require OWNER decisions;
+- ensuring tests and evidence are real, non-vacuous and tied to the right SHA;
+- detecting duplicated work, stalled agents, stale HEAD, scope drift or single-writer conflicts;
+- coordinating worker/reviewer handoffs;
+- requesting correction before bad work propagates;
+- keeping Mission Control/JUPITER state aligned with material progress.
+
+Hermes must not use supervision time to invent unrelated work, become a second writer, or cross protected boundaries.
