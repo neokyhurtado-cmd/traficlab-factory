@@ -63,7 +63,7 @@ verified by `tests/test_body0_contract.py::test_manifest_denies_every_frozen_bou
 pytest agent_body/tests/ -v
 ```
 
-Expected: 24 tests pass. Coverage:
+Expected: 55 tests pass across 8 files. Coverage:
 
   - BODY-0 contract (5 tests): manifest denials, no free-text columns,
     no secret columns, no prompt injection surface, no out-of-scope edits.
@@ -80,6 +80,15 @@ Expected: 24 tests pass. Coverage:
   - INTERNAL_CONSULT executable (5 tests): correlation parser rejects
     mismatch on QUERY_ID + COMMIT_SHA, ACTOR_UNVERIFIED is a real
     branch, transitive secret scan, skill discoverability.
+  - Role whitelist + enum enforcement (27 tests, added by
+    `evolution-v1-role-whitelist-fix-20260914-01`): canonical role /
+    decision / risk sets frozen; correlate() rejects non-canonical role
+    on direct-dict and envelope paths; correlate() fails closed on every
+    missing required correlation field; non-canonical decisions and risk
+    levels are rejected; the headline sabotage proves three
+    non-canonical roles (PROMPTER / GHOST / MINION) can never push a
+    quorum of four to AUTO_GO; negative control confirms all four
+    canonical roles still produce AUTO_GO.
 
 ## Rollback
 
