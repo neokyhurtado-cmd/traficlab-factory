@@ -63,20 +63,23 @@ def test_mutations_this_gate_is_zero_outside_agent_body():
     )
 
 
-def test_added_tests_count_is_at_least_24():
-    """The closeout must report at least 5 new test files under agent_body/tests/.
+def test_added_tests_count_is_at_least_55():
+    """The closeout must report at least 8 new test files under agent_body/tests/.
 
     We assert on the file-system (which is the source of truth between
     commit and push). The PR description in the closeout post cites
-    28 tests across 6 files; the on-disk truth must reflect that.
+    55 tests across 8 files (24 from BODY-0/1/2 + INTERNAL_CONSULT executable,
+    +27 role-whitelist / enum-enforcement sabotage tests added by
+    `evolution-v1-role-whitelist-fix-20260914-01`); the on-disk truth
+    must reflect that.
     """
     test_dir = Path("agent_body/tests")
     on_disk = [
         p for p in test_dir.glob("test_*.py")
         if p.is_file()
     ]
-    assert len(on_disk) >= 5, (
-        f"expected >=5 test files on disk, got {len(on_disk)}: "
+    assert len(on_disk) >= 7, (
+        f"expected >=7 test files on disk, got {len(on_disk)}: "
         f"{[p.name for p in on_disk]}"
     )
 

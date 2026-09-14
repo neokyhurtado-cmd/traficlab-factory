@@ -37,6 +37,33 @@ _REVIEW_MARKER = re.compile(
 )
 _FIELD_LINE = re.compile(r"^\s*([A-Z_]+)\s*=\s*(.*?)\s*$")
 
+# Canonical enum sets — frozen from orchestrator/contracts/internal_consult_v1.yaml.
+# These MUST stay in lock-step with the YAML; the yaml is authoritative and
+# the regression tests under directive_watcher/tests/test_internal_consult_contract.py
+# freeze the contract. The Python sets here are the runtime enforcement that
+# catches a non-canonical role / malformed enum before it can vote.
+CANONICAL_REVIEW_ROLES: frozenset = frozenset({
+    "ARCHITECT", "EVIDENCE", "RED_TEAM", "TEST_ORACLE",
+})
+CANONICAL_REVIEW_DECISIONS: frozenset = frozenset({
+    "GO", "REPLAN", "BLOCK", "ESCALATE",
+})
+CANONICAL_RISK_LEVELS: frozenset = frozenset({
+    "LOW", "MEDIUM", "HIGH", "CRITICAL",
+})
+
+# Required correlation fields per internal_consult_v1.yaml::identity::required_correlation_fields.
+# A review missing any of these is rejected as ACTOR_UNVERIFIED — fail closed.
+REQUIRED_CORRELATION_FIELDS: tuple = (
+    "query_id", "repository", "issue_or_pr", "commit_sha",
+)
+
+# Required per-review fields for synthesize() direct path.
+# A review missing any of these cannot vote and is rejected as ACTOR_UNVERIFIED.
+REQUIRED_REVIEW_FIELDS: tuple = (
+    "role", "decision", "risk",
+) + REQUIRED_CORRELATION_FIELDS
+
 
 def parse_review_envelope(text: str, expected_bundle: dict) -> Tuple[Optional[dict], dict]:
     """Parse a [MINIMAX_REVIEW:<ROLE>:v1] envelope into a structured dict.
@@ -91,24 +118,71 @@ def parse_review_envelope(text: str, expected_bundle: dict) -> Tuple[Optional[di
 
 
 def correlate(parsed: dict, expected_bundle: dict) -> dict:
-    """Verify the parsed review's correlation fields against the bundle.
+    """Verify the parsed review against the bundle AND the canonical enums.
 
-    The four required correlation fields per internal_consult_v1.yaml:
+    The review is admitted to the quorum only if:
+      1. Its ``role`` is one of the four canonical review_roles, AND
+      2. Its ``decision`` is one of the canonical review_decisions, AND
+      3. Its ``risk`` is one of the canonical risk_levels, AND
+      4. Every required correlation field is present in both the review
+         and the bundle, AND matches exactly.
+
+    Any failure returns ``valid=False``, ``actor="ACTOR_UNVERIFIED"``,
+    and a populated ``mismatch_fields`` so the caller can show why.
+
+    The four required correlation fields per internal_consult_v1.yaml::
         QUERY_ID, REPOSITORY, ISSUE_OR_PR, COMMIT_SHA.
-    Any mismatch → ACTOR_UNVERIFIED.
     """
-    required = ("query_id", "repository", "issue_or_pr", "commit_sha")
+    # Structural checks: missing fields, non-canonical role/decision/risk.
+    missing = [f for f in REQUIRED_REVIEW_FIELDS if not parsed.get(f)]
+    if missing:
+        return {
+            "valid": False,
+            "mismatch_fields": [m.upper() for m in missing],
+            "actor": "ACTOR_UNVERIFIED",
+            "reason": "missing_required_fields",
+        }
+
+    role = parsed.get("role")
+    if role not in CANONICAL_REVIEW_ROLES:
+        return {
+            "valid": False,
+            "mismatch_fields": ["ROLE"],
+            "actor": "ACTOR_UNVERIFIED",
+            "reason": "non_canonical_role",
+        }
+
+    decision = parsed.get("decision")
+    if decision not in CANONICAL_REVIEW_DECISIONS:
+        return {
+            "valid": False,
+            "mismatch_fields": ["DECISION"],
+            "actor": "ACTOR_UNVERIFIED",
+            "reason": "non_canonical_decision",
+        }
+
+    risk = parsed.get("risk")
+    if risk not in CANONICAL_RISK_LEVELS:
+        return {
+            "valid": False,
+            "mismatch_fields": ["RISK"],
+            "actor": "ACTOR_UNVERIFIED",
+            "reason": "non_canonical_risk",
+        }
+
+    # Correlation: every required field must match the bundle exactly.
     mismatch = []
-    for f in required:
+    for f in REQUIRED_CORRELATION_FIELDS:
         want = expected_bundle.get(f.upper())
         got = parsed.get(f)
-        if want is not None and got != want:
+        if want is None or got != want:
             mismatch.append(f.upper())
     if mismatch:
         return {
             "valid": False,
             "mismatch_fields": mismatch,
             "actor": "ACTOR_UNVERIFIED",
+            "reason": "correlation_mismatch",
         }
     return {
         "valid": True,
