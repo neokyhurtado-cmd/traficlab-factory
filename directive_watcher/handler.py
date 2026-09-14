@@ -202,6 +202,27 @@ def default_execution(
             evidence=evidence_dir,
         )
 
+    # AUTONOMY-V2 (2026-09-13): close the kanban→sessions.jsonl
+    # observation gap. The dispatcher just minted a SessionRecord with
+    # state=DISPATCHED; if the kanban task has already produced a
+    # terminal event, advance the session in-place. The sync is
+    # fail-soft + idempotent — installations without a kanban DB or a
+    # JSONL sidecar are not affected (opt-in via HERMES_KANBAN_DB /
+    # HERMES_SESSION_LOG).
+    try:
+        from directive_watcher.kanban_session_sync import (
+            sync_session_from_kanban_event,
+        )
+        sync_session_from_kanban_event(
+            session_id=result.session_id, dispatcher=dispatcher,
+        )
+    except Exception as _sync_exc:  # noqa: BLE001
+        # Observation must never break execution — log and continue.
+        LOG.warning(
+            "kanban session sync failed for %s: %s",
+            result.session_id, _sync_exc,
+        )
+
     # Dispatch succeeded → session is bound. We emit a new status
     # ``DISPATCHED`` so the handler's RESULT body carries the session_id
     # + kanban_task_id back to GitHub. READY is reserved for completed
