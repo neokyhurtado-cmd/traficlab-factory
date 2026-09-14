@@ -44,3 +44,9 @@ directive_watcher.sqlite-shm
 directive_watcher.sqlite-wal
 watcher_status.json
 evidence/visual/
+
+# AUTONOMY-V2 / runtime sidecars (mutated by runway/cron)
+directive_watcher.sqlite
+directive_watcher.sqlite.bak.*
+directive_watcher.sqlite-journal
+sessions.jsonl
