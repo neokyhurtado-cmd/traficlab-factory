@@ -23,26 +23,22 @@ import pytest
 
 
 def test_mutations_this_gate_is_zero_outside_agent_body():
-    """`git diff origin/main...HEAD -- <path>` must show 0 lines outside agent_body/."""
+    """`git diff origin/main...HEAD --name-only` must list 0 files outside agent_body/."""
     repo = Path.cwd()
     out = subprocess.run(
-        ["git", "diff", "--stat", "origin/main...HEAD"],
+        ["git", "diff", "--name-only", "origin/main...HEAD"],
         cwd=str(repo),
         capture_output=True,
         text=True,
     )
     assert out.returncode == 0, out.stderr
-    lines = [l for l in out.stdout.splitlines() if l.strip()]
+    lines = [l.strip() for l in out.stdout.splitlines() if l.strip()]
     non_agent_body = [
         l for l in lines
-        if "agent_body/" not in l and "|" in l
-        # Ignore the trailing summary line ("N files changed, ...").
-        and not l.endswith("changed,")
-        and not l.endswith("insertion(+)")
-        and not l.endswith("deletion(-)")
+        if not l.startswith("agent_body/")
     ]
     assert not non_agent_body, (
-        f"MUTATIONS_THIS_GATE must be 0 outside agent_body/. Offending lines:\n"
+        f"MUTATIONS_THIS_GATE must be 0 outside agent_body/. Offending files:\n"
         + "\n".join(non_agent_body)
     )
 
