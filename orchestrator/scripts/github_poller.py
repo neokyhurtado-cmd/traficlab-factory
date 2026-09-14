@@ -406,6 +406,7 @@ def run_directive_tick(
             load_prod_author_allowlist,
         )
         from directive_watcher.handler import WatcherHandler
+        from directive_watcher.kanban_session_sync import reconcile_open_sessions
         from directive_watcher.orch_dispatch import OrchestratorDispatcher
         from directive_watcher.retry import BackoffPolicy
         from directive_watcher.sidecar_store import SidecarStore
@@ -474,6 +475,23 @@ def run_directive_tick(
     # row ONLY IF main() didn't open one (defensive — production always
     # passes a run_id). See handler.py::tick for the contract.
     summary = handler.tick(list(allowlist_repos))
+
+    # PR #30 async observation gate: dispatch and worker completion are not
+    # synchronous. Reconcile *all existing non-terminal sessions* on every
+    # canonical ORCH tick, even when GitHub produced no new directive. The
+    # resolved session_log is passed explicitly; HERMES_KANBAN_DB remains the
+    # opt-in pointer to the existing kanban DB. Observation is fail-soft and
+    # never changes the tick exit code by itself.
+    reconcile = reconcile_open_sessions(
+        dispatcher=dispatcher,
+        kanban_db_path=os.environ.get("HERMES_KANBAN_DB"),
+        session_log=session_log,
+    )
+    if reconcile["updated"]:
+        summary.notes.append(f"session_reconcile:updated={reconcile['updated']}")
+    if reconcile["errors"]:
+        log(f"warn: session reconciliation errors={reconcile['errors']}")
+
     return 0 if summary.directives_failed == 0 else 1
 
 
