@@ -54,11 +54,12 @@ def _directive_body(
     target_branch: str = "feat/hermes-2.0-github-directive-watcher",
     expected_head: str = "07d44c33649a4a29a141a9d477fb22200a542529",
     auto_from_ctx: str = "NO",
+    action: str = "CONTINUE",
 ) -> str:
     return textwrap.dedent(
         f"""\
         [ASTRA_DIRECTIVE:v1]
-        ACTION = CONTINUE
+        ACTION = {action}
         REPOSITORY = {repository}
         ISSUE = {issue}
         TARGET_BRANCH = {target_branch}
@@ -381,3 +382,48 @@ def test_fresh_start_admits_historical_comment_with_current_head(env):
 # =============================================================================
 # Imported here from a sibling module so this file remains the canonical
 # closeout test seam. Tests live in test_cli_env_separation.py.
+
+# --- AUTONOMY-V2 -----------------------------------------------------------
+# Per issue #18 comment 5658677691: stale EXPECTED_HEAD on ACTION = REVIEW
+# is auto-refreshed to the live HEAD rather than fail-closed. Other
+# actions (which may mutate) keep the fail-closed contract.
+
+def test_autonomy_v2_refresh_head_for_review_action(env):
+    """REVIEW action with stale EXPECTED_HEAD is auto-refreshed to live HEAD."""
+    gh = env["gh"]
+    gh.add(_make_comment(101, _directive_body(
+        directive_id="d-review-stale",
+        expected_head="cd7c8091111111111111111111111111111111111",
+        action="REVIEW",
+    )))
+    s = env["handler"].tick(["neokyhurtado-cmd/traficlab-factory"])
+    # The directive should NOT be skipped due to HEAD mismatch — it is
+    # auto-refreshed and claimed.
+    matching_skip = [n for n in s.notes if "EXPECTED_HEAD" in n and "mismatch" in n]
+    assert not matching_skip, (
+        f"REVIEW with stale HEAD must NOT be skipped; got notes={s.notes}"
+    )
+    refresh_notes = [n for n in s.notes if "autonomy_v2_refresh_head" in n]
+    assert refresh_notes, (
+        f"REVIEW refresh must be noted for audit; got notes={s.notes}"
+    )
+    # The directive MUST be claimed (full pipeline runs).
+    assert s.directives_claimed == 1, (
+        f"REVIEW after refresh should be claimed; got s.directives_claimed={s.directives_claimed}"
+    )
+
+
+def test_autonomy_v2_does_NOT_refresh_for_mutating_actions(env):
+    """CONTINUE with stale EXPECTED_HEAD stays fail-closed (mutates)."""
+    gh = env["gh"]
+    gh.add(_make_comment(101, _directive_body(
+        directive_id="d-continue-stale",
+        expected_head="cd7c8091111111111111111111111111111111111",
+        action="CONTINUE",
+    )))
+    s = env["handler"].tick(["neokyhurtado-cmd/traficlab-factory"])
+    assert s.directives_claimed == 0
+    matching = [n for n in s.notes if "EXPECTED_HEAD" in n and "mismatch" in n]
+    assert matching, (
+        f"CONTINUE with stale HEAD must remain fail-closed; got notes={s.notes}"
+    )

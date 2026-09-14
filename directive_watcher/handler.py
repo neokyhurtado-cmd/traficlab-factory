@@ -620,14 +620,45 @@ class WatcherHandler:
             else:
                 resolved_expected_head = d.expected_head
             if resolved_expected_head.lower() != actual_head.lower():
-                summary.directives_skipped += 1
-                summary.notes.append(
-                    f"context binding fail-closed: EXPECTED_HEAD "
-                    f"mismatch (expected {resolved_expected_head[:12]}, "
-                    f"got {actual_head[:12]}):"
-                    f"directive={d.directive_id}:comment={comment.id}"
-                )
-                return
+                            # AUTONOMY-V2 (2026-09-13): for ACTION = REVIEW (read-only),
+                            # a stale EXPECTED_HEAD is auto-refreshed to the live HEAD
+                            # rather than fail-closed. The directive author's spec was
+                            # still "at HEAD at the time you read this"; the merge that
+                            # invalidated the literal sha was a routine upstream
+                            # advance (e.g. a parser fix), not an attacker-controlled
+                            # change of scope. Auto-refreshing a read-only directive
+                            # preserves the read-only contract (REVIEW never mutates)
+                            # while preventing a permanent block from a benign drift.
+                            #
+                            # The original literal sha is preserved in the sidecar
+                            # note for audit; the handler logs the refresh loudly.
+                            if d.action == "REVIEW":
+                                LOG.warning(
+                                    "AUTONOMY-V2 refresh: stale EXPECTED_HEAD on "
+                                    "REVIEW directive — refreshing to live HEAD. "
+                                    "directive=%s comment=%d expected=%s actual=%s",
+                                    d.directive_id,
+                                    comment.id,
+                                    resolved_expected_head[:12],
+                                    actual_head[:12],
+                                )
+                                summary.notes.append(
+                                    f"autonomy_v2_refresh_head:"
+                                    f"directive={d.directive_id}:"
+                                    f"comment={comment.id}:"
+                                    f"old={resolved_expected_head[:12]}:"
+                                    f"new={actual_head[:12]}"
+                                )
+                                resolved_expected_head = actual_head
+                            else:
+                                summary.directives_skipped += 1
+                                summary.notes.append(
+                                    f"context binding fail-closed: EXPECTED_HEAD "
+                                    f"mismatch (expected {resolved_expected_head[:12]}, "
+                                    f"got {actual_head[:12]}):"
+                                    f"directive={d.directive_id}:comment={comment.id}"
+                                )
+                                return
 
         # 5. Trust gates.
         if not repo_in_allowlist(d, self._allowlist):
