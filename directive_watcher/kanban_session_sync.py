@@ -10,10 +10,17 @@ when the downstream kanban task progressed — the record stayed stuck at
 on the board. The Astra session-of-truth review (ref #27) flagged this
 as the kanban/observation gap.
 
-This module closes the gap by reading the latest terminal
-``task_events`` row for the directive's kanban task and writing the
-matching state onto the ``SessionRecord`` through the dispatcher's
-``update_session()`` seam.
+This module closes the gap by reading the latest kanban ``task_events`` row
+for a directive and writing the matching state onto its ``SessionRecord``
+through the dispatcher's ``update_session()`` seam.
+
+There are two observation paths:
+
+1. ``sync_session_from_kanban_event`` — immediate post-dispatch observation.
+2. ``reconcile_open_sessions`` — periodic reconciliation for sessions whose
+   kanban work finishes *after* the dispatch tick. This second path is the
+   critical async contract: a later tick must advance DISPATCHED/RUNNING to
+   DONE/FAILED without requiring a new GitHub comment or directive.
 
 Design constraints (all enforced by tests)
 ------------------------------------------
@@ -25,18 +32,14 @@ Design constraints (all enforced by tests)
   - **Idempotent.** Running sync twice with the same kanban event is a
     no-op the second time (no dup evidence, no bad writes).
   - **Fail-soft.** Missing DB, missing table, missing task, or missing
-    session all return ``False`` rather than raising — the watcher tick
+    session all return a no-op rather than raising — the watcher tick
     must never crash because the observation layer is down.
   - **Single-write per transition.** We only call
     ``dispatcher.update_session`` when we actually have a transition to
     record; otherwise the function returns ``False`` and leaves the
     in-memory + on-disk record untouched.
-
-Wire-up
--------
-The handler calls this function once per dispatch via
-``sync_session_from_kanban_event``, only when ``HERMES_KANBAN_DB`` is
-set (opt-in: installations without a kanban DB are not broken).
+  - **No terminal regression.** Periodic reconciliation skips DONE, FAILED
+    and BLOCKED sessions; a stale kanban event cannot move them backwards.
 """
 from __future__ import annotations
 
@@ -47,6 +50,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from directive_watcher.orch_dispatch import (
+    SESSION_STATE_BLOCKED,
     SESSION_STATE_DONE,
     SESSION_STATE_FAILED,
     SESSION_STATE_RUNNING,
@@ -59,6 +63,15 @@ from directive_watcher.orch_dispatch import (
 # keep working unchanged.
 ENV_KANBAN_DB = "HERMES_KANBAN_DB"
 ENV_SESSION_LOG = "HERMES_SESSION_LOG"
+
+# States that periodic observation must never regress. WAITING_REVIEW remains
+# reconcilable because a downstream kanban task may legitimately finish while
+# the session is waiting for review/evidence publication.
+TERMINAL_SESSION_STATES = frozenset({
+    SESSION_STATE_DONE,
+    SESSION_STATE_FAILED,
+    SESSION_STATE_BLOCKED,
+})
 
 
 def _resolve_session_log(session_log: str | Path | None) -> Optional[Path]:
@@ -121,12 +134,13 @@ def _find_kanban_event_for_directive(
     *,
     kanban_db_path: str | Path,
 ) -> Optional[dict[str, Any]]:
-    """Find the latest terminal task_event for the given directive.
+    """Find the latest meaningful task_event for the given directive.
 
     Joins ``tasks.idempotency_key = 'directive:<id>'`` against
     ``task_events`` and returns the row with the highest ``created_at``
-    whose kind is in ``KIND_TO_STATE`` or is ``spawned`` (with a
-    ``worker_pid`` payload). Returns ``None`` when no row matches.
+    whose kind is completed/failed/spawned. ``spawned`` only mutates a
+    session when its payload has ``worker_pid``; that validation happens
+    in ``sync_session_from_kanban_event``.
 
     The function never raises; missing DB / table / task → ``None``.
     """
@@ -180,31 +194,24 @@ def sync_session_from_kanban_event(
     session_log: str | Path | None = None,
     dispatcher: OrchestratorDispatcher,
 ) -> bool:
-    """Advance the SessionRecord to match the kanban task's latest event.
+    """Advance one SessionRecord to match the kanban task's latest event.
 
     Returns ``True`` when the session was mutated, ``False`` when there
-    was nothing to do (unknown session, no event, event already
-    reflected on the session, or non-terminal event).
+    was nothing to do (unknown session, no event, event already reflected
+    on the session, non-meaningful event, or observation not configured).
 
-    Opt-in: when either ``kanban_db_path`` or the resolved
-    ``session_log`` is missing/empty the function returns ``False``
-    immediately. Installations without a kanban DB or JSONL sidecar are
-    not affected.
+    Opt-in: when either ``kanban_db_path`` or the resolved ``session_log``
+    is missing/empty the function returns ``False`` immediately.
 
     Mapping:
 
       - ``completed`` payload  → ``state=DONE``, with ``tests_summary``
         and ``evidence_uri`` taken from the payload when present.
-      - ``failed``    payload  → ``state=FAILED``, with ``evidence_uri``
+      - ``failed`` payload     → ``state=FAILED``, with ``evidence_uri``
         taken from the payload when present.
       - ``spawned`` (with worker_pid) → ``state=RUNNING``.
-      - Anything else (heartbeat, commented, …) → no-op.
-
-    Idempotency: if the session is already in the target state, ``False``
-    is returned and the sidecar is not rewritten.
+      - Anything else → no-op.
     """
-    # Resolve opt-in knobs FIRST so the directive lookup uses the same
-    # path the sync will write to.
     if kanban_db_path is None:
         kanban_db_path = os.environ.get(ENV_KANBAN_DB)
     if not kanban_db_path:
@@ -259,3 +266,46 @@ def sync_session_from_kanban_event(
         kwargs["evidence_uri"] = evidence_uri
     dispatcher.update_session(session_id, **kwargs)
     return True
+
+
+def reconcile_open_sessions(
+    *,
+    dispatcher: OrchestratorDispatcher,
+    kanban_db_path: str | Path | None = None,
+    session_log: str | Path | None = None,
+) -> dict[str, int]:
+    """Reconcile every non-terminal session against current kanban state.
+
+    This function is intended to run once on *every* watcher/orchestrator
+    tick, even when there are zero new GitHub comments. That makes state
+    observation asynchronous: dispatch can happen on tick N, the worker can
+    finish later, and tick N+1 advances the existing session to DONE/FAILED.
+
+    The observer is deliberately fail-soft. One malformed/missing task does
+    not prevent other sessions from being inspected, and observation failure
+    never breaks execution. The returned counters are evidence/telemetry only.
+    """
+    if kanban_db_path is None:
+        kanban_db_path = os.environ.get(ENV_KANBAN_DB)
+    resolved_session_log = _resolve_session_log(session_log)
+    if not kanban_db_path or resolved_session_log is None:
+        return {"scanned": 0, "updated": 0, "errors": 0}
+
+    scanned = 0
+    updated = 0
+    errors = 0
+    for session in dispatcher.list_sessions():
+        if session.state in TERMINAL_SESSION_STATES:
+            continue
+        scanned += 1
+        try:
+            if sync_session_from_kanban_event(
+                session.session_id,
+                kanban_db_path=kanban_db_path,
+                session_log=resolved_session_log,
+                dispatcher=dispatcher,
+            ):
+                updated += 1
+        except Exception:  # noqa: BLE001 — observer must remain fail-soft
+            errors += 1
+    return {"scanned": scanned, "updated": updated, "errors": errors}
