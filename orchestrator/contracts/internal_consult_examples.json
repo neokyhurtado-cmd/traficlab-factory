@@ -1,0 +1,46 @@
+{
+  "examples": [
+    {
+      "name": "reversible_consensus",
+      "expected_action": "AUTO_GO",
+      "reversible": true,
+      "critical_gate": false,
+      "human_gate": false,
+      "reviews": [
+        {"role": "ARCHITECT", "decision": "GO", "risk": "LOW", "counterexample": ""},
+        {"role": "EVIDENCE", "decision": "GO", "risk": "LOW", "counterexample": ""},
+        {"role": "RED_TEAM", "decision": "GO", "risk": "MEDIUM", "counterexample": ""},
+        {"role": "TEST_ORACLE", "decision": "GO", "risk": "LOW", "counterexample": ""}
+      ]
+    },
+    {
+      "name": "counterexample_beats_consensus",
+      "expected_action": "AUTO_REPLAN",
+      "reversible": true,
+      "critical_gate": false,
+      "human_gate": false,
+      "reviews": [
+        {"role": "ARCHITECT", "decision": "GO", "risk": "LOW", "counterexample": ""},
+        {"role": "EVIDENCE", "decision": "GO", "risk": "LOW", "counterexample": ""},
+        {"role": "RED_TEAM", "decision": "REPLAN", "risk": "MEDIUM", "counterexample": "reproducible failure"},
+        {"role": "TEST_ORACLE", "decision": "GO", "risk": "LOW", "counterexample": ""}
+      ]
+    },
+    {
+      "name": "critical_gate",
+      "expected_action": "ESCALATE_ASTRA",
+      "reversible": true,
+      "critical_gate": true,
+      "human_gate": false,
+      "reviews": []
+    },
+    {
+      "name": "human_gate",
+      "expected_action": "ESCALATE_DAVID",
+      "reversible": false,
+      "critical_gate": true,
+      "human_gate": true,
+      "reviews": []
+    }
+  ]
+}
