@@ -70,6 +70,43 @@ def test_parses_envelope_with_prose_before_and_after():
     assert d.requires_human_go_real is True
 
 
+def test_parses_action_review():
+    """ACTION = REVIEW must be accepted as a first-class verb.
+
+    Astra uses REVIEW to ask for read-only inspection (no mutations).
+    See directive_parser.VALID_ACTIONS for the contract distinction
+    between REVIEW (read-only) and REAUDIT_FIX (may mutate).
+    Regression test added 2026-09-13: AGENT-BODY-27-READONLY-WAKE
+    directive (comment 5658256935 on traficlab-factory#27) was being
+    silently dropped by the parser because REVIEW was not in
+    VALID_ACTIONS, leaving ``directive_id`` = None in the sidecar.
+    """
+    body = (
+        "[ASTRA_DIRECTIVE:v1]\n"
+        "ACTION = REVIEW\n"
+        "REPOSITORY = neokyhurtado-cmd/traficlab-factory\n"
+        "ISSUE = 27\n"
+        "PR = NONE\n"
+        "TARGET_BRANCH = main\n"
+        "EXPECTED_HEAD = 3022a2f47ece970faa5cffda8bb87f53ba515b26\n"
+        "SCOPE = AGENT_BODY_01_READONLY_DESIGN_GATE\n"
+        "AUTO_NEXT_SAFE_GATE = NO\n"
+        "REQUIRES_HUMAN_GO_REAL = NO\n"
+        "DIRECTIVE_ID = AGENT-BODY-27-READONLY-WAKE-20260913-01\n"
+        "AUTO_FROM_ISSUE_CONTEXT = NO\n"
+    )
+    d = parse_directive(body)
+    assert d is not None, "REVIEW must parse, not return None"
+    assert d.action == "REVIEW"
+    assert d.repository == "neokyhurtado-cmd/traficlab-factory"
+    assert d.issue == 27
+    assert d.target_branch == "main"
+    assert d.expected_head == "3022a2f47ece970faa5cffda8bb87f53ba515b26"
+    assert d.auto_next_safe_gate is False
+    assert d.requires_human_go_real is False
+    assert d.directive_id == "AGENT-BODY-27-READONLY-WAKE-20260913-01"
+
+
 def test_parses_boolean_variants():
     """YES/NO, yes/no, true/false, 1/0 are all valid boolean spellings."""
     body = (

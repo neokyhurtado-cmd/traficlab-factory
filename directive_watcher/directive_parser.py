@@ -16,9 +16,22 @@ MARKER = "[ASTRA_DIRECTIVE:v1]"
 
 # Actions the watcher knows how to dispatch. Anything else is a parse error
 # so we never silently invent a behaviour for an unknown verb.
+#
+# NOTE on REVIEW (added 2026-09-13):
+#   Astra uses ``ACTION = REVIEW`` as a first-class verb in production
+#   ASTRA_DIRECTIVE envelopes (e.g. the AGENT-BODY-27-READONLY-WAKE directive).
+#   ``REVIEW`` is semantically distinct from ``REAUDIT_FIX``:
+#     * REAUDIT_FIX = re-audit existing work + apply corrective edits
+#     * REVIEW      = read-only inspection; produce evidence, do not mutate
+#   The handler/dispatcher does NOT branch on action today (every directive
+#   produces a SessionRecord + kanban task); ``REVIEW`` is accepted here so
+#   the parser no longer drops valid envelopes, and so a future dispatcher
+#   can enforce the read-only contract for REVIEW without a parser change.
+#   See #27 in traficlab-factory.
 VALID_ACTIONS = frozenset({
     "CONTINUE",
     "REAUDIT_FIX",
+    "REVIEW",
     "INVESTIGATE",
     "TEST",
     "BUILD",
