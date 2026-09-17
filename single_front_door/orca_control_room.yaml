@@ -1,29 +1,39 @@
 # Orca Hermes Control Room — descriptor for SINGLE-FRONT-DOOR-01
-# This file is metadata only. Orca reads it when registering the workspace;
-# it never starts a daemon or new gateway. The fenced YAML blocks below are
-# fenced so they parse cleanly even when this file is included in markdown
-# docs/reports.
+#
+# ASTRA REAUDIT_FIX (SINGLE-FRONT-DOOR-01-CLOSEOUT-20260916-02): all commands
+# listed here MUST be supported primitives from the installed `orca` CLI
+# (verified against `orca skills get orca-cli` from build 1.4.204).
+#
+# NO guessed commands. NO `orca workspace add`. NO `orca mobile pair`. NO
+# `orca workspace persist`. The real CLI uses `worktree create`, `terminal
+# create`, `project setup-existing-folder`, `terminal send`, etc.
 
 identity:
   name: "wt-orca-hermes-control-room"
   agent: hermes
   profile: orchestrator
-  repo: neokyhurtado-cmd/traficlab-factory
+  repo: neokyhurtado-cmd/panorama-mission-control  # control-room is OWNED by orchestration, NOT by product
   runtime_owner: "$HERMES_HOME/profiles/orchestrator"
-  created_via: "orca workspace add"
-  created_at: "2026-09-16T19:00:00Z"
+  created_via: "orca worktree create + orca terminal create + orca project setup-existing-folder"
+  created_at: "2026-09-16T20:00:00Z"
 
 purpose: |
   Single Orca-managed Hermes session for human goal intake and orchestration
-  only. Never writes product code in this worktree; product changes happen
-  in the per-task worktree Orca creates from this control room.
+  only. Lives in panorama-mission-control (the orchestration repo) because
+  product code lives in IA-VISION / suini / traficlab-factory. Never writes
+  product code in this worktree; product changes happen in the per-task
+  worktree Orca creates from this control room.
 
 hard_rules:
-  - created/managed only through Orca (no raw git-worktree-add on host)
-  - Hermes TUI visible from Orca Desktop and paired Orca Mobile
+  - created/managed only through the verified `orca` CLI primitives below
+  - Hermes TUI visible from Orca Desktop and paired Orca Mobile (device
+    7794deca-d061-47e1-ab9f-1f0c54e4f390 already paired, network reach)
   - session persists across Hermes restarts under the existing runtime model
+    (Worktree lifecycle owned by Orca; Hermes session resumed via
+    `orca terminal create --worktree id:<repoId>::<path> --command "hermes"`)
   - never mutates product code directly
-  - may read GitHub, Obsidian/Panorama, and invoke Orca CLI to spawn product worktrees
+  - may read GitHub, Obsidian/Panorama (via BrainPool folder setup), and
+    invoke Orca CLI to spawn product worktrees
   - exactly one control-room session — never one new chat per task
 
 skills_loaded_at_session_start:
@@ -39,11 +49,52 @@ routing:
   control_room_assignee: orchestrator
   product_worktree_assignee_resolver: profiles/orchestrator/config/routing.yaml
 
+# Verified primitive commands. Each was confirmed against `orca --help`,
+# `orca worktree create --help`, `orca terminal create --help`, and
+# `orca project setup-existing-folder --help` in build 1.4.204.
 orca_registration_commands:
-  - "orca workspace add --name wt-orca-hermes-control-room --repo neokyhurtado-cmd/traficlab-factory --agent hermes --profile orchestrator"
-  - "orca mobile pair --workspace wt-orca-hermes-control-room"
-  - "orca workspace persist wt-orca-hermes-control-room --recover-on-restart"
-  - "orca workspace bind-gateway wt-orca-hermes-control-room --task Hermes_Gateway_orchestrator"
+  # 1. Create the persistent control-room worktree in panorama-mission-control.
+  #    Independent top-level work → --no-parent. Branch from repo default base
+  #    (origin/main) — explicitly avoid branching from current feature branch.
+  - >-
+    orca worktree create
+    --project github:neokyhurtado-cmd/panorama-mission-control
+    --host local
+    --name wt-orca-hermes-control-room
+    --base-branch origin/main
+    --no-parent
+    --setup inherit
+    --activate
+    --json
+
+  # 2. Register the existing BrainPool Obsidian vault as a folder project setup.
+  #    NO copy. NO migration. NO new knowledge DB. Orca just references the path.
+  - >-
+    orca project setup-existing-folder
+    --project github:neokyhurtado-cmd/panorama-mission-control
+    --host local
+    --path "C:/Users/david/Documents/BrainPool"
+    --kind folder
+    --display-name "BrainPool Obsidian vault"
+    --json
+
+  # 3. Attach a persistent Hermes terminal session to the new control room.
+  - >-
+    orca terminal create
+    --worktree id:5e174572-bfef-4505-bbbe-e15562bb02dc::C:/Users/david/orca/workspaces/panorama-mission-control/wt-orca-hermes-control-room
+    --title "Hermes Control Room"
+    --command "hermes"
+    --focus
+    --json
+
+  # 4. Persist the workspace status as the canonical control-room marker.
+  - >-
+    orca worktree set
+    --worktree id:5e174572-bfef-4505-bbbe-e15562bb02dc::C:/Users/david/orca/workspaces/panorama-mission-control/wt-orca-hermes-control-room
+    --display-name "Hermes Control Room (orchestrator)"
+    --workspace-status in-progress
+    --comment "SINGLE-FRONT-DOOR-01 — persistent control room (do not close)"
+    --json
 
 orca_does_not_do:
   - install a second gateway
@@ -51,8 +102,30 @@ orca_does_not_do:
   - create a second SQLite or queue
   - bind the control room to a second runtime owner
   - expose the gateway on a new port
+  - copy or migrate the BrainPool vault (Orca references it in place)
+  - branch the control-room worktree from a feature branch
 
 mobile_desktop_followup_contract: |
-  The control-room session is reachable from Orca Desktop and paired Orca
-  Mobile. Follow-up questions from David are in-session chat turns — they
-  never create a new worktree and never bypass the goal loop.
+  The control-room worktree id (set by `orca worktree create --json`) is the
+  two-part `<repoId>::<absolute-path>` string. Orca Mobile (paired device
+  7794deca-d061-47e1-ab9f-1f0c54e4f390) follows the same worktree and can
+  read terminal output. Follow-up questions from David are in-session chat
+  turns — they never create a new worktree and never bypass the goal loop.
+
+# Reality matrix (F0 — populated at runtime by the adapter)
+reality_matrix_template:
+  hermes_home: "$HERMES_HOME"
+  orca_runtime_id: "0d039b76-1898-4243-b6ea-ad30bba86e72"
+  orca_pid: 30576
+  orca_build: "1.4.204"
+  orca_repos_registered:
+    - "panorama-mission-control (id=5e174572-bfef-4505-bbbe-e15562bb02dc)"
+    - "IA-VISION (id=da80ed64-c701-4c65-a280-9724656834c1)"
+  orca_paired_devices:
+    - name: "Mobile 9/16/2026"
+      device_id: "7794deca-d061-47e1-ab9f-1f0c54e4f390"
+      scope: mobile
+      last_seen_unix: 1789604243
+  obsidian_vault: "C:/Users/david/Documents/BrainPool"
+  obsidian_vault_kind: folder
+  github_poller_cron_id: "44c091e79145"

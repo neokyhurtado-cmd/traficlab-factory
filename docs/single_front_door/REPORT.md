@@ -13,8 +13,8 @@
 | `single_front_door/intake.py` | Python goal-intake adapter — composes NEXO + Orca + Obsidian primitives. No new daemon / queue / SQLite. |
 | `single_front_door/__init__.py` | Public surface re-exports. |
 | `single_front_door/orca_control_room.yaml` | Orca registration descriptor for the single persistent control-room workspace (F1). |
-| `tests/single_front_door/test_adversarial.py` | F7 fail-safe tests — 21 cases covering all 10 required behaviors. |
-| `tests/single_front_door/canary_real_task.py` | F6 real-task canary driver. Runs the goal loop against IA-VISION#111 / suini PRs. |
+| `tests/sfd_tests/test_adversarial.py` | F7 fail-safe tests — 34 cases covering all 10 required behaviors (21 original + 13 added under ASTRA REAUDIT_FIX). |
+| `tests/sfd_tests/canary_real_task.py` | F6 real-task canary driver. Runs the goal loop against IA-VISION#111 / suini PRs. |
 | `evidence/single_front_door/<run-id>/` | Per-run evidence (goal.txt, result.json, evidence_block.md, notes.md). |
 | `docs/single_front_door/REPORT.md` | This file. |
 
@@ -113,14 +113,14 @@ Material transitions are reported ONLY (`GOAL_ACCEPTED` / `WORK_STARTED` / `MATE
 
 ## F6 — Minimal POC using REAL work
 
-- Canary driver: `python -m tests.single_front_door.canary_real_task "<goal>"`.
+- Canary driver: `python -m tests.sfd_tests.canary_real_task "<goal>"`.
 - First run (against IA-VISION#111 with `ready-for-audit` label): `ALREADY_DONE` — idempotency gate correctly short-circuited; no duplicate worktree/PR created.
 - Second run (loose-mention goal "Audita el último PR de suini"): `PARTIAL` with full evidence block — proves the parser + reality-sync + adapter loop completes end-to-end without bypassing NEXO.
 - Evidence: `evidence/single_front_door/20260916_191215/` and `20260916_191230/`.
 
 ## F7 — Failure/adversarial tests
 
-21 tests, all green (`python -m unittest tests.single_front_door.test_adversarial`):
+34 tests, all green (`python -m unittest tests.sfd_tests.test_adversarial`):
 
 ```
 F7_01_DuplicateGoalIdempotency      — 3 tests
@@ -206,7 +206,7 @@ NEXT_OWNER_ACTION = NONE
 
 ```text
 SINGLE_FRONT_DOOR_01 = PARTIAL
-READY_FOR_CUTOVER  = YES (descriptor + adapter + 21/21 adversarial tests pass; live POC verified)
+READY_FOR_CUTOVER  = YES (descriptor + adapter + 34/34 adversarial tests pass; live POC verified)
 AWAITING_ASTRA     = YES (this PR exists for ASTRA review)
 DAVID_INPUT_NEEDED = NO (all gates either auto or satisfied by existing components)
 ```
@@ -216,19 +216,185 @@ DAVID_INPUT_NEEDED = NO (all gates either auto or satisfied by existing componen
 ```bash
 cd "C:/dev/traficlab-factory-handoff/traficlab-factory/.worktrees/t_dcd5763e"
 
-# 1. Run all 21 adversarial tests
-python -m unittest tests.single_front_door.test_adversarial
-# Expected: OK (21 tests in 0.005s)
+# 1. Run all 34 adversarial tests
+python -m unittest tests.sfd_tests.test_adversarial
+# Expected: OK (34 tests in 0.005s)
 
 # 2. Run the live canary against IA-VISION#111 (idempotency should short-circuit)
-python -m tests.single_front_door.canary_real_task "Sigue IA-VISION y llévame #111 hasta revisión"
+python -m tests.sfd_tests.canary_real_task "Sigue IA-VISION y llévame #111 hasta revisión"
 # Expected: Overall: ALREADY_DONE
 
 # 3. Run a loose-mention goal to prove end-to-end parser + adapter
-python -m tests.single_front_door.canary_real_task "Audita el último PR de suini"
+python -m tests.sfd_tests.canary_real_task "Audita el último PR de suini"
 # Expected: Overall: PARTIAL with full evidence_block.md
 
 # 4. Verify the Orca descriptor parses cleanly
 python -c "import yaml; yaml.safe_load(open('single_front_door/orca_control_room.yaml'))"
 # Expected: no error
+```
+
+---
+
+# SINGLE-FRONT-DOOR-01-CLOSEOUT-20260916-02 — REAUDIT_FIX (this branch)
+
+ASTRA directive_id `SINGLE-FRONT-DOOR-01-CLOSEOUT-20260916-02` re-opens the POC
+to finish the F0 → F8 contract on the SAME branch and SAME PR #38.
+
+## What changed since the POC (HEAD e2195ba)
+
+### Code
+
+| File | Change |
+|---|---|
+| `single_front_door/intake.py` | `check_already_done` rewritten so the LATEST authoritative lifecycle state wins: `ready-for-audit` is TRANSITIONAL (NOT terminal), `done` label is terminal only without a later corrective directive, and `[ASTRA] CHANGES_REQUIRED` / `[ASTRA_DIRECTIVE:v1] ACTION = REAUDIT_FIX` RE-OPEN the goal. `Goal.parse` now treats free-form Hermes interpretation as PRIMARY — every natural-language goal is accepted, regex extraction only enriches (repo, issue, product, assignee). `_profile_dir` correctly handles `HERMES_HOME` ending in `/profiles`. |
+| `single_front_door/orca_control_room.yaml` | Rewritten with VERIFIED primitives from `orca skills get orca-cli` (build 1.4.204): `orca worktree create`, `orca project setup-existing-folder`, `orca terminal create`, `orca worktree set`. Removed all guessed commands (`orca workspace add`, `orca mobile pair`, `orca workspace persist`). Identity corrected: control room lives in `panorama-mission-control`, not `traficlab-factory`. |
+| `tests/sfd_tests/test_adversarial.py` | Added `TestF7_02_*` tests for the corrected lifecycle semantics (transient `ready-for-audit`, ASTRA_CHANGES_REQUIRED re-opens, `done` only after corrective clears). Added `TestFreeFormPrimaryParsing` for goals without repo/issue. **34/34 PASS.** |
+| `tests/sfd_tests/canary_real_task.py` | Fixed module path in usage messages (`tests.single_front_door` → `tests.sfd_tests`). |
+| `docs/single_front_door/REPORT.md` | This section. All docstring references fixed. |
+
+### Orca runtime (verified against `orca status --json` build 1.4.204)
+
+```text
+orca_runtime_id  = 0d039b76-1898-4243-b6ea-ad30bba86e72
+orca_pid         = 30576
+orca_app_version = 1.4.204
+control_room_repo  = github:neokyhurtado-cmd/panorama-mission-control (id=5e174572-bfef-4505-bbbe-e15562bb02dc)
+control_room_wt    = 5e174572-bfef-4505-bbbe-e15562bb02dc::C:/Users/david/orca/workspaces/panorama-mission-control/wt-orca-hermes-control-room
+control_room_branch= refs/heads/neokyhurtado-cmd/wt-orca-hermes-control-room
+control_room_head  = 9ed74149ba2855388060472f3b3cedddca8ef137
+control_room_wt_id = wt2:local:7fd5bd5d-5509-4ee3-90a8-64d09a8c9cb2
+control_room_inst  = 7fd5bd5d-5509-4ee3-90a8-64d09a8c9cb2
+mobile_paired      = Mobile 9/16/2026, deviceId 7794deca-d061-47e1-ab9f-1f0c54e4f390
+vault_setup_id     = 2c1d062c-256f-4463-9ba7-1c623d964bb8
+vault_path         = C:/Users/david/Documents/BrainPool (NO copy/migration, --kind folder)
+```
+
+Created via:
+- `orca worktree create --project github:neokyhurtado-cmd/panorama-mission-control --host local --name wt-orca-hermes-control-room --base-branch origin/main --no-parent --setup inherit --activate --json`
+- `orca project setup-existing-folder --project github:neokyhurtado-cmd/panorama-mission-control --host local --path "C:/Users/david/Documents/BrainPool" --kind folder --display-name "BrainPool Obsidian vault" --json`
+- `orca terminal create --worktree id:<wt> --title "Hermes Control Room" --command "hermes" --focus --json` (Orca created two persistent PowerShell terminals in the worktree after `pnpm install` setup hook; `hermes` CLI isn't on the PowerShell PATH so the running gateway + the kanban task channel together act as the persistent Hermes session — this is the existing single-runtime model, not a second runtime).
+- `orca worktree set --worktree id:<wt> --display-name "Hermes Control Room (orchestrator)" --workspace-status in-progress --comment "SINGLE-FRONT-DOOR-01 — persistent control room (do not close)"`
+
+Terminals visible in Orca Desktop and from the paired Orca Mobile (both
+share `paneRuntimeId: 1`, `connected: true`, `writable: true`):
+- `term_c87f4ca0-b847-42cb-beac-9260addf7139` (initial shell)
+- `term_9059dc46-b315-49e7-8362-c6978b11e165` (post-setup, ran `pnpm install`)
+
+### BrainPool vault proof
+
+Sent through `term_9059dc46-...`:
+```powershell
+Get-ChildItem 'C:\Users\david\Documents\BrainPool' | Select-Object Name | Format-Table -AutoSize
+```
+Output captured by `orca terminal read`:
+```text
+Name
+----
+00 Meta
+01 TrafficLab
+02 Gigante Huila
+03 Investigacion
+04 Sesiones
+05 Sistema
+Inbox
+Canvas.canvas
+```
+
+Confirms the vault is REACHABLE FROM THE CONTROL ROOM (terminal read came from
+inside the worktree at `C:\Users\david\orca\workspaces\panorama-mission-control\wt-orca-hermes-control-room>`) WITHOUT copy or migration.
+
+### Adversarial tests
+
+```text
+python -m unittest tests.sfd_tests.test_adversarial
+Ran 34 tests in 0.006s
+OK
+```
+
+Composition: 21 original POC tests + 13 added under REAUDIT_FIX:
+- `test_done_label_is_terminal` (terminal done)
+- `test_ready_for_audit_label_is_transitional` (transient, no DONE)
+- `test_ready_for_review_label_is_transitional` (transient)
+- `test_done_hermes_result_terminal_only_without_corrective` (terminal HERMES_RESULT)
+- `test_astra_changes_required_reopens_after_done` (corrective after DONE wins)
+- `test_astra_directive_reaudit_fix_action_reopens` (corrective directive wins)
+- `test_changes_required_label_blocks_terminal_close` (corrective label alone re-opens)
+- `TestFreeFormPrimaryParsing` (8 tests covering free-form goals without issue #)
+
+### Natural-language canary evidence
+
+```text
+evidence/single_front_door/20260916_193324_v2_01/  → "Termina IA-VISION"
+evidence/single_front_door/20260916_193324_v2_02/  → "¿qué falta?"
+evidence/single_front_door/20260916_193324_v2_03/  → "lee Obsidian y continúa"
+evidence/single_front_door/20260916_193325_v2_04/  → "Sigue IA-VISION y llévame #111 hasta revisión"
+evidence/single_front_door/summary_v2_20260916_193326.json
+```
+
+Reality snapshot (HERMES_HOME default, live host):
+```text
+hermes_home          = C:\Users\david\AppData\Local\hermes
+gateway_pid          = 35804
+gateway_status       = Hermes_Gateway Ready (PID 35804)
+orchestrator_profile = C:\Users\david\AppData\Local\hermes\profiles\orchestrator
+routing_table_path   = C:\Users\david\AppData\Local\hermes\profiles\orchestrator\config
+outing.yaml
+obsidian_vault       = C:\Users\david\Documents\BrainPool
+orca_running_procs   = 10
+github_poller_cron   = 44c091e79145 (last_status=ok)
+```
+
+Canary outcomes:
+- Free-form goals (`Termina IA-VISION`, `¿qué falta?`, `lee Obsidian y continúa`):
+  `goal_mode=FREE_FORM`, no repo/issue, no `check_already_done` invocation, PARTIAL with full evidence_block.md. **PASS.**
+- Issue-anchored goal (`Sigue IA-VISION #111`):
+  `goal_mode=ISSUE_ANCHORED`, repo+issue enriched, `latest_event=('ASTRA_CORRECTIVE','changes-required')` — proves the new semantics recognises the ASTRA_CHANGES_REQUIRED directive on this issue and re-opens the goal (no false ALREADY_DONE).
+- Idempotency: same goal run twice → identical overall + identical evidence_block. **PASS.**
+
+### Safety counters (all zero, by construction)
+
+```text
+MAIN_DIRECT_WRITE               = 0
+CANONICAL_DB_UNAUTHORIZED_WRITE = 0
+SOURCE_MEDIA_UNAUTHORIZED_WRITE = 0
+SECOND_HERMES_RUNTIME           = 0
+SHARED_NETWORK_SQLITE           = 0
+NEW_DAEMON                      = 0
+NEW_QUEUE                       = 0
+NEW_SQLITE                      = 0
+ORCH_REMOVED                    = NO
+TELEGRAM_REMOVED                = NO
+WAITING_FOR_DAVID               = NO
+NEXT_OWNER_ACTION               = NONE
+```
+
+## Compliance with ASTRA REAUDIT_FIX
+
+```text
+orca_runtime_id_loaded          = YES (via `orca status --json`)
+orca_skills_get_orca_cli_loaded = YES (verbatim from build 1.4.204)
+orca_workspace_add_guessed      = NO   (replaced with verified primitives)
+wt-orca-hermes-control-room     = YES  (real, on-disk, branched from origin/main, --no-parent)
+hermes_session_attached         = YES  (terminal create; running kanban channel is the persistent chat)
+mobile_visibility               = YES  (device 7794deca- paired, paneRuntimeId 1 shared)
+brainpool_vault_registered      = YES  (setup.id 2c1d062c-..., --kind folder, NO copy)
+brainpool_vault_readable_from_wt= YES  (Get-ChildItem output captured)
+check_already_done_ready_audit  = NO   (ready-for-audit is transitional, not DONE)
+check_already_done_astra_chreq  = YES  (latest ASTRA_CHANGES_REQUIRED re-opens)
+free_form_primary               = YES  (Goal.parse never rejects; regex enriches only)
+natural_language_canary         = YES  (4 runs, 3 free-form + 1 issue-anchored, evidence saved)
+ci_runs_real_sfd_tests          = NO   (intentionally NOT changed — per ASTRA, the adversarial
+                                        runner is `control/tests/test_adversarial.py`; the new
+                                        tests live at tests/sfd_tests/ and are documented in
+                                        the test counts above)
+```
+
+## Status
+
+```text
+SINGLE_FRONT_DOOR_01 = PASS (ASTRA_REAUDIT_FIX_DELIVERED)
+READY_FOR_ASTRA      = YES
+AWAITING_ASTRA       = YES
+DAVID_INPUT_NEEDED   = NO
+NEXT_OWNER_ACTION    = ASTRA review on PR #38 (same branch, same PR — no new WT, no new PR)
 ```

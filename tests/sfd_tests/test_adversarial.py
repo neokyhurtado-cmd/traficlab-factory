@@ -102,17 +102,46 @@ class TestF7_01_DuplicateGoalIdempotency(unittest.TestCase):
 
 
 class TestF7_02_StaleAlreadyFixed(unittest.TestCase):
-    """Stale issue already fixed → no worktree created."""
+    """Stale issue already fixed → no worktree created.
+
+    ASTRA REAUDIT_FIX (SINGLE-FRONT-DOOR-01-CLOSEOUT-20260916-02): latest
+    authoritative lifecycle state wins. `ready-for-audit` is TRANSITIONAL, not
+    terminal. A later ASTRA CHANGES_REQUIRED / corrective directive re-opens
+    the goal.
+    """
 
     def test_closed_issue_short_circuits(self):
-        closed_payload = json.dumps({"state": "CLOSED", "labels": [], "comments": []})
+        closed_payload = json.dumps({
+            "state": "CLOSED",
+            "labels": [],
+            "comments": [],
+        })
         with mock.patch("subprocess.run") as run:
             run.return_value = mock.Mock(returncode=0, stdout=closed_payload, stderr="")
             r = check_already_done("neokyhurtado-cmd/suini", 99)
         self.assertTrue(r["already_done"])
         self.assertIn("CLOSED", r["evidence"])
 
-    def test_ready_for_audit_label_short_circuits(self):
+    def test_done_label_is_terminal(self):
+        payload = json.dumps({
+            "state": "OPEN",
+            "labels": [{"name": "done"}],
+            "comments": [],
+        })
+        with mock.patch("subprocess.run") as run:
+            run.return_value = mock.Mock(returncode=0, stdout=payload, stderr="")
+            r = check_already_done("neokyhurtado-cmd/ia-vision", 50)
+        self.assertTrue(r["already_done"])
+        self.assertIn("done", r["evidence"])
+
+    def test_ready_for_audit_label_is_transitional(self):
+        """`ready-for-audit` MUST NOT count as DONE — ASTRA REAUDIT_FIX.
+
+        Before this fix, the parser lumped `ready-for-audit` together with
+        `done`, short-circuiting the corrective re-audit. The current policy:
+        `ready-for-audit` is a TRANSITIONAL label awaiting a verdict; the
+        corrective directive wins.
+        """
         payload = json.dumps({
             "state": "OPEN",
             "labels": [{"name": "ready-for-audit"}],
@@ -121,18 +150,88 @@ class TestF7_02_StaleAlreadyFixed(unittest.TestCase):
         with mock.patch("subprocess.run") as run:
             run.return_value = mock.Mock(returncode=0, stdout=payload, stderr="")
             r = check_already_done("neokyhurtado-cmd/ia-vision", 111)
-        self.assertTrue(r["already_done"])
+        self.assertFalse(
+            r["already_done"],
+            "ready-for-audit is transitional; an ASTRA corrective must be eligible",
+        )
 
-    def test_done_hermes_result_short_circuits(self):
+    def test_ready_for_review_label_is_transitional(self):
         payload = json.dumps({
             "state": "OPEN",
-            "labels": [],
-            "comments": [{"body": "[HERMES_RESULT:v1]\nSTATUS = DONE"}],
+            "labels": [{"name": "ready-for-review"}],
+            "comments": [],
         })
         with mock.patch("subprocess.run") as run:
             run.return_value = mock.Mock(returncode=0, stdout=payload, stderr="")
+            r = check_already_done("neokyhurtado-cmd/ia-vision", 111)
+        self.assertFalse(r["already_done"])
+
+    def test_done_hermes_result_terminal_only_without_corrective(self):
+        """HERMES_RESULT:DONE alone is terminal; corrective after it re-opens."""
+        terminal_payload = json.dumps({
+            "state": "OPEN",
+            "labels": [],
+            "comments": [
+                {"body": "[HERMES_RESULT:v1]\nSTATUS = DONE\nHEAD_AFTER = abc"},
+            ],
+        })
+        with mock.patch("subprocess.run") as run:
+            run.return_value = mock.Mock(returncode=0, stdout=terminal_payload, stderr="")
             r = check_already_done("neokyhurtado-cmd/suini", 35)
         self.assertTrue(r["already_done"])
+
+    def test_astra_changes_required_reopens_after_done(self):
+        """`[ASTRA] CHANGES_REQUIRED` AFTER a HERMES_RESULT:DONE re-opens work."""
+        reopen_payload = json.dumps({
+            "state": "OPEN",
+            "labels": [{"name": "ready-for-audit"}, {"name": "changes-required"}],
+            "comments": [
+                {"body": "[HERMES_RESULT:v1]\nSTATUS = DONE"},
+                {"body": "[ASTRA] CHANGES_REQUIRED — re-audit and fix"},
+            ],
+        })
+        with mock.patch("subprocess.run") as run:
+            run.return_value = mock.Mock(returncode=0, stdout=reopen_payload, stderr="")
+            r = check_already_done("neokyhurtado-cmd/ia-vision", 111)
+        self.assertFalse(
+            r["already_done"],
+            f"ASTRA CHANGES_REQUIRED must supersede earlier DONE: got {r!r}",
+        )
+        self.assertIn("ASTRA_CHANGES_REQUIRED", r["latest_event"][0])
+
+    def test_astra_directive_reaudit_fix_action_reopens(self):
+        """`[ASTRA_DIRECTIVE:v1] ACTION = REAUDIT_FIX` re-opens work."""
+        reopen_payload = json.dumps({
+            "state": "OPEN",
+            "labels": [],
+            "comments": [
+                {"body": "[HERMES_RESULT:v1]\nSTATUS = DONE"},
+                {
+                    "body": (
+                        "[ASTRA_DIRECTIVE:v1]\nACTION = REAUDIT_FIX\n"
+                        "DIRECTIVE_ID = SINGLE-FRONT-DOOR-01-CLOSEOUT-20260916-02"
+                    ),
+                },
+            ],
+        })
+        with mock.patch("subprocess.run") as run:
+            run.return_value = mock.Mock(returncode=0, stdout=reopen_payload, stderr="")
+            r = check_already_done("neokyhurtado-cmd/traficlab-factory", 37)
+        self.assertFalse(r["already_done"])
+        self.assertEqual(r["latest_event"][0], "ASTRA_CORRECTIVE")
+
+    def test_changes_required_label_blocks_terminal_close(self):
+        """`changes-required` label alone re-opens even when issue is CLOSED."""
+        reopen_payload = json.dumps({
+            "state": "CLOSED",
+            "labels": [{"name": "changes-required"}],
+            "comments": [],
+        })
+        with mock.patch("subprocess.run") as run:
+            run.return_value = mock.Mock(returncode=0, stdout=reopen_payload, stderr="")
+            r = check_already_done("neokyhurtado-cmd/ia-vision", 99)
+        # Closed + changes-required alone: not done (corrective needed).
+        self.assertFalse(r["already_done"])
 
 
 class TestF7_03_OrcaRestartRecovery(unittest.TestCase):
@@ -347,6 +446,74 @@ class TestEvidenceBlockShape(unittest.TestCase):
             m_ = re.search(rf"{key} = (\d+)", block)
             self.assertIsNotNone(m_, f"missing counter {key}")
             self.assertEqual(int(m_.group(1)), 0, f"{key} should be 0")
+
+
+class TestFreeFormPrimaryParsing(unittest.TestCase):
+    """ASTRA REAUDIT_FIX: free-form Hermes interpretation is PRIMARY.
+
+    Goals like `Termina IA-VISION`, `¿qué falta?`, or `lee Obsidian y continúa`
+    must parse successfully as natural-language intents WITHOUT an issue #.
+    Regex extraction only enriches (repo, issue, product, assignee) hints —
+    it never rejects.
+    """
+
+    def test_termina_ia_vision_parses(self):
+        g = Goal.parse("Termina IA-VISION")
+        self.assertIsNotNone(g.text)
+        self.assertEqual(g.text, "Termina IA-VISION")
+        # No issue number, but the goal is accepted as free-form.
+        self.assertIsNone(g.issue)
+        self.assertEqual(g.product, "FREE_FORM")
+
+    def test_que_falta_parses(self):
+        g = Goal.parse("¿qué falta?")
+        self.assertIsNotNone(g.text)
+        self.assertEqual(g.text, "¿qué falta?")
+        self.assertIsNone(g.issue)
+        self.assertEqual(g.product, "FREE_FORM")
+
+    def test_lee_obsidian_y_continua_parses(self):
+        g = Goal.parse("lee Obsidian y continúa")
+        self.assertIsNotNone(g.text)
+        self.assertEqual(g.text, "lee Obsidian y continúa")
+        self.assertIsNone(g.issue)
+        self.assertEqual(g.product, "FREE_FORM")
+
+    def test_empty_string_returns_goal(self):
+        g = Goal.parse("")
+        # Even empty input is a valid (degenerate) free-form Goal.
+        self.assertIsNotNone(g.text)
+        self.assertIsNone(g.issue)
+        self.assertEqual(g.product, "FREE_FORM")
+
+    def test_goal_with_issue_still_enriches(self):
+        """Issue-anchored goals still get repo/issue enrichment."""
+        g = Goal.parse("Sigue IA-VISION y llévame #111 hasta revisión")
+        self.assertEqual(g.repo, "neokyhurtado-cmd/ia-vision")
+        self.assertEqual(g.issue, 111)
+        self.assertEqual(g.product, "IA-VISION")
+        self.assertEqual(g.assignee, "ia-vision")
+
+    def test_goal_with_explicit_owner_repo_issue_enriches(self):
+        g = Goal.parse("neokyhurtado-cmd/IA-VISION#111")
+        self.assertEqual(g.repo, "neokyhurtado-cmd/ia-vision")
+        self.assertEqual(g.issue, 111)
+        self.assertEqual(g.product, "IA-VISION")
+        self.assertEqual(g.assignee, "ia-vision")
+
+    def test_goal_with_factory_issue_enriches_to_orchestrator(self):
+        g = Goal.parse("Cierre traficlab-factory #37 si pasa los tests")
+        self.assertEqual(g.repo, "neokyhurtado-cmd/traficlab-factory")
+        self.assertEqual(g.issue, 37)
+        self.assertEqual(g.product, "ORCHESTRATION")
+        self.assertEqual(g.assignee, "orchestrator")
+
+    def test_goal_run_loop_accepts_free_form(self):
+        """`run_goal_loop` must accept free-form goals without repo/issue."""
+        m = _fake_matrix()
+        with _patch_runtime("single_front_door.intake", m):
+            r = run_goal_loop("Termina IA-VISION", dry_run=True)
+        self.assertIn(r["overall"], {"PARTIAL", "DRY_RUN", "PASS"})
 
 
 def asdict_for_test(g: Goal) -> dict:

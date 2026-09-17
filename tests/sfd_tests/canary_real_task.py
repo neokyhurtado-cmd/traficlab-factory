@@ -8,7 +8,7 @@ Does NOT mutate GitHub Issues, does NOT open PRs, does NOT touch canonical
 DB. The adapter handles all of that inside an existing NEXO dispatch.
 
 Usage:
-    python -m tests.single_front_door.canary_real_task --goal "..."
+    python -m tests.sfd_tests.canary_real_task --goal "..."
 """
 
 from __future__ import annotations
@@ -60,7 +60,7 @@ does not bypass them.
 
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        print("usage: python -m tests.single_front_door.canary_real_task <goal> [--live]",
+        print("usage: python -m tests.sfd_tests.canary_real_task <goal> [--live]",
               file=sys.stderr)
         return 2
 
