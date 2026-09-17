@@ -1,0 +1,34 @@
+{
+  "matrix": {
+    "hermes_home": "C:\\Users\\david\\AppData\\Local\\hermes\\profiles\\orchestrator",
+    "gateway_pid": 33516,
+    "gateway_status": "✓ Scheduled Task registered: Hermes_Gateway_orchestrator\n  Status: Ready\n  Last Run Time: 9/16/2026 12:43:38 PM\n  Last Run Result: 0\n✓ Gateway process running (PID: 33516)\n\nOther profiles:\n  ✓ default          — PID 35804\n  ✓ ia-vision        — PID 29168",
+    "orchestrator_profile": "(missing)",
+    "ia_vision_profile": "(missing)",
+    "suini_profile": "(missing)",
+    "routing_table_path": "(missing)",
+    "obsidian_vault": "C:\\Users\\david\\Documents\\BrainPool",
+    "orca_installed": true,
+    "orca_path": "C:\\Users\\david\\AppData\\Local\\Programs\\orca\\Orca.exe",
+    "orca_running_procs": 16,
+    "github_poller_cron_id": null,
+    "github_poller_last_status": null,
+    "asof_unix": 1789603934
+  },
+  "goal": {
+    "text": "Sigue IA-VISION y llévame #111 hasta revisión",
+    "repo": "neokyhurtado-cmd/ia-vision",
+    "issue": 111,
+    "product": "IA-VISION",
+    "assignee": "ia-vision",
+    "source": "control-room",
+    "received_at": 1789603934
+  },
+  "dry_run": true,
+  "overall": "ALREADY_DONE",
+  "waiting_reason": null,
+  "next_owner": "NONE",
+  "idempotency": "PASS",
+  "evidence": " label:ready/done merged PR#116",
+  "evidence_block": "```\nSINGLE_FRONT_DOOR_01 = ALREADY_DONE\nCONTROL_ROOM = C:\\Users\\david\\AppData\\Local\\hermes\\profiles\\orchestrator\nCONTROL_ROOM_HOST = hostname=WIN-01-AXIA-PAN os=windows\nCONTROL_ROOM_ORCA_WORKSPACE = (missing)\nORCA_MOBILE_CHAT_FOLLOWUP = N/A\nORCA_DESKTOP_CHAT_FOLLOWUP = N/A\nONE_GOAL_END_TO_END = N/A\nGOAL_USED = 'Sigue IA-VISION y llévame #111 hasta revisión'\nPRODUCT_WORKTREE_CREATED_BY_ORCA = N/A\nOBSIDIAN_READ = N/A\nOBSIDIAN_WRITE_BOUNDED = NOT_NEEDED\nGITHUB_DURABLE_EVIDENCE = N/A\nTELEGRAM_ALERT_FALLBACK = N/A\nDUPLICATE_GOAL_IDEMPOTENCY = PASS\nORCA_RESTART_RECOVERY = N/A\nMAIN_DIRECT_WRITE = 0\nCANONICAL_DB_UNAUTHORIZED_WRITE = 0\nSOURCE_MEDIA_UNAUTHORIZED_WRITE = 0\nSECOND_HERMES_RUNTIME = 0\nSHARED_NETWORK_SQLITE = 0\nNEW_DAEMON = 0\nNEW_QUEUE = 0\nNEW_SQLITE = 0\nORCH_REMOVED = NO\nTELEGRAM_REMOVED = NO\nWAITING_FOR_DAVID = NO\nNEXT_OWNER_ACTION = NONE\n```"
+}

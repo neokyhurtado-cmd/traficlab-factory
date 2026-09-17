@@ -1,0 +1,58 @@
+# Orca Hermes Control Room — descriptor for SINGLE-FRONT-DOOR-01
+# This file is metadata only. Orca reads it when registering the workspace;
+# it never starts a daemon or new gateway. The fenced YAML blocks below are
+# fenced so they parse cleanly even when this file is included in markdown
+# docs/reports.
+
+identity:
+  name: "wt-orca-hermes-control-room"
+  agent: hermes
+  profile: orchestrator
+  repo: neokyhurtado-cmd/traficlab-factory
+  runtime_owner: "$HERMES_HOME/profiles/orchestrator"
+  created_via: "orca workspace add"
+  created_at: "2026-09-16T19:00:00Z"
+
+purpose: |
+  Single Orca-managed Hermes session for human goal intake and orchestration
+  only. Never writes product code in this worktree; product changes happen
+  in the per-task worktree Orca creates from this control room.
+
+hard_rules:
+  - created/managed only through Orca (no raw git-worktree-add on host)
+  - Hermes TUI visible from Orca Desktop and paired Orca Mobile
+  - session persists across Hermes restarts under the existing runtime model
+  - never mutates product code directly
+  - may read GitHub, Obsidian/Panorama, and invoke Orca CLI to spawn product worktrees
+  - exactly one control-room session — never one new chat per task
+
+skills_loaded_at_session_start:
+  - single-front-door
+  - hermes-orchestrator-control-plane
+  - factory-orchestrator-governance
+  - github-pr-workflow
+  - github-issue-to-pr
+  - obsidian
+  - subagent-supervision-discipline
+
+routing:
+  control_room_assignee: orchestrator
+  product_worktree_assignee_resolver: profiles/orchestrator/config/routing.yaml
+
+orca_registration_commands:
+  - "orca workspace add --name wt-orca-hermes-control-room --repo neokyhurtado-cmd/traficlab-factory --agent hermes --profile orchestrator"
+  - "orca mobile pair --workspace wt-orca-hermes-control-room"
+  - "orca workspace persist wt-orca-hermes-control-room --recover-on-restart"
+  - "orca workspace bind-gateway wt-orca-hermes-control-room --task Hermes_Gateway_orchestrator"
+
+orca_does_not_do:
+  - install a second gateway
+  - start a second cron
+  - create a second SQLite or queue
+  - bind the control room to a second runtime owner
+  - expose the gateway on a new port
+
+mobile_desktop_followup_contract: |
+  The control-room session is reachable from Orca Desktop and paired Orca
+  Mobile. Follow-up questions from David are in-session chat turns — they
+  never create a new worktree and never bypass the goal loop.
