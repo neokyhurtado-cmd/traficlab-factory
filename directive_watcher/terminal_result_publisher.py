@@ -138,6 +138,7 @@ def publish_terminal_session_results(
     dispatcher: Any,
     gh: Any,
     kanban_db_path: str | Path | None = None,
+    allowed_repos: frozenset[str] | set[str] | None = None,
 ) -> dict[str, int]:
     """Project reconciled terminal sessions back to their source GitHub issue.
 
@@ -158,6 +159,9 @@ def publish_terminal_session_results(
         if session.state not in {SESSION_STATE_DONE, SESSION_STATE_FAILED}:
             continue
         stats["scanned"] += 1
+        if allowed_repos is not None and session.repository not in allowed_repos:
+            stats["skipped"] += 1
+            continue
 
         if _already_projected_terminal_result(gh, session):
             stats["skipped"] += 1
