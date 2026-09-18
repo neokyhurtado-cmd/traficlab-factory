@@ -398,6 +398,66 @@ class TestRunwayScriptSelfCheck(Harness):
         # the FACTORY_SHA literal is present in the rendered source.
         self.assertIn(f'FACTORY_SHA = "{VALID_SHA}"', body)
 
+    def test_runway_main_block_does_not_refer_to_local_from_main(self) -> None:
+        # Regression: the diagnostic log inside `if __name__ == "__main__":`
+        # must NOT reference `profile_routing` (which is only defined inside
+        # main()). It must resolve the path at module scope.
+        ihr.install(
+            profile="ashley",
+            factory_sha=VALID_SHA,
+            repos=list(ASHLEY_REPOS),
+            authors=list(ASHLEY_AUTHORS),
+            hermes_home=self.hermes_home,
+            hermes_install=self.hermes_install,
+            factory_checkout=self.factory_checkout,
+            interval_minutes=2,
+            job_name="ashley-directive-watcher",
+            dry_run=False,
+        )
+        runway = self.ashley / "scripts" / "ashley-directive-watcher_runway.py"
+        body = runway.read_text(encoding="utf-8")
+        # The diagnostic line must reference the underscore-prefixed local.
+        self.assertIn("HERMES_ROUTING_PATH (set): {_profile_routing}", body)
+        # The bare `profile_routing` reference inside the if-main block is
+        # forbidden — it would NameError because main() hasn't run yet.
+        main_block = body.split('if __name__ == "__main__":', 1)[1]
+        # Allow occurrences in comments but not as a literal f-string token.
+        self.assertNotIn("{profile_routing}", main_block)
+
+    def test_runway_runs_as_main_without_nameerror(self) -> None:
+        # Smoke test: invoking the runway as `__main__` must NOT raise
+        # NameError. The canonical poller (github_poller.py) is not on
+        # disk in this isolated hermes_home tree, so we expect main() to
+        # exit with EXIT_RUNWAY_BROKEN (5) — that's a clean failure mode,
+        # not a NameError.
+        ihr.install(
+            profile="ashley",
+            factory_sha=VALID_SHA,
+            repos=list(ASHLEY_REPOS),
+            authors=list(ASHLEY_AUTHORS),
+            hermes_home=self.hermes_home,
+            hermes_install=self.hermes_install,
+            factory_checkout=self.factory_checkout,
+            interval_minutes=2,
+            job_name="ashley-directive-watcher",
+            dry_run=False,
+        )
+        runway = self.ashley / "scripts" / "ashley-directive-watcher_runway.py"
+        # Use the same Python interpreter that is running this test.
+        proc = subprocess.run(
+            [sys.executable, str(runway)],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        # Must NOT be a NameError. The runway's own diagnostic log
+        # captures any NameError before main() runs.
+        combined = proc.stdout + proc.stderr
+        self.assertNotIn("NameError", combined, f"NameError in runway:\n{combined}")
+        # The runway will exit 5 because the canonical checkout is empty
+        # in this isolated hermes_home tree. That's expected.
+        self.assertEqual(proc.returncode, 5, f"unexpected exit: {proc.returncode}\n{combined}")
+
 
 if __name__ == "__main__":
     unittest.main()

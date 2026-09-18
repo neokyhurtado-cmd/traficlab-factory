@@ -199,12 +199,16 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # Resolve the profile routing path at module scope so the diagnostic
+    # log can record it without depending on main() having run. This is
+    # the SAME path main() will use to dispatch the canonical poller.
+    _profile_routing = HERMES_HOME / "profiles" / PROFILE / "config" / "routing.yaml"
     log_path = HERMES_HOME / "profiles" / PROFILE / "logs" / "runway_env.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with open(log_path, "a") as _f:
         _f.write(f"\\n--- runway[{PROFILE}] invoked at {time.time()} ---\\n")
         _f.write(f"sys.executable: {sys.executable}\\n")
-        _f.write(f"HERMES_ROUTING_PATH (set): {profile_routing}\\n")
+        _f.write(f"HERMES_ROUTING_PATH (set): {_profile_routing}\\n")
         _f.write(f"Factory SHA: {FACTORY_SHA}\\n")
     sys.exit(main())
 '''
