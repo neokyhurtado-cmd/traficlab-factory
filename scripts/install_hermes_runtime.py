@@ -594,10 +594,15 @@ def install(
     ))
 
     # 5. Register cron job (idempotent on name).
-    script_rel = f"scripts/{runway_path.name}"
+    # The hermes cron scheduler resolves the script path as
+    # HERMES_HOME/scripts/<script>. So we store ONLY the basename here;
+    # the absolute path of HERMES_HOME/scripts/<basename> is what the
+    # scheduler actually invokes. Storing "scripts/<basename>" would
+    # resolve to HERMES_HOME/scripts/scripts/<basename> (doubled).
+    cron_basename = runway_path.name
     cron_summary, cron_id = register_cron_job(
         profile=profile_root,
-        script_relpath=script_rel,
+        script_relpath=cron_basename,
         interval_minutes=interval_minutes,
         job_name=job_name,
         dry_run=dry_run,

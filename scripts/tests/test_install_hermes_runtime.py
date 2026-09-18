@@ -278,6 +278,31 @@ class TestInstallHappyPath(Harness):
         self.assertNotIn("traficlab-factory", rt)
         self.assertNotIn("IA-VISION", rt)
 
+    def test_cron_script_field_is_basename(self) -> None:
+        # Regression: hermes cron scheduler resolves the script path as
+        # HERMES_HOME/scripts/<script>. If we store "scripts/<file>" the
+        # scheduler resolves to HERMES_HOME/scripts/scripts/<file>
+        # (doubled). The job MUST store ONLY the basename.
+        ihr.install(
+            profile="ashley",
+            factory_sha=VALID_SHA,
+            repos=list(ASHLEY_REPOS),
+            authors=list(ASHLEY_AUTHORS),
+            hermes_home=self.hermes_home,
+            hermes_install=self.hermes_install,
+            factory_checkout=self.factory_checkout,
+            interval_minutes=2,
+            job_name="ashley-directive-watcher",
+            dry_run=False,
+        )
+        jobs = json.loads((self.ashley / "cron" / "jobs.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(jobs["jobs"]), 1)
+        script_path = jobs["jobs"][0]["script"]
+        # Must be the basename only — no directory prefix.
+        self.assertNotIn("/", script_path)
+        self.assertNotIn("\\", script_path)
+        self.assertTrue(script_path.endswith("_runway.py"))
+
 
 class TestCronRegistration(Harness):
     def test_backup_on_overwrite(self) -> None:
