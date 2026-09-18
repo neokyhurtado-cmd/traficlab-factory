@@ -502,6 +502,7 @@ def run_directive_tick(
         dispatcher=dispatcher,
         gh=gh,
         kanban_db_path=os.environ.get("HERMES_KANBAN_DB"),
+        allowed_repos=allowlist_repos,
     )
     if terminal_publish["posted"]:
         summary.notes.append(
@@ -549,7 +550,18 @@ def main() -> int:
     # paths at once.
     directive_repos = _directive_repos_from_routes(repos)
     if directive_repos:
-        rc = run_directive_tick(directive_repos)
+        # Per-profile runtimes pin durable watcher state outside the Factory
+        # checkout so moving to a reviewed SHA/worktree cannot reset the
+        # cursor or replay already-consumed directives.
+        sidecar_db = os.environ.get(
+            "HERMES_DIRECTIVE_SIDECAR_DB", "directive_watcher.sqlite"
+        )
+        session_log = os.environ.get("HERMES_SESSION_LOG")
+        rc = run_directive_tick(
+            directive_repos,
+            sidecar_db=sidecar_db,
+            session_log=session_log,
+        )
         if rc is None:
             log("warn: directive ingestion skipped (module unavailable on host)")
         elif rc != 0:
