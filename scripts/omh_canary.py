@@ -54,16 +54,43 @@ def run(cmd: list[str], *, env: dict[str, str] | None = None) -> dict:
     }
 
 
+def hermes_home_candidates() -> list[Path]:
+    """Return deterministic ambient Hermes homes worth protecting.
+
+    Hermes on Windows commonly lives under %LOCALAPPDATA%\\hermes, while
+    other installs may use HERMES_HOME or ~/.hermes. We snapshot all observed
+    candidates instead of declaring success from a single missing default.
+    """
+    raw: list[Path] = []
+    explicit = os.environ.get("HERMES_HOME")
+    if explicit:
+        raw.append(Path(explicit))
+    local_appdata = os.environ.get("LOCALAPPDATA")
+    if local_appdata:
+        raw.append(Path(local_appdata) / "hermes")
+    raw.append(Path.home() / ".hermes")
+
+    out: list[Path] = []
+    seen: set[str] = set()
+    for path in raw:
+        key = str(path.resolve(strict=False)).lower()
+        if key not in seen:
+            seen.add(key)
+            out.append(path)
+    return out
+
+
 def hermes_config_snapshot() -> dict[str, str | None]:
-    home = Path.home() / ".hermes"
-    targets = [home / "config.yaml"]
-    profiles = home / "profiles"
-    if profiles.is_dir():
-        targets.extend(sorted(profiles.glob("*/config.yaml")))
+    """Hash ambient Hermes config surfaces across all candidate homes."""
     snapshot: dict[str, str | None] = {}
-    for path in targets:
-        key = str(path)
-        snapshot[key] = sha256_file(path) if path.is_file() else None
+    for home in hermes_home_candidates():
+        targets = [home / "config.yaml"]
+        profiles = home / "profiles"
+        if profiles.is_dir():
+            targets.extend(sorted(profiles.glob("*/config.yaml")))
+        for path in targets:
+            key = str(path.resolve(strict=False))
+            snapshot[key] = sha256_file(path) if path.is_file() else None
     return snapshot
 
 
@@ -238,6 +265,8 @@ def main() -> int:
                             "--live",
                             "--install-path",
                             "setup",
+                            "--omh-command",
+                            str(omh),
                         ],
                         env=env,
                     )
