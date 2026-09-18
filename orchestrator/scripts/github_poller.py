@@ -407,6 +407,7 @@ def run_directive_tick(
         )
         from directive_watcher.handler import WatcherHandler
         from directive_watcher.kanban_session_sync import reconcile_open_sessions
+        from directive_watcher.terminal_result_publisher import publish_terminal_session_results
         from directive_watcher.orch_dispatch import OrchestratorDispatcher
         from directive_watcher.retry import BackoffPolicy
         from directive_watcher.sidecar_store import SidecarStore
@@ -491,6 +492,26 @@ def run_directive_tick(
         summary.notes.append(f"session_reconcile:updated={reconcile['updated']}")
     if reconcile["errors"]:
         log(f"warn: session reconciliation errors={reconcile['errors']}")
+
+    # Async terminal projection: reconciliation above advances durable
+    # sessions.jsonl to DONE/FAILED after the worker finishes. Project that
+    # terminal truth back to the original GitHub issue on the SAME
+    # directive/execution lineage. The publisher dedupes against GitHub
+    # itself, so restarts/replays do not create a second terminal RESULT.
+    terminal_publish = publish_terminal_session_results(
+        dispatcher=dispatcher,
+        gh=gh,
+        kanban_db_path=os.environ.get("HERMES_KANBAN_DB"),
+    )
+    if terminal_publish["posted"]:
+        summary.notes.append(
+            f"terminal_result_publish:posted={terminal_publish['posted']}"
+        )
+    if terminal_publish["errors"]:
+        log(
+            f"warn: terminal result publication errors="
+            f"{terminal_publish['errors']}"
+        )
 
     return 0 if summary.directives_failed == 0 else 1
 
