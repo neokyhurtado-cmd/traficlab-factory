@@ -1,45 +1,47 @@
 # TraficLab Factory
 
-Fábrica de perfiles, políticas y bootstrap para onboarding de equipo Hermes.
+Factory for governed Hermes execution: profiles, policies, workers, worktrees, review, automation and durable evidence.
 
-## Estructura
+## Current Ashley status
 
-```
-policies/           ← reglas canónicas de operación
-profiles/           ← plantillas de perfil Hermes
-  ashley/           ← perfil para HERMES-ASHLEY-01
-bootstrap/          ← scripts de setup (pendientes)
-skills-manifest/   ← inventario y bundles de skills
-```
+Ashley is no longer in onboarding-only mode for SUINI.
 
-## Propósito
+~~~text
+AGENT_ID = HERMES-ASHLEY-01
+MEMBER_STATE = ACTIVE_PROJECT_MEMBER
+CURRENT_PRIMARY_ASSIGNMENT = SUINI
+SUINI_OWNER = ASHLEY
+DEFAULT_WORK_MODE = GOAL_CHAIN
+AUTO_NEXT_SAFE_GATE = YES
+DAVID_COPY_PASTE_REQUIRED = NO
+~~~
 
-Permite que nuevos miembros del equipo (como Ashley) se onboardeen de forma:
-- Segura (sin copiar secrets de David)
-- Reproducible (desde GitHub, no desde chat)
-- Gobernada (con Work Orders y jerarquía de autoridad)
+See ASHLEY-AGENT.md for the active contract.
 
-## Docs clave
+The historical read-only onboarding evidence remains in GitHub history and suini#29, but must not be treated as Ashley's current operating restriction.
 
-- [ASHLEY-AGENT.md](./ASHLEY-AGENT.md) — blueprint completo del onboarding de Ashley
-- [policies/authority-hierarchy.md](./policies/authority-hierarchy.md) — jerarquía GitHub > control-plane > Obsidian > chat
+## Structure
 
-## Para nuevo miembro
+~~~text
+policies/          canonical operating rules
+profiles/          Hermes profile templates
+bootstrap/         setup/bootstrap tooling
+skills-manifest/   skills and bundles
+loop_engineering/  autonomous goal-loop contracts
+orchestrator/      routing/control-plane primitives
+~~~
 
-1. Leer `ASHLEY-AGENT.md`
-2. Ejecutar scripts de bootstrap en orden
-3. Hacer CLAIM en `suini#29`
-4. Seguir el piloto read-only
-5. Publicar resultado en GitHub
+## Authority
 
-## Autoridad
+~~~text
+GitHub remote > control-plane > product docs/state > PANORAMA/Obsidian > chat
+~~~
 
-```
-GitHub remote > control-plane > PROJECT_STATE > Obsidian > chat
-```
+Product ownership remains strict:
 
-Regla:
-```
+~~~text
 if target_product != assigned_product:
-  STOP — PRODUCT_OWNERSHIP_MISMATCH
-```
+    STOP — PRODUCT_OWNERSHIP_MISMATCH
+~~~
+
+Factory workers may operate inside an assigned product boundary, but factory orchestration does not itself grant cross-product write authority.
