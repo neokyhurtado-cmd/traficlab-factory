@@ -459,5 +459,76 @@ class TestRunwayScriptSelfCheck(Harness):
         self.assertEqual(proc.returncode, 5, f"unexpected exit: {proc.returncode}\n{combined}")
 
 
+class TestStableWatcherState(Harness):
+    def _install(self, *, legacy_state_root=None, dry_run=False):
+        return ihr.install(
+            profile="ashley",
+            factory_sha=VALID_SHA,
+            repos=list(ASHLEY_REPOS),
+            authors=list(ASHLEY_AUTHORS),
+            hermes_home=self.hermes_home,
+            hermes_install=self.hermes_install,
+            factory_checkout=self.factory_checkout,
+            interval_minutes=2,
+            job_name="ashley-directive-watcher",
+            dry_run=dry_run,
+            legacy_state_root=legacy_state_root,
+        )
+
+    def test_runway_pins_profile_local_state_paths(self) -> None:
+        rc = self._install()
+        self.assertEqual(rc, 0)
+        runway = self.ashley / "scripts" / "ashley-directive-watcher_runway.py"
+        body = runway.read_text(encoding="utf-8")
+        self.assertIn('"HERMES_DIRECTIVE_SIDECAR_DB"', body)
+        self.assertIn('"HERMES_SESSION_LOG"', body)
+        self.assertIn('"directive_watcher" / "state"', body)
+        self.assertIn('"directive_watcher.sqlite"', body)
+        self.assertIn('"sessions.jsonl"', body)
+
+    def test_migrates_legacy_state_once_and_preserves_destination(self) -> None:
+        legacy = Path(self.tmp) / "legacy-state"
+        legacy.mkdir(parents=True, exist_ok=True)
+        old_db = legacy / "directive_watcher.sqlite"
+        old_sessions = legacy / "sessions.jsonl"
+        old_db.write_bytes(b"legacy-db-v1")
+        old_sessions.write_text('{"session_id":"legacy-1"}\n', encoding="utf-8")
+
+        rc = self._install(legacy_state_root=legacy)
+        self.assertEqual(rc, 0)
+
+        state_dir = self.ashley / "directive_watcher" / "state"
+        new_db = state_dir / "directive_watcher.sqlite"
+        new_sessions = state_dir / "sessions.jsonl"
+        self.assertEqual(new_db.read_bytes(), b"legacy-db-v1")
+        self.assertEqual(
+            new_sessions.read_text(encoding="utf-8"),
+            '{"session_id":"legacy-1"}\n',
+        )
+
+        old_db.write_bytes(b"legacy-db-v2")
+        old_sessions.write_text('{"session_id":"legacy-2"}\n', encoding="utf-8")
+        rc2 = self._install(legacy_state_root=legacy)
+        self.assertEqual(rc2, 0)
+
+        self.assertEqual(new_db.read_bytes(), b"legacy-db-v1")
+        self.assertEqual(
+            new_sessions.read_text(encoding="utf-8"),
+            '{"session_id":"legacy-1"}\n',
+        )
+
+    def test_dry_run_does_not_copy_legacy_state(self) -> None:
+        legacy = Path(self.tmp) / "legacy-state"
+        legacy.mkdir(parents=True, exist_ok=True)
+        (legacy / "directive_watcher.sqlite").write_bytes(b"legacy")
+        (legacy / "sessions.jsonl").write_text("{}\n", encoding="utf-8")
+
+        rc = self._install(legacy_state_root=legacy, dry_run=True)
+        self.assertEqual(rc, 0)
+        state_dir = self.ashley / "directive_watcher" / "state"
+        self.assertFalse((state_dir / "directive_watcher.sqlite").exists())
+        self.assertFalse((state_dir / "sessions.jsonl").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
