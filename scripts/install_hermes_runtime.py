@@ -186,6 +186,14 @@ def main() -> int:
         **os.environ,
         "HERMES_HOME": str(HERMES_HOME / "profiles" / PROFILE),
         "HERMES_ROUTING_PATH": str(profile_routing),
+        "HERMES_DIRECTIVE_SIDECAR_DB": str(
+            HERMES_HOME / "profiles" / PROFILE / "directive_watcher" / "state"
+            / "directive_watcher.sqlite"
+        ),
+        "HERMES_SESSION_LOG": str(
+            HERMES_HOME / "profiles" / PROFILE / "directive_watcher" / "state"
+            / "sessions.jsonl"
+        ),
         "PYTHONIOENCODING": "utf-8",
         "PYTHONPATH": f"{HERMES_INSTALL};{venv_site_packages}",
     }
@@ -354,6 +362,23 @@ def backup_file(path: Path, dry_run: bool) -> str:
     shutil.copy2(path, backup)
     return f"BACKED UP {path} -> {backup}"
 
+def migrate_state_file(source: Path | None, destination: Path, dry_run: bool) -> str:
+    """One-time state migration used when the reviewed Factory checkout moves.
+
+    Existing profile-local state always wins. A missing legacy source is a
+    no-op. This preserves directive cursors/session lineage without coupling
+    future runtime state to a particular Factory worktree.
+    """
+    if destination.is_file():
+        return f"UNCHANGED state {destination}"
+    if source is None or not source.is_file():
+        return f"NO-MIGRATION (missing source) {source}"
+    if dry_run:
+        return f"[dry-run] WOULD-MIGRATE {source} -> {destination}"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+    return f"MIGRATED {source} -> {destination}"
+
 
 # --- Cron registration ------------------------------------------------------
 
@@ -466,6 +491,7 @@ def install(
     interval_minutes: int,
     job_name: str,
     dry_run: bool,
+    legacy_state_root: Path | None = None,
 ) -> int:
     if not is_valid_sha(factory_sha):
         print(
@@ -597,7 +623,26 @@ def install(
         dry_run,
     ))
 
-    # 5. Register cron job (idempotent on name).
+    # 5. Stable profile-local watcher state. This deliberately lives outside
+    # the Factory checkout so moving between reviewed SHAs/worktrees cannot
+    # reset cursors or replay already-consumed directives.
+    state_dir = dw_root / "state"
+    state_dir.mkdir(parents=True, exist_ok=True)
+    sidecar_db = state_dir / "directive_watcher.sqlite"
+    session_log = state_dir / "sessions.jsonl"
+    legacy_root = Path(legacy_state_root) if legacy_state_root else None
+    actions.append(migrate_state_file(
+        legacy_root / "directive_watcher.sqlite" if legacy_root else None,
+        sidecar_db,
+        dry_run,
+    ))
+    actions.append(migrate_state_file(
+        legacy_root / "sessions.jsonl" if legacy_root else None,
+        session_log,
+        dry_run,
+    ))
+
+    # 6. Register cron job (idempotent on name).
     # The hermes cron scheduler resolves the script path as
     # HERMES_HOME/scripts/<script>. So we store ONLY the basename here;
     # the absolute path of HERMES_HOME/scripts/<basename> is what the
@@ -630,6 +675,8 @@ def install(
     print(f"  routing yaml       : {routing_path}")
     print(f"  repos yaml         : {repos_yaml}")
     print(f"  authors yaml       : {authors_yaml}")
+    print(f"  sidecar db         : {sidecar_db}")
+    print(f"  session log        : {session_log}")
     print(f"  profile root       : {profile_root}")
     print("=" * 72)
     if dry_run:
@@ -700,6 +747,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=f"Factory checkout (default: {DEFAULT_FACTORY_CHECKOUT})",
     )
     p.add_argument(
+        "--legacy-state-root",
+        type=Path,
+        default=None,
+        help=(
+            "optional previous Factory checkout/state root containing "
+            "directive_watcher.sqlite and sessions.jsonl; copied once into "
+            "the target profile's stable directive_watcher/state directory"
+        ),
+    )
+    p.add_argument(
         "--interval-minutes",
         type=int,
         default=DEFAULT_INTERVAL_MINUTES,
@@ -733,6 +790,7 @@ def main(argv: list[str] | None = None) -> int:
         interval_minutes=args.interval_minutes,
         job_name=args.job_name,
         dry_run=args.dry_run,
+        legacy_state_root=args.legacy_state_root,
     )
 
 
