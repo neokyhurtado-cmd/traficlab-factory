@@ -123,6 +123,28 @@ def python_command(venv_dir: Path) -> Path:
     return venv_dir / "bin" / "python"
 
 
+def build_hermes_smoke_command(
+    omh: Path,
+    omh_home: Path,
+    hermes_home: Path,
+) -> list[str]:
+    """Build the isolated smoke command with an absolute recursive OMH path."""
+    return [
+        str(omh),
+        "--omh-home",
+        str(omh_home),
+        "--hermes-home",
+        str(hermes_home),
+        "release",
+        "hermes-smoke",
+        "--live",
+        "--install-path",
+        "setup",
+        "--omh-command",
+        str(omh),
+    ]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -254,20 +276,7 @@ def main() -> int:
                 report["hermes_command"] = hermes
                 if hermes:
                     smoke = run(
-                        [
-                            str(omh),
-                            "--omh-home",
-                            str(omh_home),
-                            "--hermes-home",
-                            str(hermes_home),
-                            "release",
-                            "hermes-smoke",
-                            "--live",
-                            "--install-path",
-                            "setup",
-                            "--omh-command",
-                            str(omh),
-                        ],
+                        build_hermes_smoke_command(omh, omh_home, hermes_home),
                         env=env,
                     )
                 else:
