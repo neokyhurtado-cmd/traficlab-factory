@@ -49,8 +49,11 @@ def _runtime_evidence_for_directive(
     """
     if not kanban_db_path:
         return {}
+    db_path = Path(kanban_db_path)
+    if not db_path.is_file():
+        return {}
     try:
-        with sqlite3.connect(str(kanban_db_path)) as conn:
+        with sqlite3.connect(str(db_path)) as conn:
             conn.row_factory = sqlite3.Row
             task = conn.execute(
                 """
@@ -92,7 +95,7 @@ def _runtime_evidence_for_directive(
             if worker_pid is None:
                 worker_pid = payload.get("worker_pid")
                 spawned_at = row["created_at"]
-        elif kind in {"heartbeat", "heartbeats"}:
+        elif "heartbeat" in kind.lower():
             heartbeat_count += 1
             last_heartbeat_at = row["created_at"]
         elif kind in {"completed", "failed"}:
