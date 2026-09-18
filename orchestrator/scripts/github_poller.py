@@ -407,6 +407,7 @@ def run_directive_tick(
         )
         from directive_watcher.handler import WatcherHandler
         from directive_watcher.kanban_session_sync import reconcile_open_sessions
+        from directive_watcher.terminal_result_publisher import publish_terminal_session_results
         from directive_watcher.orch_dispatch import OrchestratorDispatcher
         from directive_watcher.retry import BackoffPolicy
         from directive_watcher.sidecar_store import SidecarStore
@@ -492,6 +493,27 @@ def run_directive_tick(
     if reconcile["errors"]:
         log(f"warn: session reconciliation errors={reconcile['errors']}")
 
+    # Async terminal projection: reconciliation above advances durable
+    # sessions.jsonl to DONE/FAILED after the worker finishes. Project that
+    # terminal truth back to the original GitHub issue on the SAME
+    # directive/execution lineage. The publisher dedupes against GitHub
+    # itself, so restarts/replays do not create a second terminal RESULT.
+    terminal_publish = publish_terminal_session_results(
+        dispatcher=dispatcher,
+        gh=gh,
+        kanban_db_path=os.environ.get("HERMES_KANBAN_DB"),
+        allowed_repos=allowlist_repos,
+    )
+    if terminal_publish["posted"]:
+        summary.notes.append(
+            f"terminal_result_publish:posted={terminal_publish['posted']}"
+        )
+    if terminal_publish["errors"]:
+        log(
+            f"warn: terminal result publication errors="
+            f"{terminal_publish['errors']}"
+        )
+
     return 0 if summary.directives_failed == 0 else 1
 
 
@@ -528,7 +550,18 @@ def main() -> int:
     # paths at once.
     directive_repos = _directive_repos_from_routes(repos)
     if directive_repos:
-        rc = run_directive_tick(directive_repos)
+        # Per-profile runtimes pin durable watcher state outside the Factory
+        # checkout so moving to a reviewed SHA/worktree cannot reset the
+        # cursor or replay already-consumed directives.
+        sidecar_db = os.environ.get(
+            "HERMES_DIRECTIVE_SIDECAR_DB", "directive_watcher.sqlite"
+        )
+        session_log = os.environ.get("HERMES_SESSION_LOG")
+        rc = run_directive_tick(
+            directive_repos,
+            sidecar_db=sidecar_db,
+            session_log=session_log,
+        )
         if rc is None:
             log("warn: directive ingestion skipped (module unavailable on host)")
         elif rc != 0:
