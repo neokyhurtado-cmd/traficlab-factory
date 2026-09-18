@@ -37,6 +37,7 @@ env/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+.loop_snapshots/
 
 # Watcher runtime
 directive_watcher.sqlite
