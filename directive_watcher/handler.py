@@ -823,3 +823,17 @@ class WatcherHandler:
             is_retryable=_is_retryable,
         )
         self._store.mark_result_posted(d.directive_id)
+        # Live Brain bridge (B4 outcome observer) — emit a real terminal event
+        # when the watcher's RESULT is successfully posted. Fail-soft: the watch
+        # tick MUST NOT abort if Live Brain is unreachable.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_result_posted(
+                directive_id=d.directive_id,
+                session_id=getattr(claim, "session_id", "") or "",
+                result_status=outcome.status,
+                comment_id=None,  # not threaded through post_comment response yet
+                actor=f"Factory Director (directive_watcher)",
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
