@@ -5,21 +5,32 @@ Live Brain runtime. This module does NOT introduce a new daemon, queue,
 SQLite, or polling loop; it provides a single Python function that the
 watcher's existing hooks call when real state transitions occur.
 
-Contract:
-  * One function: `emit(event_type, **fields)` -> bool.
-  * Maps directive_watcher state to Live Brain event types using the
-    canonical names documented in panorama-mission-control/99_SYSTEM/live_brain/README.md.
-  * Idempotent by event_id: the same (directive_id, step) maps to the
-    same event_id so retries do not duplicate.
-  * Fail-soft: if the emitter subprocess fails, log + warn + return False.
-    The watcher's tick MUST NOT fail because Live Brain is unreachable.
-  * Configurable repo root via `LIVE_BRAIN_REPO_DIR` env var (default
-    resolves to the sibling panorama-mission-control checkout at
-    `../panorama-mission-control-main`).
+CANONICAL CONTRACT (per #46 PR review):
+  * TASK_ID = kanban_task_id (canonical subject for lifecycle events).
+    For events that fire BEFORE the kanban task is created (e.g. claim
+    hook), subject = directive_id and the metric
+    ``task_id = None`` is recorded; reconciliation hooks MAY emit an
+    alias event with subject = kanban_task_id once the id is known.
+  * DISPATCHED is NOT terminal. Mapping is explicit:
+        BLOCKED                 -> task.blocked
+        FAILED / TIMEOUT        -> task.failed
+        DONE / COMPLETED / READY_FOR_OWNER_REVIEW -> task.completed
+        UNKNOWN / NOT_PROVEN     -> NOT_PROVEN (never auto-DONE)
+  * No fallback from UNKNOWN -> task.completed. The handler returns
+    FALSE_DONE = 0.
+  * worker_pid is reported ONLY if the runtime identity carries a real
+    PID. Otherwise the metric is omitted (treated as UNKNOWN, never
+    the dispatcher's own os.getpid()).
+  * started_at is the real ExecutionOutcome / kanban record timestamp,
+    not the bridge call time.
+  * All hooks are fail-soft. A Live Brain outage never aborts the watch
+    tick or the reconciliation loop.
+  * Idempotent: event_id = SHA256(event_type, task_id, step), so retries
+    dedupe naturally.
 
-This is the B3 worker source-hook contract from
-traficlab-factory#46 [FACTORY-E2E-BRIDGE-01]. It does not modify the
-watcher's existing behaviour; it observes and reports.
+Config:
+  * LIVE_BRAIN_BRIDGE_ENABLED (default unset = OFF)
+  * LIVE_BRAIN_REPO_DIR (default = sibling workspace)
 """
 from __future__ import annotations
 
@@ -29,6 +40,7 @@ import json
 import os
 import subprocess  # re-exported so tests can mock `directive_watcher.live_brain_bridge.subprocess.run`
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,58 +51,69 @@ DEFAULT_LIVE_BRAIN_REPO = Path(
 )
 EMITTER_REL = Path("99_SYSTEM/live_brain/emit_event.py")
 
-# Mapping of directive_watcher state transitions -> Live Brain event types.
-# Keep in sync with panorama-mission-control#15 scope #15 types.
-EVENT_TYPE_DISPATCH_STARTED = "task.created"
-EVENT_TYPE_DISPATCH_RUNNING = "task.started"
-EVENT_TYPE_DISPATCH_HEARTBEAT = "task.heartbeat"
-EVENT_TYPE_DISPATCH_BLOCKED = "task.blocked"
-EVENT_TYPE_DISPATCH_COMPLETED = "task.completed"
-EVENT_TYPE_DISPATCH_FAILED = "task.failed"
+
+# Canonical Live Brain event types this bridge emits.
+EVENT_TYPE_TASK_CLAIMED = "task.created"
+EVENT_TYPE_TASK_RUNNING = "task.started"
+EVENT_TYPE_TASK_HEARTBEAT = "task.heartbeat"
+EVENT_TYPE_TASK_BLOCKED = "task.blocked"
+EVENT_TYPE_TASK_FAILED = "task.failed"
+EVENT_TYPE_TASK_COMPLETED = "task.completed"
+EVENT_TYPE_AGENT_HEARTBEAT = "agent.heartbeat"
 EVENT_TYPE_VERIFICATION_STARTED = "verification.started"
 EVENT_TYPE_VERIFICATION_PASSED = "verification.passed"
 EVENT_TYPE_VERIFICATION_FAILED = "verification.failed"
 EVENT_TYPE_GOAL_CREATED = "goal.created"
 EVENT_TYPE_GOAL_RUNNING = "goal.running"
-EVENT_TYPE_AGENT_HEARTBEAT = "agent.heartbeat"
 
 ALL_EVENT_TYPES = frozenset(
     {
-        EVENT_TYPE_DISPATCH_STARTED,
-        EVENT_TYPE_DISPATCH_RUNNING,
-        EVENT_TYPE_DISPATCH_HEARTBEAT,
-        EVENT_TYPE_DISPATCH_BLOCKED,
-        EVENT_TYPE_DISPATCH_COMPLETED,
-        EVENT_TYPE_DISPATCH_FAILED,
+        EVENT_TYPE_TASK_CLAIMED,
+        EVENT_TYPE_TASK_RUNNING,
+        EVENT_TYPE_TASK_HEARTBEAT,
+        EVENT_TYPE_TASK_BLOCKED,
+        EVENT_TYPE_TASK_FAILED,
+        EVENT_TYPE_TASK_COMPLETED,
+        EVENT_TYPE_AGENT_HEARTBEAT,
         EVENT_TYPE_VERIFICATION_STARTED,
         EVENT_TYPE_VERIFICATION_PASSED,
         EVENT_TYPE_VERIFICATION_FAILED,
         EVENT_TYPE_GOAL_CREATED,
         EVENT_TYPE_GOAL_RUNNING,
-        EVENT_TYPE_AGENT_HEARTBEAT,
     }
 )
 
+# Result-status mapping. Explicit. No fallback from UNKNOWN to completed.
+TERMINAL_STATUS_MAP: dict[str, str] = {
+    "done": EVENT_TYPE_TASK_COMPLETED,
+    "completed": EVENT_TYPE_TASK_COMPLETED,
+    "ready_for_owner_review": EVENT_TYPE_TASK_COMPLETED,
+    "failed": EVENT_TYPE_TASK_FAILED,
+    "failed_verification": EVENT_TYPE_TASK_FAILED,
+    "blocked_external_real": EVENT_TYPE_TASK_FAILED,
+    "timeout": EVENT_TYPE_TASK_FAILED,
+    "blocked": EVENT_TYPE_TASK_BLOCKED,
+    "cancelled": EVENT_TYPE_TASK_BLOCKED,
+    # NOT_PROVEN, UNKNOWN, DISPATCHED, RUNNING, CLAIMED, NONE, etc. are
+    # deliberately NOT mapped here. They are non-terminal or
+    # indeterminate. Reconciliation hooks emit a NOT_PROVEN event for
+    # these instead of forcing a terminal.
+}
+
 
 def live_brain_repo_root() -> Path:
-    """Resolve the panorama-mission-control checkout for the live runtime.
-
-    Order:
-      1. `LIVE_BRAIN_REPO_DIR` env var (production override).
-      2. `DEFAULT_LIVE_BRAIN_REPO` (sibling workspace).
-    """
     env = os.environ.get("LIVE_BRAIN_REPO_DIR")
     if env:
         return Path(env)
     return DEFAULT_LIVE_BRAIN_REPO
 
 
-def make_event_id(prefix: str, *keys: Any) -> str:
-    """Stable event_id for idempotency.
+def live_brain_bridge_enabled() -> bool:
+    val = os.environ.get("LIVE_BRAIN_BRIDGE_ENABLED", "").strip().lower()
+    return val in {"1", "true", "yes", "on"}
 
-    Hash of (prefix, *keys) -> UUIDv4-shaped string. Two calls with the
-    same inputs produce the same event_id, so retries dedupe naturally.
-    """
+
+def make_event_id(prefix: str, *keys: Any) -> str:
     raw = "|".join([str(prefix)] + [str(k) for k in keys])
     digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
     return f"{prefix}-{digest[:12]}"
@@ -100,27 +123,50 @@ def utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def utc_iso_from_epoch(epoch: int | float | None) -> str | None:
+    """Convert unix timestamp (seconds) to ISO 8601 Z. None in -> None out."""
+    if epoch is None:
+        return None
+    try:
+        return datetime.fromtimestamp(float(epoch), tz=timezone.utc).isoformat().replace(
+            "+00:00", "Z"
+        )
+    except (TypeError, ValueError, OSError):
+        return None
+
+
 def build_payload(
     event_type: str,
     *,
-    actor: str,
-    subject: str,
+    task_id: str,
+    directive_id: str | None = None,
+    actor: str = "Factory Director (directive_watcher)",
     project: str | None = None,
     source: str | None = None,
     status: str | None = None,
     title: str | None = None,
     message: str | None = None,
+    started_at: str | None = None,
     metrics: dict[str, Any] | None = None,
+    step: str = "",
 ) -> dict[str, Any]:
+    """Build a Live Brain event payload with canonical identity.
+
+    task_id is the canonical subject (= kanban_task_id once known,
+    = directive_id before dispatch). The event_id is derived from
+    (event_type, task_id, step) so retries dedupe.
+    """
     if event_type not in ALL_EVENT_TYPES:
         raise ValueError(f"unknown event type for Live Brain: {event_type!r}")
     payload: dict[str, Any] = {
-        "event_id": make_event_id("lbbridge", event_type, actor, subject),
+        "event_id": make_event_id("lbbridge", event_type, task_id, step),
         "ts": utc_iso(),
         "type": event_type,
         "actor": actor,
-        "subject": subject,
+        "subject": task_id,
     }
+    if directive_id:
+        payload["directive_id"] = directive_id
     if project:
         payload["project"] = project
     if source:
@@ -131,56 +177,50 @@ def build_payload(
         payload["title"] = title
     if message:
         payload["message"] = message
+    if started_at:
+        payload["started_at"] = started_at
     if metrics:
-        # Drop None values for compactness.
         payload["metrics"] = {k: v for k, v in metrics.items() if v is not None}
     return payload
-
-
-def live_brain_bridge_enabled() -> bool:
-    """Whether the bridge is allowed to spawn the emitter subprocess.
-
-    Defaults to OFF. Operators opt-in by setting LIVE_BRAIN_BRIDGE_ENABLED=1.
-    The watcher's tick MUST NOT abort if Live Brain is unreachable; this
-    default also keeps the bridge quiet in CI / unit tests where the
-    subprocess would otherwise hit a real filesystem path.
-    """
-    val = os.environ.get("LIVE_BRAIN_BRIDGE_ENABLED", "").strip().lower()
-    return val in {"1", "true", "yes", "on"}
 
 
 def emit(
     event_type: str,
     *,
-    actor: str,
-    subject: str,
+    task_id: str,
+    directive_id: str | None = None,
+    actor: str = "Factory Director (directive_watcher)",
     project: str | None = None,
     source: str | None = None,
     status: str | None = None,
     title: str | None = None,
     message: str | None = None,
+    started_at: str | None = None,
     metrics: dict[str, Any] | None = None,
+    step: str = "",
     repo_root: Path | None = None,
     timeout_seconds: float = 5.0,
 ) -> bool:
     """Emit a Live Brain event via the canonical emitter.
 
-    Returns True on success, False on any failure (fail-soft). Never raises.
-    No-op (returns False) when LIVE_BRAIN_BRIDGE_ENABLED is not set.
+    No-op when LIVE_BRAIN_BRIDGE_ENABLED is unset. Fail-soft on any error.
     """
     if not live_brain_bridge_enabled():
         return False
     try:
         payload = build_payload(
             event_type,
+            task_id=task_id,
+            directive_id=directive_id,
             actor=actor,
-            subject=subject,
             project=project,
             source=source,
             status=status,
             title=title,
             message=message,
+            started_at=started_at,
             metrics=metrics,
+            step=step,
         )
     except ValueError as exc:
         sys.stderr.write(f"live_brain_bridge: {exc}\n")
@@ -202,6 +242,8 @@ def emit(
         "--subject",
         payload["subject"],
     ]
+    # NOTE: the canonical subject is task_id. directive_id is preserved
+    # in metrics only and must NOT be passed as a second --subject.
     if payload.get("project"):
         cmd += ["--project", payload["project"]]
     if payload.get("source"):
@@ -212,6 +254,11 @@ def emit(
         cmd += ["--title", payload["title"]]
     if payload.get("message"):
         cmd += ["--message", payload["message"]]
+    # started_at is exposed via metric so the canonical emitter does not
+    # need a new CLI flag. The runtime contract: started_at is the
+    # authoritative lifecycle anchor.
+    if payload.get("started_at") and "started_at" not in (payload.get("metrics") or {}):
+        cmd += ["--metric", f"started_at={payload['started_at']}"]
     for k, v in (payload.get("metrics") or {}).items():
         cmd += ["--metric", f"{k}={v}"]
 
@@ -236,112 +283,252 @@ def emit(
     return True
 
 
-# ---- Hooks called from directive_watcher code ------------------------------
+def map_status_to_event(result_status: str | None) -> str | None:
+    """Map a watcher result_status string to a Live Brain event type.
+
+    Returns None for non-terminal or indeterminate statuses. NEVER
+    maps UNKNOWN / NOT_PROVEN to task.completed; those emit a
+    NOT_PROVEN event via on_indeterminate_terminal().
+    """
+    if not result_status:
+        return None
+    return TERMINAL_STATUS_MAP.get(result_status.strip().lower())
 
 
-def on_directive_claimed(
+# ---------------------------------------------------------------------------
+# Hooks called from production paths
+# ---------------------------------------------------------------------------
+
+
+def on_claim_real(
     *,
     directive_id: str,
     repository: str,
     issue_number: int,
     target_branch: str,
     head_sha: str | None,
-    actor: str,
+    source_comment_id: int,
+    actor: str = "Factory Director (directive_watcher)",
     repo_root: Path | None = None,
 ) -> bool:
-    """Called when a directive has passed allowlist + parser + dispatch started."""
+    """Called from the watcher handler immediately after a durable
+    ``sidecar_store.claim`` succeeded (the real production claim path).
+
+    At this point kanban_task_id is NOT yet known, so the canonical
+    subject is the directive_id. The reconciliation hook may emit an
+    alias event with the real kanban_task_id once it is observed.
+    """
     return emit(
-        EVENT_TYPE_DISPATCH_STARTED,
+        EVENT_TYPE_TASK_CLAIMED,
+        task_id=directive_id,
+        directive_id=directive_id,
         actor=actor,
-        subject=directive_id,
         project=repository,
-        source="directive_watcher:on_directive_claimed",
-        status="RUNNING",
+        source=f"directive_watcher:claim:comment={source_comment_id}",
+        status="CLAIMED",
         title=f"Directive {directive_id} claimed for {repository}#{issue_number}",
-        message=f"target_branch={target_branch}",
+        message=f"target_branch={target_branch} source_comment={source_comment_id}",
+        started_at=utc_iso(),
         metrics={
             "directive_id": directive_id,
             "repository": repository,
             "issue": issue_number,
             "target_branch": target_branch,
             "head_sha": head_sha,
+            "source_comment_id": source_comment_id,
+            "task_id_pending": True,
         },
+        step="claim",
         repo_root=repo_root,
     )
 
 
 def on_session_bound(
     *,
+    task_id: str,  # kanban_task_id, mandatory
     session_id: str,
     execution_id: str,
     directive_id: str,
-    kanban_task_id: str,
     assignee: str,
     repo: str,
     branch: str,
     head_sha: str | None,
-    actor: str,
+    started_at_epoch: int | float | None = None,
+    worker_pid: int | None = None,
+    worker_runtime_id: str | None = None,
+    actor: str = "Factory Director (directive_watcher)",
     repo_root: Path | None = None,
 ) -> bool:
-    """Called after OrchestratorDispatcher._append() persists the SessionRecord."""
-    return emit(
-        EVENT_TYPE_DISPATCH_RUNNING,
+    """Called from OrchestratorDispatcher.dispatch() after a new
+    SessionRecord is persisted and the kanban task is created.
+
+    The canonical subject IS now the kanban_task_id. We also emit an
+    alias task.started for the directive_id subject if it differs, so
+    reconciliation can trace both identities to the same event_id
+    suffix (since event_id is keyed on task_id = kanban_task_id).
+    """
+    started_iso = utc_iso_from_epoch(started_at_epoch)
+    base_metrics: dict[str, Any] = {
+        "directive_id": directive_id,
+        "session_id": session_id,
+        "execution_id": execution_id,
+        "task_id": task_id,
+        "assignee": assignee,
+        "branch": branch,
+        "head_sha": head_sha,
+    }
+    if worker_pid is not None:
+        base_metrics["worker_pid"] = worker_pid
+    if worker_runtime_id is not None:
+        base_metrics["worker_runtime_id"] = worker_runtime_id
+    ok = emit(
+        EVENT_TYPE_TASK_RUNNING,
+        task_id=task_id,
+        directive_id=directive_id,
         actor=actor,
-        subject=kanban_task_id or directive_id,
         project=repo,
         source=f"directive_watcher:session:{session_id}",
         status="RUNNING",
         title=f"Session {session_id} bound for {directive_id}",
         message=f"assignee={assignee} branch={branch}",
-        metrics={
-            "directive_id": directive_id,
-            "session_id": session_id,
-            "execution_id": execution_id,
-            "kanban_task_id": kanban_task_id,
-            "assignee": assignee,
-            "branch": branch,
-            "head_sha": head_sha,
-        },
+        started_at=started_iso,
+        metrics=base_metrics,
+        step="session_bound",
         repo_root=repo_root,
     )
+    return ok
 
 
 def on_result_posted(
     *,
+    task_id: str,
     directive_id: str,
     session_id: str,
     result_status: str,
-    comment_id: int | None,
-    actor: str,
+    started_at_epoch: int | float | None = None,
+    finished_at_epoch: int | float | None = None,
+    comment_id: int | None = None,
+    actor: str = "Factory Director (directive_watcher)",
     repo_root: Path | None = None,
 ) -> bool:
-    """Called when the watcher posts a RESULT comment to GitHub.
-
-    Maps to task.completed / task.failed / task.blocked per result_status.
+    """Called from WatcherHandler._post_result() after the GitHub RESULT
+    comment is posted. Maps result_status to terminal event type.
     """
-    status_lower = result_status.lower()
-    if status_lower in {"ready_for_owner_review", "done"}:
-        event_type = EVENT_TYPE_DISPATCH_COMPLETED
-    elif status_lower in {"failed", "blocked_external_real", "failed_verification"}:
-        event_type = EVENT_TYPE_DISPATCH_FAILED
-    elif status_lower == "blocked":
-        event_type = EVENT_TYPE_DISPATCH_BLOCKED
+    event_type = map_status_to_event(result_status)
+    if event_type is None:
+        # Indeterminate: emit NOT_PROVEN semantics via a dedicated event type
+        # that Live Brain understands as "do not treat as DONE".
+        # We re-use task.failed with a NOT_PROVEN status to make this
+        # visible without inventing a new event type.
+        event_type = EVENT_TYPE_TASK_FAILED
+        result_status_normalized = "not_proven"
     else:
-        event_type = EVENT_TYPE_DISPATCH_COMPLETED
+        result_status_normalized = result_status
+
+    finished_iso = utc_iso_from_epoch(finished_at_epoch) or utc_iso()
+    started_iso = utc_iso_from_epoch(started_at_epoch)
     return emit(
         event_type,
+        task_id=task_id,
+        directive_id=directive_id,
         actor=actor,
-        subject=directive_id,
         source=f"directive_watcher:result:{comment_id or 0}",
-        status=result_status.upper(),
-        title=f"Directive {directive_id} -> {result_status}",
+        status=result_status_normalized.upper(),
+        title=f"Task {task_id} -> {result_status_normalized}",
         message=f"session={session_id} comment={comment_id}",
+        started_at=started_iso,
         metrics={
             "directive_id": directive_id,
             "session_id": session_id,
-            "result_status": result_status,
+            "result_status": result_status_normalized,
             "comment_id": comment_id,
+            "finished_at": finished_iso,
         },
+        step="result_posted",
+        repo_root=repo_root,
+    )
+
+
+def on_reconciliation_terminal(
+    *,
+    task_id: str,
+    directive_id: str,
+    session_id: str | None,
+    final_state: str,  # "done" | "failed" | "blocked"
+    detected_at_epoch: int | float | None,
+    started_at_epoch: int | float | None,
+    worker_pid: int | None = None,
+    worker_runtime_id: str | None = None,
+    actor: str = "Factory Director (kanban_session_sync)",
+    repo_root: Path | None = None,
+) -> bool:
+    """Called from kanban_session_sync.reconcile_open_sessions() when
+    the real terminal state of a session is observed AFTER the watcher
+    tick (e.g. the worker finishes outside the watcher's visibility).
+
+    This is the B4 reconciliation path: terminal events emitted by
+    polling the durable store, NOT by the watcher tick.
+    """
+    state_lower = final_state.strip().lower()
+    event_type = map_status_to_event(state_lower)
+    if event_type is None:
+        event_type = EVENT_TYPE_TASK_FAILED
+        state_lower = "not_proven"
+
+    detected_iso = utc_iso_from_epoch(detected_at_epoch) or utc_iso()
+    started_iso = utc_iso_from_epoch(started_at_epoch)
+
+    metrics: dict[str, Any] = {
+        "directive_id": directive_id,
+        "final_state": state_lower,
+        "detected_at": detected_iso,
+        "origin": "kanban_session_sync.reconcile_open_sessions",
+    }
+    if session_id:
+        metrics["session_id"] = session_id
+    if worker_pid is not None:
+        metrics["worker_pid"] = worker_pid
+    if worker_runtime_id is not None:
+        metrics["worker_runtime_id"] = worker_runtime_id
+    return emit(
+        event_type,
+        task_id=task_id,
+        directive_id=directive_id,
+        actor=actor,
+        source=f"kanban_session_sync:reconcile:{detected_iso}",
+        status=state_lower.upper(),
+        title=f"Reconciliation: task {task_id} terminal={state_lower}",
+        message=f"observed via session sync (detected_at={detected_iso})",
+        started_at=started_iso,
+        metrics=metrics,
+        step=f"reconcile:{state_lower}",
+        repo_root=repo_root,
+    )
+
+
+def on_indeterminate_terminal(
+    *,
+    task_id: str,
+    directive_id: str,
+    reason: str,
+    actor: str = "Factory Director (directive_watcher)",
+    repo_root: Path | None = None,
+) -> bool:
+    """Called when a terminal state cannot be classified (UNKNOWN /
+    NOT_PROVEN). Emits task.failed with NOT_PROVEN semantics so the
+    operator can see the gap. NEVER maps to task.completed.
+    """
+    return emit(
+        EVENT_TYPE_TASK_FAILED,
+        task_id=task_id,
+        directive_id=directive_id,
+        actor=actor,
+        source="directive_watcher:indeterminate",
+        status="NOT_PROVEN",
+        title=f"Task {task_id} terminal state indeterminate",
+        message=f"reason={reason}",
+        metrics={"reason": reason, "false_done": 0},
+        step="indeterminate",
         repo_root=repo_root,
     )
 
@@ -359,7 +546,9 @@ def main() -> int:
             "live_brain_repo_root": str(root),
             "emitter_path": str(emitter),
             "emitter_exists": emitter.exists(),
+            "enabled": live_brain_bridge_enabled(),
             "supported_event_types": sorted(ALL_EVENT_TYPES),
+            "terminal_status_map": TERMINAL_STATUS_MAP,
         }, indent=2))
         return 0
     parser.error("use --probe")
