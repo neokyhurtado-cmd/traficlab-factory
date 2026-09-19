@@ -718,7 +718,44 @@ class WatcherHandler:
             summary.directives_skipped += 1
             return
 
+        # Live Brain bridge (B3 + #46 review finding #1) — emit a real
+        # task.created event from the PRODUCTION claim path, immediately
+        # after a durable claim succeeded. Canonical subject = directive_id
+        # at this stage (kanban_task_id is not known yet). Fail-soft.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_claim_real(
+                directive_id=d.directive_id,
+                repository=repo,
+                issue_number=comment.issue_number,
+                target_branch=d.target_branch,
+                head_sha=None,  # filled by dispatch
+                source_comment_id=comment.id,
+                actor=f"Factory Director (directive_watcher)",
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
+
         summary.directives_claimed += 1
+
+        # 6.5 (B3 C1) — emit task.created to Live Brain from the REAL
+        # production path, immediately after the durable claim succeeds
+        # and before any execution_fn or dispatcher work. This satisfies
+        # the FACTORY-E2E-BRIDGE-01 C1 acceptance: REAL_WATCHER_CLAIM
+        # produces task.created, NOT a synthetic call from a test/canary.
+        # Fail-soft: a Live Brain outage must NEVER abort the watch tick.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_directive_claimed(
+                directive_id=d.directive_id,
+                repository=repo,
+                issue_number=comment.issue_number,
+                target_branch=d.target_branch or "",
+                head_sha=None,
+                actor=f"Factory Director (directive_watcher)",
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
 
         # Stash source_comment_id + execution_id so the wrapped
         # execution_fn can pass them to the dispatcher.
@@ -823,3 +860,22 @@ class WatcherHandler:
             is_retryable=_is_retryable,
         )
         self._store.mark_result_posted(d.directive_id)
+        # Live Brain bridge (B4 outcome observer) — emit a real terminal event
+        # when the watcher's RESULT is successfully posted. Canonical subject
+        # = kanban_task_id if known (carried via the session record), else
+        # directive_id. Fail-soft: a bridge error MUST NOT abort the tick.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            sess = self._store.get_by_directive(d.directive_id)
+            task_id = (sess.kanban_task_id if sess and sess.kanban_task_id else d.directive_id)
+            _lbb.on_result_posted(
+                task_id=task_id,
+                directive_id=d.directive_id,
+                session_id=getattr(sess, "session_id", "") or claim.execution_id,
+                result_status=outcome.status,
+                finished_at_epoch=getattr(outcome, "finished_at", None),
+                comment_id=None,  # not threaded through post_comment response yet
+                actor=f"Factory Director (directive_watcher)",
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass

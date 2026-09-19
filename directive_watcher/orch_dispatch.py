@@ -429,6 +429,23 @@ class OrchestratorDispatcher:
                     f"session {existing.session_id} "
                     f"(execution_id={existing.execution_id})"
                 )
+            # Live Brain bridge — report idempotent re-bind as a session_bound event.
+            # Failure is fail-soft; the watch tick MUST NOT abort on a bridge error.
+            try:
+                from . import live_brain_bridge as _lbb  # type: ignore
+                _lbb.on_session_bound(
+                    task_id=existing.kanban_task_id or d.directive_id,
+                    session_id=existing.session_id,
+                    execution_id=existing.execution_id,
+                    directive_id=d.directive_id,
+                    assignee=existing.assignee,
+                    repo=d.repository,
+                    branch=d.target_branch,
+                    head_sha=request.head_before,
+                    started_at_epoch=existing.created_at if isinstance(existing.created_at, (int, float)) else None,
+                )
+            except Exception:  # pragma: no cover - bridge is best-effort
+                pass
             return DispatchResult(
                 session_id=existing.session_id,
                 kanban_task_id=existing.kanban_task_id,
@@ -461,6 +478,25 @@ class OrchestratorDispatcher:
             requires_human_go_real=d.requires_human_go_real,
         )
         self._append(rec)
+        # Live Brain bridge — emit a real task.started event when the session
+        # is bound. Canonical subject = kanban_task_id. This is the B3 source-side
+        # hook from #46. Failure is fail-soft: a Live Brain outage MUST NOT abort
+        # the watch tick.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_session_bound(
+                task_id=kanban_task_id or d.directive_id,
+                session_id=session_id,
+                execution_id=request.execution_id,
+                directive_id=d.directive_id,
+                assignee=assignee,
+                repo=d.repository,
+                branch=d.target_branch,
+                head_sha=request.head_before,
+                started_at_epoch=time.time(),
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
         return DispatchResult(
             session_id=session_id,
             kanban_task_id=kanban_task_id,
