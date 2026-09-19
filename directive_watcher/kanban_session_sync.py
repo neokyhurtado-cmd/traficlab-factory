@@ -265,6 +265,26 @@ def sync_session_from_kanban_event(
     if evidence_uri is not None:
         kwargs["evidence_uri"] = evidence_uri
     dispatcher.update_session(session_id, **kwargs)
+    # Live Brain bridge (B4 reconciliation path) — when a session
+    # transitions to a terminal state (DONE / FAILED) OR to RUNNING
+    # via reconciliation, emit a real event so the owner sees the
+    # async outcome. The watcher tick that originally claimed the
+    # directive did NOT see this transition because the worker finished
+    # outside the tick's visibility. Fail-soft.
+    try:
+        from . import live_brain_bridge as _lbb  # type: ignore
+        _lbb.on_reconciliation_terminal(
+            task_id=current.kanban_task_id or directive_id,
+            directive_id=directive_id,
+            session_id=session_id,
+            final_state=target,
+            detected_at_epoch=event.get("created_at"),
+            started_at_epoch=current.created_at if isinstance(current.created_at, (int, float)) else None,
+            worker_pid=payload.get("worker_pid") if isinstance(payload, dict) else None,
+            worker_runtime_id=None,  # kanban events don't carry a runtime_id
+        )
+    except Exception:  # pragma: no cover - bridge is best-effort
+        pass
     return True
 
 
