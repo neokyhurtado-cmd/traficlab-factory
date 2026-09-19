@@ -1,0 +1,88 @@
+version: 1
+name: INTERNAL_CONSULT
+
+review_roles:
+  - ARCHITECT
+  - EVIDENCE
+  - RED_TEAM
+  - TEST_ORACLE
+
+min_quorum: 3
+first_round_independent: true
+consultation_mutation: forbidden
+
+review_decisions:
+  - GO
+  - REPLAN
+  - BLOCK
+  - ESCALATE
+
+risk_levels:
+  - LOW
+  - MEDIUM
+  - HIGH
+  - CRITICAL
+
+actions:
+  - AUTO_GO
+  - AUTO_REPLAN
+  - BLOCK
+  - SECOND_ROUND
+  - ESCALATE_ASTRA
+  - ESCALATE_DAVID
+
+precedence:
+  - human_gate
+  - reproducible_counterexample
+  - critical_or_irreversible
+  - high_or_critical_risk
+  - material_blocker
+  - quorum
+  - disagreement
+  - consensus
+
+rules:
+  human_gate: ESCALATE_DAVID
+  counterexample_reversible: AUTO_REPLAN
+  counterexample_irreversible: ESCALATE_ASTRA
+  critical_gate: ESCALATE_ASTRA
+  irreversible: ESCALATE_ASTRA
+  high_risk: ESCALATE_ASTRA
+  critical_risk: ESCALATE_ASTRA
+  material_blocker: BLOCK
+  insufficient_quorum: SECOND_ROUND
+  disagreement: SECOND_ROUND
+  persistent_second_round_ambiguity: ESCALATE_ASTRA
+  consensus_go_reversible_low_or_medium: AUTO_GO
+  consensus_replan_reversible: AUTO_REPLAN
+
+identity:
+  transport_actor_is_decision_actor: false
+  actor_unverified_value: ACTOR_UNVERIFIED
+  required_correlation_fields:
+    - QUERY_ID
+    - REPOSITORY
+    - ISSUE_OR_PR
+    - COMMIT_SHA
+  decision_actors:
+    - DAVID
+    - ASTRA
+    - HERMES
+    - JUPITER
+    - MINIMAX_CONSULTANT
+  message_families:
+    - INTERNAL_CONSULT_QUERY:v1
+    - MINIMAX_REVIEW:ARCHITECT:v1
+    - MINIMAX_REVIEW:EVIDENCE:v1
+    - MINIMAX_REVIEW:RED_TEAM:v1
+    - MINIMAX_REVIEW:TEST_ORACLE:v1
+    - CONSULT_DECISION:v1
+    - ASTRA_QUERY:v1
+    - ASTRA_DECISION:v1
+    - DAVID_DECISION:v1
+
+provider:
+  reuse_parent_provider_configuration: true
+  new_api_key_required: false
+  secret_copying: forbidden
+  provider_change: forbidden

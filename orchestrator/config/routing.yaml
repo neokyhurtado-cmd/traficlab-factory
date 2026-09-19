@@ -1,0 +1,45 @@
+# routing.yaml — single source of truth for repo → product → assignee routing.
+#
+# Owned by: HERMES-ORCH profile (per ORCH-V1 §Roles — only HERMES-ORCH writes
+# control-plane files under .hermes/profiles/orchestrator/**). Any other profile
+# or hand-edit here is a contract violation.
+#
+# Read by: routing_resolver.py (one-shot lookup at dispatcher tick time).
+#
+# Decision precedence (frozen in SUINI#35.AD-1):
+#   1. A route entry whose `repo:` matches the incoming task's repo → use it.
+#   2. If task.assignee already set disagrees with the matched entry → DENY
+#      (PRODUCT_OWNERSHIP_MISMATCH: assignee=<X> product=<Y> expected=<Z>).
+#      Operator override requires David GO.
+#   3. No repo match → DENY (PRODUCT_OWNERSHIP_MISMATCH: repo=<X>). Never
+#      silently fall back to kanban.default_assignee when the repo is known
+#      to exist somewhere — the table is the routing authority.
+#
+# Edits: this file is the canonical routing authority. Do NOT hardcode the
+# same mappings anywhere else (per task FORBIDDEN list).
+#
+# AUTO_DISPATCH_02 update: real target profiles `ia-vision` and `suini` now
+# exist (created 2026-09-07 from orchestrator clone). The mapping below is
+# the binding contract — github_poller.py imports routing_resolver and reads
+# THIS file, no hardcoded WATCHED_REPOS tuple.
+
+routes:
+  - repo: neokyhurtado-cmd/suini
+    product: SUINI
+    assignee: suini
+    capabilities: [write]
+    max_runtime_seconds: 3600
+  - repo: neokyhurtado-cmd/IA-VISION
+    product: IA-VISION
+    assignee: ia-vision
+    capabilities: [write]
+    max_runtime_seconds: 3600
+  - repo: neokyhurtado-cmd/traficlab-factory
+    product: ORCHESTRATION
+    assignee: orchestrator
+    capabilities: [write]
+    max_runtime_seconds: 3600
+  - product: ASHLEY
+    assignee: default
+    capabilities: [read]
+    max_runtime_seconds: 1800

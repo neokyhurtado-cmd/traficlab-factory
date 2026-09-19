@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="TrafficLab Control V0 — read-only mobile/desktop control surface for IA-VISION + SUINI." />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0a0d12" />
+  <title>TrafficLab Control · V0</title>
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/mobile.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body data-mode="composition-a" data-freshness-budget-secs="120">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="app-header" role="banner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◆</span>
+      <span class="brand-text">
+        <span class="brand-name">TrafficLab Control</span>
+        <span class="brand-sub" id="brand-sub">V0 · composition A · read-only</span>
+      </span>
+    </div>
+    <div class="status" id="header-status" aria-live="polite">
+      <span class="dot dot-running"></span>
+      <span id="status-text">connecting…</span>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Primary">
+    <button class="nav-item" data-screen="home" aria-current="page">
+      <span class="nav-ico" aria-hidden="true">⌂</span><span class="nav-label">Command</span>
+    </button>
+    <button class="nav-item" data-screen="mission">
+      <span class="nav-ico" aria-hidden="true">⊞</span><span class="nav-label">Mission</span>
+    </button>
+    <button class="nav-item" data-screen="iavision">
+      <span class="nav-ico" aria-hidden="true">◉</span><span class="nav-label">IA-VISION</span>
+    </button>
+    <button class="nav-item" data-screen="suini">
+      <span class="nav-ico" aria-hidden="true">◈</span><span class="nav-label">SUINI</span>
+    </button>
+    <button class="nav-item" data-screen="review">
+      <span class="nav-ico" aria-hidden="true">⧉</span><span class="nav-label">Review</span>
+    </button>
+    <button class="nav-item" data-screen="goal">
+      <span class="nav-ico" aria-hidden="true">⌗</span><span class="nav-label">Goal</span>
+    </button>
+    <button class="nav-item" data-screen="prlab">
+      <span class="nav-ico" aria-hidden="true">⚙</span><span class="nav-label">PR Lab</span>
+    </button>
+    <button class="nav-item" data-screen="evidence">
+      <span class="nav-ico" aria-hidden="true">⏱</span><span class="nav-label">Evidence</span>
+    </button>
+    <button class="nav-item" data-screen="humango">
+      <span class="nav-ico" aria-hidden="true">⚑</span><span class="nav-label">Human-Go</span>
+    </button>
+    <button class="nav-item" data-screen="health">
+      <span class="nav-ico" aria-hidden="true">♥</span><span class="nav-label">Health</span>
+    </button>
+  </nav>
+
+  <main id="main" class="app-main">
+    <!-- screens injected by router -->
+  </main>
+
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-row">
+      <span id="footer-freshness" class="muted">freshness: —</span>
+      <span id="footer-host" class="muted">host: loopback</span>
+      <span id="footer-build" class="muted">V0 · static-first</span>
+    </div>
+  </footer>
+
+  <!-- SVG icons sprite; never inline raw secrets; placeholder for visual review -->
+  <div hidden aria-hidden="true">
+    <svg id="vis-placeholder"><rect width="100%" height="100%" fill="#0e1726"/></svg>
+  </div>
+
+  <script src="js/idb.js"></script>
+  <script src="js/redact.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Default YAML config for the GitHub Directive Watcher.
+#
+# Anchored to traficlab-factory/main per the WO. To activate, copy this to
+# directive_watcher.yaml and edit the allowlists for the specific host.
+# Both allowlists are EXPLICIT — wildcards are forbidden (fail-closed).
+
+# Repositories the watcher polls every comment on.
+allowlisted_repos:
+  - neokyhurtado-cmd/traficlab-factory
+
+# GitHub logins the watcher accepts directives FROM (case-insensitive).
+allowlisted_authors:
+  - neokyhurtado-cmd

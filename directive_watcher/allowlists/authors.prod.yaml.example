@@ -1,0 +1,17 @@
+# Production author allowlist (CONTEXT_BINDING_FAIL_CLOSED / PROD/TEST ENV
+# SEPARATION, PR #19 closeout).
+#
+# The watcher in production reads this file via --author-allowlist (or its
+# default location under the host's config dir) when --env=prod. When the
+# file is MISSING, the CLI fails closed (exit code != 0 + stderr message).
+#
+# Fail-closed-by-default: this file ships with ONLY ``neokyhurtado-cmd``
+# (David) as an allowed author. ``astra`` is intentionally NOT in the
+# default prod allowlist because the production watcher must only accept
+# directives from David; Astra's re-audits come through David in the
+# governance process, not through the watcher's auto-execution path.
+#
+# To add an author, append a new ``- <login>`` line below. GitHub logins
+# are case-insensitive in the match; list them in canonical lowercase.
+allowlisted_authors:
+  - neokyhurtado-cmd

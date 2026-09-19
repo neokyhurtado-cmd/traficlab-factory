@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traficlab-factory-directive-watcher"
+version = "0.1.0"
+description = "Phase 1 GitHub Directive Watcher for Hermes 2.0."
+requires-python = ">=3.10"
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[tool.pytest.ini_options]
+# Per Fix #6 from the Astra re-audit: do NOT narrow pytest discovery
+# to a single directory. The previous ``testpaths = ["directive_watcher/tests"]``
+# masked the ``control/tests`` + ``orchestrator/scripts`` suites, making
+# the watcher report "83 PASS" while leaving the rest of the repo's
+# regression unverified. Letting pytest's default rootdir discovery run
+# is the honest answer.
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

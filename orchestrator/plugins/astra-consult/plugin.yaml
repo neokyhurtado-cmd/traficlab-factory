@@ -1,0 +1,5 @@
+name: astra-consult
+version: "1.0.0"
+description: Zero-handoff Astra technical consultant for Hermes workers
+requires_env:
+  - OPENAI_API_KEY
