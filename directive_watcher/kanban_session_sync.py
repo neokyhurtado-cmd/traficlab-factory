@@ -265,6 +265,32 @@ def sync_session_from_kanban_event(
     if evidence_uri is not None:
         kwargs["evidence_uri"] = evidence_uri
     dispatcher.update_session(session_id, **kwargs)
+
+    # C4 — Live Brain terminal observation hook. Emit a REAL terminal
+    # event from the reconciliation path that observed the worker
+    # completing AFTER the watcher tick that originally dispatched it.
+    # This is distinct from on_result_posted (which fires from the
+    # watcher's own RESULT comment path). source="directive_watcher:
+    # reconcile_open_sessions" marks the origin so consumers can
+    # distinguish watcher-driven vs reconciliation-driven terminal events.
+    # Fail-soft: a Live Brain outage MUST NOT abort reconciliation.
+    if target in (SESSION_STATE_DONE, SESSION_STATE_FAILED):
+        outcome_label = (
+            "done" if target == SESSION_STATE_DONE else "failed"
+        )
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_terminal_observed(
+                directive_id=directive_id,
+                session_id=session_id,
+                kanban_task_id=current.kanban_task_id,
+                outcome=outcome_label,
+                actor=f"Factory Director (directive_watcher)",
+                tests_summary=tests_summary,
+                evidence_uri=evidence_uri,
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
     return True
 
 

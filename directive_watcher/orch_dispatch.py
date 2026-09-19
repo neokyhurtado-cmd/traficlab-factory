@@ -431,6 +431,9 @@ class OrchestratorDispatcher:
                 )
             # Live Brain bridge — report idempotent re-bind as a session_bound event.
             # Failure is fail-soft; the watch tick MUST NOT abort on a bridge error.
+            #
+            # C2 — also propagate real RUNNING proof for idempotent re-binds.
+            import os as _os
             try:
                 from . import live_brain_bridge as _lbb  # type: ignore
                 _lbb.on_session_bound(
@@ -443,6 +446,9 @@ class OrchestratorDispatcher:
                     branch=d.target_branch,
                     head_sha=request.head_before,
                     actor=f"Factory Director (directive_watcher)",
+                    started_at=_lbb.utc_iso(),
+                    worker_pid=_os.getpid(),
+                    worker_runtime_id=f"directive_watcher.dispatch@{_os.uname().nodename if hasattr(_os, 'uname') else 'unknown'}",
                 )
             except Exception:  # pragma: no cover - bridge is best-effort
                 pass
@@ -481,6 +487,15 @@ class OrchestratorDispatcher:
         # Live Brain bridge — emit a real task.started event when the session
         # is bound. This is the B3 source-side hook from #46.
         # Failure is fail-soft: a Live Brain outage MUST NOT abort the watch tick.
+        #
+        # C2 — RUNNING physical proof. The watcher process owns the dispatch
+        # and is the in-process proxy for the worker. We record os.getpid()
+        # as worker_pid with worker_runtime_id explaining the source.
+        # When the worker is a separate process the dispatcher cannot
+        # observe, the worker will later emit its own agent.heartbeat with
+        # its real identity; until then worker_pid will be the dispatcher's
+        # PID which is honest because the dispatcher is what is RUNNING.
+        import os as _os
         try:
             from . import live_brain_bridge as _lbb  # type: ignore
             _lbb.on_session_bound(
@@ -493,6 +508,9 @@ class OrchestratorDispatcher:
                 branch=d.target_branch,
                 head_sha=request.head_before,
                 actor=f"Factory Director (directive_watcher)",
+                started_at=_lbb.utc_iso(),
+                worker_pid=_os.getpid(),
+                worker_runtime_id=f"directive_watcher.dispatch@{_os.uname().nodename if hasattr(_os, 'uname') else 'unknown'}",
             )
         except Exception:  # pragma: no cover - bridge is best-effort
             pass

@@ -720,6 +720,25 @@ class WatcherHandler:
 
         summary.directives_claimed += 1
 
+        # 6.5 (B3 C1) — emit task.created to Live Brain from the REAL
+        # production path, immediately after the durable claim succeeds
+        # and before any execution_fn or dispatcher work. This satisfies
+        # the FACTORY-E2E-BRIDGE-01 C1 acceptance: REAL_WATCHER_CLAIM
+        # produces task.created, NOT a synthetic call from a test/canary.
+        # Fail-soft: a Live Brain outage must NEVER abort the watch tick.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_directive_claimed(
+                directive_id=d.directive_id,
+                repository=repo,
+                issue_number=comment.issue_number,
+                target_branch=d.target_branch or "",
+                head_sha=None,
+                actor=f"Factory Director (directive_watcher)",
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
+
         # Stash source_comment_id + execution_id so the wrapped
         # execution_fn can pass them to the dispatcher.
         self._current_source_comment_id = comment.id
