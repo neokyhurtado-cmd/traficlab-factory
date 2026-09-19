@@ -160,14 +160,16 @@ BEYOND_20_NOT_STARTED_target = 0
 ## Dispatch order (dependency-graph; not serial obrero)
 
 ```text
-T0: A (auditor)  ──> capability matrix + capability matrix published on #45
-T1: B (evidence) ──> EvidenceGraph + read-model facade + lineage + schema registry
-T1: F (interop)  ──> OpenDRIVE/OpenSCENARIO exporters + round-trip validator (parallel after B contract)
-T2: C (frontend) ──> multiview surfaces (MapLibre eagle + Deck trajectory + Canvas/Pixi benchmark)
-T3: D (perf)     ──> reproducible benchmark harness on C's runnable
-T3: E (visual)   ──> Orca + MiniMax visual refinement
-T4: G (verifier) ──> adversarial review of every material gate
-T5: H (integrator) ──> reconciliation pass, full regression, <=3 coherent IA-VISION PRs (NOT merged)
+T0:     A (auditor)  ──> capability matrix + conflict report + dispatch order      [DONE: t_4ce2e57c dispatched, ready]
+T0.5:   B-1 (EvidenceGraph CONTRACT_READY spec)                                    [DONE: t_b1b8c9be dispatched, ready]
+                          (parallel with A — contract is bounded and does not depend on A's findings)
+T1:     B-2 (SQL facade implementation against real schema)                       [BLOCKED on A; uses A's real table names]
+T1:     F (interop)  ──> OpenDRIVE/OpenSCENARIO exporters + round-trip validator    [BLOCKED on A + B-1 contract]
+T2:     C (frontend) ──> multiview surfaces (MapLibre eagle + Deck trajectory + Canvas/Pixi benchmark) [BLOCKED on B-1 contract]
+T3:     D (perf)     ──> reproducible benchmark harness on C's runnable             [BLOCKED on C runnable]
+T3:     E (visual)   ──> Orca + MiniMax visual refinement                          [BLOCKED on C surface]
+T4:     G (verifier) ──> adversarial review of every material gate                  [each material gate]
+T5:     H (integrator) ──> reconciliation pass + full regression + <=3 IA-VISION PRs (NOT merged) [after lane proofs]
 ```
 
 ---
@@ -204,3 +206,25 @@ If any lane hits a real external blocker (e.g. LiDAR data absent), JUPITER marks
 
 **Status:** ORCHESTRATION PUBLISHED. RUNNING_CONFIRMED.
 **Next action:** dispatch Lane A (auditor) — capability matrix + state pointer.
+
+---
+
+# Orchestration status log (updated as gates complete)
+
+| Gate | Status | Task ID | Branch | Notes |
+|---|---|---|---|---|
+| FACTORY_ORCHESTRATION:v1 published | DONE | n/a | feat/multiview-orchestration-20260919 | comment 5740170167 on #45 |
+| G0 reality sync | DONE | n/a | feat/multiview-orchestration-20260919 | commit c2b3ee1; comment 5740191658 on #45 |
+| T0: Lane A (auditor) | DISPATCHED | t_4ce2e57c | n/a (read-only) | awaiting dispatcher tick |
+| T0.5: Lane B-1 (EvidenceGraph contract) | DISPATCHED | t_b1b8c9be | feat/multiview-evidencegraph-contract-v1 (pending) | awaiting dispatcher tick |
+| T1: Lane B-2 (SQL facade) | BLOCKED | n/a | n/a | BLOCKED on Lane A's table-name report |
+| T1: Lane F (interop) | BLOCKED | n/a | n/a | BLOCKED on A + B-1 |
+| T2: Lane C (frontend) | BLOCKED | n/a | n/a | BLOCKED on B-1 contract |
+| T3: Lane D (perf) | BLOCKED | n/a | n/a | BLOCKED on C runnable |
+| T3: Lane E (visual) | BLOCKED | n/a | n/a | BLOCKED on C surface |
+| T4: Lane G (verifier) | READY | n/a | n/a | dispatched at each material gate |
+| T5: Lane H (integrator) | BLOCKED | n/a | n/a | BLOCKED on all lanes |
+
+This status table will be updated as each gate completes. Each lane completion appends an entry to evidence/orchestration/LANE_LOG.md (one-line per lane: task_id, branch, commit, state_transitions, verifier_decision).
+
+End of FACTORY_ORCHESTRATION:v1.
