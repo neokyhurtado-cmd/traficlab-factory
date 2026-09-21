@@ -14,42 +14,78 @@
       <span class="brand-name">TrafficLab Control</span>
     </div>
     <div class="topbar-meta">
+      <span id="human-go-count" class="pill pill-alert" hidden></span>
       <span id="bff-version" class="meta-tag"></span>
     </div>
   </header>
 
   <main class="app">
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="home" role="tab">Home</button>
-      <button class="tab" data-tab="mission" role="tab">Mission</button>
+      <button class="tab active" data-tab="mission" role="tab">Mission</button>
+      <button class="tab" data-tab="humango" role="tab">Human-Go</button>
+      <button class="tab" data-tab="timeline" role="tab">Evidencia</button>
       <button class="tab" data-tab="review" role="tab">Review</button>
       <button class="tab" data-tab="health" role="tab">Health</button>
     </nav>
 
-    <section class="tab-panel active" id="panel-home" role="tabpanel">
-      <h1>Command</h1>
-      <p class="muted">Conversa con Hermes o ejecuta una meta.</p>
-      <div class="card">
-        <div class="chat-log" id="chat-log" aria-live="polite"></div>
-        <form id="chat-form" class="chat-input">
-          <input type="text" id="chat-input" placeholder="Preguntale algo a Hermes..." autocomplete="off" />
-          <button type="submit">Enviar</button>
-        </form>
-        <div class="muted small" id="chat-meta">session_token = configurado en BFF; M3+ conectará al API Server.</div>
+    <!-- ============================ MISSION CONTROL ============================ -->
+    <section class="tab-panel active" id="panel-mission" role="tabpanel">
+      <div class="panel-head">
+        <h1>Mission Control</h1>
+        <button class="refresh" id="refresh-mission" type="button" aria-label="Actualizar">↻</button>
       </div>
+
+      <section class="card goal-card" id="goal-card" aria-live="polite">
+        <div class="muted small">Cargando meta activa…</div>
+      </section>
+
+      <div class="grid grid-kpi" id="queue-grid"></div>
+
+      <h2>Código</h2>
+      <div class="grid" id="code-grid"></div>
+
+      <h2>Pull requests abiertos</h2>
+      <div class="grid" id="pr-grid"></div>
+
+      <h2>Productos</h2>
+      <p class="muted small">Solo se enlaza lo que respondió ahora mismo. Lo demás dice NOT_AVAILABLE_YET.</p>
+      <div class="grid" id="product-grid"></div>
     </section>
 
-    <section class="tab-panel" id="panel-mission" role="tabpanel">
-      <h1>Mission Control</h1>
-      <p class="muted">Proyectos activos y visores disponibles.</p>
-      <div class="grid" id="projects-grid"></div>
-      <h2>Preview targets</h2>
-      <div class="grid" id="previews-grid"></div>
+    <!-- ============================= HUMAN-GO INBOX ============================ -->
+    <section class="tab-panel" id="panel-humango" role="tabpanel">
+      <div class="panel-head">
+        <h1>Human-Go Inbox</h1>
+        <button class="refresh" id="refresh-humango" type="button" aria-label="Actualizar">↻</button>
+      </div>
+      <p class="muted">Lo que está esperando una decisión tuya. Nada más.</p>
+      <div class="grid" id="humango-grid"></div>
+
+      <h2>Se resuelven solas</h2>
+      <p class="muted small">Dependencias y fallos transitorios. No necesitan tu intervención.</p>
+      <div class="grid" id="humango-auto-grid"></div>
     </section>
 
+    <!-- ============================ EVIDENCE TIMELINE ========================== -->
+    <section class="tab-panel" id="panel-timeline" role="tabpanel">
+      <div class="panel-head">
+        <h1>Evidence Timeline</h1>
+        <button class="refresh" id="refresh-timeline" type="button" aria-label="Actualizar">↻</button>
+      </div>
+      <div class="toolbar">
+        <label class="check">
+          <input type="checkbox" id="tl-heartbeats" />
+          <span>Incluir latidos</span>
+        </label>
+        <span class="muted small" id="tl-meta"></span>
+      </div>
+      <ol class="timeline" id="timeline-list"></ol>
+    </section>
+
+    <!-- ================================ REVIEW ================================ -->
     <section class="tab-panel" id="panel-review" role="tabpanel">
       <h1>Visual Review</h1>
-      <p class="muted">Toca un preview, mirá el visor real, mandá un finding.</p>
+      <p class="muted">Abrí un visor real, mirá, y dejá un finding.</p>
       <div class="grid" id="review-previews"></div>
       <h2>Findings recientes</h2>
       <div class="grid" id="findings-grid"></div>
@@ -76,9 +112,12 @@
       </form>
     </section>
 
+    <!-- ================================ HEALTH ================================ -->
     <section class="tab-panel" id="panel-health" role="tabpanel">
       <h1>System Health</h1>
-      <div class="card" id="health-card">
+      <div class="grid" id="health-grid"></div>
+      <h2>Snapshot crudo</h2>
+      <div class="card">
         <pre id="health-pre" class="mono small"></pre>
       </div>
     </section>

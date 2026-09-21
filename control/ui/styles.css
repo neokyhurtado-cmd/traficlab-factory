@@ -110,7 +110,7 @@ h2 { font-size: 16px; margin: 24px 0 8px; color: var(--fg-muted); font-weight: 5
 }
 .form button:hover { filter: brightness(1.1); }
 
-/* chat */
+/* chat (retained: base styles reused by other panels) */
 .chat-log {
   background: var(--bg-elev);
   border-radius: 8px;
@@ -201,9 +201,151 @@ h2 { font-size: 16px; margin: 24px 0 8px; color: var(--fg-muted); font-weight: 5
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+/* ==========================================================================
+   V0.1 — Mission Control / Human-Go Inbox / Evidence Timeline
+   Mobile-first: single column by default, widening at 640px and 960px.
+   ========================================================================== */
+
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 4px;
+}
+.refresh {
+  background: var(--bg-card);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  /* 40px keeps the tap target above the 44px-with-padding accessibility floor */
+  min-width: 40px; min-height: 40px;
+  font-size: 18px; line-height: 1; cursor: pointer;
+}
+.refresh:hover { color: var(--accent); border-color: var(--accent); }
+
+.pill {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; margin-right: 8px;
+}
+.pill-alert { background: rgba(248, 113, 113, 0.18); color: var(--bad); }
+
+/* --- key/value rows --- */
+.kvs { display: grid; gap: 4px; margin: 8px 0; }
+.kv {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 13px; flex-wrap: wrap;
+}
+.kv .k { color: var(--fg-muted); min-width: 96px; flex: 0 0 auto; }
+.kv .v { color: var(--fg); word-break: break-word; }
+.kv .v.na { color: var(--warn); font-style: italic; }
+.na { color: var(--warn); font-size: 13px; }
+
+/* provenance footer — every fact says where it came from and how old it is */
+.prov {
+  color: var(--fg-muted);
+  font-size: 11px;
+  opacity: 0.75;
+  word-break: break-all;
+  border-top: 1px dashed var(--border);
+  padding-top: 6px;
+  margin-top: 2px;
+}
+.hint { color: var(--accent); font-size: 12px; }
+
+/* --- goal card --- */
+.goal-card { margin-bottom: 16px; }
+.goal-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.goal-title { font-size: 17px; margin: 8px 0 4px; font-weight: 600; line-height: 1.35; }
+.goal-card .badge {
+  display: inline-block; padding: 2px 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+}
+
+/* --- KPI strip: 3 across on phones, 5 across on desktop --- */
+.grid-kpi { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (min-width: 640px) { .grid-kpi { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 960px) { .grid-kpi { grid-template-columns: repeat(5, 1fr); } }
+.kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 8px; text-align: center;
+}
+.kpi-n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-n.alert { color: var(--bad); }
+.kpi-l { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+/* --- badges --- */
+.badge.neutral { background: rgba(76, 208, 255, 0.13); color: var(--accent); }
+.tile-block { border-left: 3px solid var(--warn); }
+.tile-gate  { border-left: 3px solid var(--bad); }
+.tile.muted { opacity: 0.72; }
+
+/* --- product target rows --- */
+.target {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; font-size: 13px;
+  padding: 6px 0; border-top: 1px solid var(--border);
+}
+.target .tl-label { flex: 1 1 auto; min-width: 120px; }
+
+/* --- toolbar --- */
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg-muted); }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* --- timeline --- */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.tl-item {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 8px;
+}
+.tl-time {
+  color: var(--fg-muted); font-size: 11px;
+  font-family: ui-monospace, "Cascadia Code", Menlo, monospace;
+  padding-top: 2px;
+}
+.tl-body { min-width: 0; display: grid; gap: 3px; }
+.tl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tl-head .tl-label { font-size: 14px; font-weight: 600; }
+.tl-body .sub { word-break: break-word; }
+.tl-item.tone-good  { border-left-color: var(--good); }
+.tl-item.tone-warn  { border-left-color: var(--warn); }
+.tl-item.tone-bad   { border-left-color: var(--bad); }
+.tl-item.tone-muted { opacity: 0.6; }
+.tl-item .badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 6px; font-size: 11px; font-weight: 600;
+}
+
+/* Raw JSON snapshot: long values (Windows DB paths, URLs) must wrap instead of
+   forcing the whole document to scroll sideways on a phone. Without this the
+   Health panel pushed the viewport ~107px wide at 393px. */
+#health-pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  margin: 0;
+}
+
 /* mobile tweaks */
 @media (max-width: 640px) {
   .app { padding: 12px; }
   h1 { font-size: 20px; }
   .tile { padding: 12px; }
+  .tl-item { grid-template-columns: 44px 1fr; padding: 9px 10px; }
+  .kv .k { min-width: 84px; }
+}
+
+/* Respect the OS reduced-motion setting (WO M5 accessibility requirement). */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .toast { transition: none; }
 }
