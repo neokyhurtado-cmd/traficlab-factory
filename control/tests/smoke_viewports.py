@@ -12,7 +12,10 @@ they are evidence for the WO comment, not repo content.
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -60,6 +63,17 @@ def smoke(page, label: str, width: int) -> dict:
     page.wait_for_timeout(3500)
 
     # ---- Mission Control (default tab) ----
+    # Race condition guard: loadMission() fires in parallel with other
+    # boot fetches. After 3500ms we may still see the pre-fetch
+    # "Cargando meta activa…" placeholder. Wait explicitly for the goal
+    # title or for a populated KPI strip, then read.
+    try:
+        page.wait_for_function(
+            "() => { const t = document.getElementById('goal-card')?.innerText || ''; return t.length > 40 && !t.includes('Cargando'); }",
+            timeout=10000,
+        )
+    except Exception:
+        pass
     goal_text = page.inner_text("#goal-card")
     check(f"[{label}] Mission goal card is populated",
           len(goal_text.strip()) > 40 and "Cargando" not in goal_text,
@@ -84,6 +98,14 @@ def smoke(page, label: str, width: int) -> dict:
           "HUMAN_GO" in pr_text, pr_text[:160])
 
     # ---- product cards: honesty about what is live ----
+    # Race condition guard: loadProducts() fires in parallel with the other
+    # boot fetches. Wait up to 5s for at least one product tile to appear
+    # before reading, otherwise we read the empty pre-fetch state and the
+    # IA-VISION/SUINI/NOT_AVAILABLE_YET assertions fail spuriously.
+    try:
+        page.wait_for_selector("#product-grid .tile", timeout=5000)
+    except Exception:
+        pass
     prod_text = page.inner_text("#product-grid")
     check(f"[{label}] IA-VISION card present", "IA-VISION" in prod_text)
     check(f"[{label}] SUINI card present", "SUINI" in prod_text)
@@ -125,10 +147,33 @@ def smoke(page, label: str, width: int) -> dict:
     page.screenshot(path=str(OUT / f"{label}-timeline.png"), full_page=True)
 
     # ---- Health ----
+    # The BFF represents external dependencies honestly. When Hermes :9119 is
+    # unreachable, the BFF returns gateway_alive=false + hermes_version='unknown'
+    # and the UI tile shows NOT_AVAILABLE_YET. When Hermes IS up, the tile shows
+    # a real version string and VERIFIED. The smoke accepts both branches.
+    # Asserting on a hardcoded version string ("v0.20") was wrong: it conflated
+    # "Hermes up with a different version" with "Hermes down".
     page.click('.tab[data-tab="health"]')
     page.wait_for_timeout(900)
-    health = page.inner_text("#panel-health")
-    check(f"[{label}] health panel shows Hermes version", "v0.20" in health, health[:160])
+    health_tiles = page.eval_on_selector_all(
+        "#health-grid .tile", "els => els.map(e => e.innerText)")
+    hermes_tile = next((t for t in health_tiles if t.startswith("Hermes")), "")
+    api_server_tile = next((t for t in health_tiles if t.startswith("API Server")), "")
+    hermes_verified_real = (
+        "VERIFIED" in hermes_tile and "unknown" not in hermes_tile
+    )
+    hermes_unavailable = "NOT_AVAILABLE_YET" in hermes_tile
+    check(f"[{label}] health panel shows Hermes tile (verified OR NOT_AVAILABLE_YET)",
+          hermes_verified_real or hermes_unavailable, hermes_tile[:160])
+    api_ok = "VERIFIED" in api_server_tile or "NOT_AVAILABLE_YET" in api_server_tile
+    check(f"[{label}] health panel shows API Server tile with explicit state",
+          api_ok, api_server_tile[:160])
+    # Cross-check: Hermes and API Server should agree on gateway state, because
+    # both are read from gateway_alive in the same payload. Inconsistency is a
+    # regression of the UI's honest-dependency contract.
+    check(f"[{label}] Hermes and API Server tiles agree on gateway state",
+          ("VERIFIED" in hermes_tile) == ("VERIFIED" in api_server_tile),
+          f"hermes={hermes_tile[:60]!r} api={api_server_tile[:60]!r}")
     page.screenshot(path=str(OUT / f"{label}-health.png"), full_page=True)
 
     # ---- layout sanity: no panel may overflow the viewport horizontally ----
@@ -155,6 +200,15 @@ def smoke(page, label: str, width: int) -> dict:
 
     check(f"[{label}] no console errors", not console_errors, "; ".join(console_errors[:3]))
     return {"viewport": label, "width": width, "console_errors": console_errors}
+
+
+# This smoke is deterministic only when the BFF's kanban DB has a known
+# state. See control/tests/_kanban_fixture.py for a helper that snapshots
+# the real kanban, installs a fixture, runs the smoke, and restores the
+# real kanban afterwards. Without the fixture, the Mission goal / KPI
+# strip / code tiles / open PRs checks fail when the kanban has no
+# active goal or no open PRs — which is exactly the kind of brittle
+# flake we want to avoid.
 
 
 results = []
