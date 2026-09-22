@@ -218,3 +218,36 @@ at 60s cadence; recovery for stuck tasks at 5m). The directive watcher
 is invoked from the same one tick (`github_poller.main()` → directive
 ingestion) — same orchestrator cron, same durable state, same single
 source of truth.
+
+## Zero-copy Orca execution target
+
+Directives keep the existing parser/envelope and opt into Orca through an
+explicit token in `SCOPE`:
+
+```text
+SCOPE = EXECUTION_TARGET=ORCA; ORCA_RUN_REQUIRED=YES; WORKER=mcode
+```
+
+For those directives only, the dispatcher **does not create the normal Hermes
+kanban task** (which would auto-spawn a direct Hermes worker). Instead it calls
+`OrcaAutoWakeBridge`, which:
+
+1. resolves the already-installed Orca CLI;
+2. reuses the target repo/worktree when one exists;
+3. finds or starts a Hermes coordinator terminal inside Orca;
+4. waits for `tui-idle`;
+5. creates or resumes one Orca Run keyed by
+   `<repo>#<issue>:<target_branch>`;
+6. sends the directive into that coordinator;
+7. persists `run_id`, worktree id and terminal handle beside
+   `sessions.jsonl`.
+
+The coordinator prompt requires MiniMax/mcode as the writer lane and
+Orca Browser/Design Mode or Playwright for browser verification. It also requires
+a durable callback to the same GitHub issue/PR.
+
+This is deliberately part of the **same** canonical GitHub poll tick. Do not add
+another watcher/cron for Orca.
+
+Non-Orca directives are unchanged and continue through the existing kanban/Hermes
+dispatch path.
