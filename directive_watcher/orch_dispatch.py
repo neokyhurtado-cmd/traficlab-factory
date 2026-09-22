@@ -65,6 +65,11 @@ if str(_ORCH_SCRIPTS) not in sys.path:
 
 from directive_watcher.directive_parser import Directive  # noqa: E402
 from directive_watcher.kanban_primitive import dispatch_to_kanban  # noqa: E402
+from directive_watcher.orca_auto_wake import (  # noqa: E402
+    OrcaAutoWakeBridge,
+    OrcaAutoWakeError,
+    directive_requests_orca,
+)
 
 
 # --- Session Registry model --------------------------------------------------
@@ -198,6 +203,7 @@ class OrchestratorDispatcher:
         parent_task_id: str = "t_47131ada",
         kanban_bin: str = "hermes",
         timeout_seconds: int = 60,
+        orca_bridge: OrcaAutoWakeBridge | None = None,
     ) -> None:
         self._session_log = Path(session_log)
         self._session_log.parent.mkdir(parents=True, exist_ok=True)
@@ -205,6 +211,9 @@ class OrchestratorDispatcher:
         self._parent_task_id = parent_task_id
         self._kanban_bin = kanban_bin
         self._timeout_seconds = timeout_seconds
+        # Construct lazily unless a test/runtime injects a bridge. This keeps
+        # non-Orca directive paths independent of local Orca installation state.
+        self._orca_bridge = orca_bridge
 
         # In-memory mirror for fast queries. Rebuilt from disk on init.
         self._sessions: dict[str, SessionRecord] = {}
@@ -342,6 +351,93 @@ class OrchestratorDispatcher:
             )
         return decision.assignee or "hermes-director"
 
+    # ---- Orca zero-copy dispatch ------------------------------------------
+
+    def _get_orca_bridge(self) -> OrcaAutoWakeBridge:
+        """Return the durable GitHub -> Orca wake bridge.
+
+        The registry lives beside sessions.jsonl so it survives checkout/worktree
+        changes and follows the same per-profile runtime boundary as the watcher.
+        """
+        if self._orca_bridge is None:
+            self._orca_bridge = OrcaAutoWakeBridge(
+                registry_path=self._session_log.parent / "orca_runs.json",
+            )
+        return self._orca_bridge
+
+    def _dispatch_to_orca(
+        self,
+        request: DispatchRequest,
+        *,
+        assignee: str,
+    ) -> DispatchResult:
+        """Start/resume one Orca Run and deliver the directive to Hermes.
+
+        Important: this path intentionally BYPASSES `hermes kanban create`.
+        Creating the normal kanban task would auto-spawn a direct Hermes worker,
+        which is exactly the copy/paste / non-Orca execution path this bridge
+        closes. The durable SessionRecord remains the watcher-side lineage.
+        """
+        d = request.directive
+        try:
+            wake = self._get_orca_bridge().start_or_resume(
+                d,
+                source_comment_id=request.source_comment_id,
+                execution_id=request.execution_id,
+            )
+        except OrcaAutoWakeError as exc:
+            raise DispatchError(
+                f"Orca auto-wake failed for {d.directive_id}: {exc}"
+            ) from exc
+
+        session_id = f"sess-{uuid.uuid4().hex[:12]}"
+        synthetic_task_id = f"orca:{wake.run_id}"
+        rec = SessionRecord(
+            session_id=session_id,
+            execution_id=request.execution_id,
+            directive_id=d.directive_id,
+            repository=d.repository,
+            issue_number=d.issue,
+            target_branch=d.target_branch,
+            kanban_task_id=synthetic_task_id,
+            assignee=assignee,
+            state=SESSION_STATE_RUNNING,
+            source_comment_id=request.source_comment_id,
+            head_before=request.head_before,
+            tests_summary=(
+                f"orca_run_id={wake.run_id}; worktree_id={wake.worktree_id}; "
+                f"terminal_handle={wake.terminal_handle}; wake={wake.action}"
+            ),
+            evidence_uri=f"orca://run/{wake.run_id}",
+            requires_human_go_real=d.requires_human_go_real,
+        )
+        self._append(rec)
+
+        # Keep Live Brain visibility without pretending an Orca Run is a kanban
+        # task. The synthetic subject is namespaced and cannot collide with t_*.
+        try:
+            from . import live_brain_bridge as _lbb  # type: ignore
+            _lbb.on_session_bound(
+                task_id=synthetic_task_id,
+                session_id=session_id,
+                execution_id=request.execution_id,
+                directive_id=d.directive_id,
+                assignee=assignee,
+                repo=d.repository,
+                branch=d.target_branch,
+                head_sha=request.head_before,
+                started_at_epoch=time.time(),
+            )
+        except Exception:  # pragma: no cover - bridge is best-effort
+            pass
+
+        return DispatchResult(
+            session_id=session_id,
+            kanban_task_id=synthetic_task_id,
+            assignee=assignee,
+            state=SESSION_STATE_RUNNING,
+        )
+
     # ---- Kanban dispatch --------------------------------------------------
     #
     # Phase 3 / Objective 3 — single kanban primitive. This adapter is a
@@ -456,7 +552,13 @@ class OrchestratorDispatcher:
         # Resolve assignee via the orchestrator routing table.
         assignee = self._resolve_assignee(d)
 
-        # Invoke the hermes kanban CLI.
+        # Zero-copy execution target: explicit Orca directives bypass the
+        # normal kanban auto-spawn and wake/resume an Orca-owned Hermes
+        # coordinator instead. Non-Orca directives retain the frozen path.
+        if directive_requests_orca(d):
+            return self._dispatch_to_orca(request, assignee=assignee)
+
+        # Existing direct-Hermes path for directives that did not request Orca.
         kanban_task_id = self._invoke_kanban(d, assignee)
 
         # Create the session record BEFORE returning — that is the bind
