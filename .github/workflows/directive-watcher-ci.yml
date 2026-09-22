@@ -57,12 +57,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
-      - name: Install project + test dependencies
+      - name: Install runtime + test dependencies
         run: |
           python -m pip install --upgrade pip
-          # Install the project itself so CI verifies declared runtime
-          # dependencies (including TypeSafe's official Jev SDK).
-          pip install -e . pytest
+          # This repository is intentionally a multi-package flat layout and
+          # is not distributed as one setuptools package. Install its declared
+          # runtime dependencies explicitly, including TypeSafe's Jev SDK.
+          pip install pytest pyyaml "typesafe-sdk>=0.7.1,<0.8"
 
       # Per Fix #6 from the Astra re-audit: real pytest discovery, no
       # testpaths narrowing. Run pytest from the repo root with no path
