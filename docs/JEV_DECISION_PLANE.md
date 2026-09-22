@@ -51,9 +51,12 @@ The project declares the official TypeSafe Python SDK:
 
 `typesafe-sdk>=0.7.1,<0.8`
 
-Install the repository environment normally:
+Install the Jev runtime dependency on the watcher/Hermes host:
 
-`python -m pip install -e .`
+`python -m pip install "typesafe-sdk>=0.7.1,<0.8"`
+
+The repository uses a multi-package flat layout, so do not use
+`pip install -e .` as the deployment command.
 
 Create a TypeSafe API key in the TypeSafe console and set it on the runtime
 host as `TYPESAFE_API_KEY`. Never commit the key.
