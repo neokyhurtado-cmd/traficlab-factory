@@ -1,0 +1,40 @@
+{
+  "snapshot": {
+    "hermes_home": "C:\\Users\\david\\AppData\\Local\\hermes",
+    "gateway_pid": 35804,
+    "gateway_status": "✓ Scheduled Task registered: Hermes_Gateway\n  Status: Ready\n  Last Run Time: 9/16/2026 6:56:04 PM\n  Last Run Result: 0\n✓ Gateway process running (PID: 35804)\n\nOther profiles:\n  ✓ ia-vision        — PID 29168\n  ✓ orchestrator     — PID 33516",
+    "orchestrator_profile": "C:\\Users\\david\\AppData\\Local\\hermes\\profiles\\orchestrator",
+    "ia_vision_profile": "C:\\Users\\david\\AppData\\Local\\hermes\\profiles\\ia-vision",
+    "suini_profile": "C:\\Users\\david\\AppData\\Local\\hermes\\profiles\\suini",
+    "routing_table_path": "C:\\Users\\david\\AppData\\Local\\hermes\\profiles\\orchestrator\\config\\routing.yaml",
+    "obsidian_vault": "C:\\Users\\david\\Documents\\BrainPool",
+    "orca_installed": true,
+    "orca_path": "C:\\Users\\david\\AppData\\Local\\Programs\\orca\\Orca.exe",
+    "orca_running_procs": 10,
+    "github_poller_cron_id": "44c091e79145",
+    "github_poller_last_status": "ok",
+    "asof_unix": 1789605204
+  },
+  "canary_results": [
+    {
+      "goal": "Termina IA-VISION",
+      "out_dir": "C:\\Users\\david\\AppData\\Local\\hermes\\kanban\\boards\\traficlabpro\\workspaces\\t_fcdefd02\\repo\\evidence\\single_front_door\\20260916_193324_v2_01"
+    },
+    {
+      "goal": "¿qué falta?",
+      "out_dir": "C:\\Users\\david\\AppData\\Local\\hermes\\kanban\\boards\\traficlabpro\\workspaces\\t_fcdefd02\\repo\\evidence\\single_front_door\\20260916_193324_v2_02"
+    },
+    {
+      "goal": "lee Obsidian y continúa",
+      "out_dir": "C:\\Users\\david\\AppData\\Local\\hermes\\kanban\\boards\\traficlabpro\\workspaces\\t_fcdefd02\\repo\\evidence\\single_front_door\\20260916_193324_v2_03"
+    },
+    {
+      "goal": "Sigue IA-VISION y llévame #111 hasta revisión",
+      "out_dir": "C:\\Users\\david\\AppData\\Local\\hermes\\kanban\\boards\\traficlabpro\\workspaces\\t_fcdefd02\\repo\\evidence\\single_front_door\\20260916_193325_v2_04"
+    }
+  ],
+  "idempotency": {
+    "same_overall": true,
+    "same_evidence_block": true
+  }
+}
