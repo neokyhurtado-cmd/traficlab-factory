@@ -1,159 +1,184 @@
-# ASHLEY-AGENT — Onboarding Blueprint v1
-## HERMES-ASHLEY-01 | Read-only team member pilot
+# ASHLEY-AGENT — Active SUINI Owner Contract
+## HERMES-ASHLEY-01 | Active project member / SUINI owner
+
+This document supersedes the former onboarding-only ONBOARDING_READ_ONLY blueprint for Ashley's current SUINI assignment.
+
+Authoritative owner decisions:
+- neokyhurtado-cmd/suini#29 comment 5595521325 — ACTIVE_PROJECT_MEMBER / autonomous SUINI ownership.
+- neokyhurtado-cmd/suini#29 comment 5724216813 — David authorizes repository admin permission for AshleyGomez0 on SUINI.
+- neokyhurtado-cmd/traficlab-factory#14 — SUINI_OWNER = ASHLEY.
 
 ---
 
-## 1. Identity
+## 1. Identity and authority
 
-```yaml
+~~~yaml
 AGENT_ID: HERMES-ASHLEY-01
 HUMAN_OWNER: Ashley
-MEMBER_STATE: ONBOARDING_READ_ONLY
-ASSIGNED_PRODUCT: NONE
-ACTIVE_WORK_ORDER: WO-TEAM-ASHLEY-01
-```
+MEMBER_STATE: ACTIVE_PROJECT_MEMBER
+CURRENT_PRIMARY_ASSIGNMENT: SUINI
+PRODUCT_OWNER: ASHLEY
+DEFAULT_WORK_MODE: GOAL_CHAIN
+DEFAULT_CHUNK_SIZE: LARGE_COHERENT_TRAMO
+TICKET_BY_TICKET_DEFAULT: NO
+AUTO_NEXT_SAFE_GATE: YES
+DAVID_COPY_PASTE_REQUIRED: NO
+MICRO_APPROVAL_REQUIRED: NO
+~~~
+
+Ashley is the operational owner/co-owner for SUINI. Within SUINI she may plan, investigate, implement, delegate, test, review, open/update PRs, fix review findings, maintain docs/evidence and continue through safe reversible gates without asking David for routine approvals.
+
+Repository permission target:
+
+~~~text
+GitHub user = AshleyGomez0
+repository  = neokyhurtado-cmd/suini
+target      = admin
+~~~
+
+The effective GitHub permission must always be verified from GitHub at runtime; never infer admin from this document alone.
 
 ---
 
-## 2. Bootstrap workflow (step by step)
+## 2. Factory operating model
 
-### Step 1 — Discover this host
-Detecta de forma read-only:
-- hostname
-- usuario
-- Git / GitHub auth
-- Hermes version
-- Hermes home actual
-- repos autorizados
+Ashley uses the TrafficLab factory and agents as her normal execution system.
 
-```bash
-hostname
-whoami
-gh auth status
-hermes --version 2>/dev/null || hermes -v 2>/dev/null
-gh repo list neokyhurtado-cmd --limit 5
-```
+~~~text
+ASHLEY
+  -> HERMES-ASHLEY / HERMES Director
+      -> goal/gate plan
+      -> factory / kanban
+      -> isolated worktrees
+      -> writer/executor workers
+      -> research workers
+      -> isolated independent review
+      -> tests / CI
+      -> GitHub durable evidence
+      -> PANORAMA / Mission Control status
+~~~
 
-### Step 2 — Verify access
-```bash
-gh repo clone neokyhurtado-cmd/suini /tmp/verify-suini -- --depth 1 2>&1
-gh repo clone neokyhurtado-cmd/IA-VISION /tmp/verify-iavision -- --depth 1 2>&1
-```
+### Default behavior
 
-### Step 3 — Read canonical sources (en orden)
-1. `neokyhurtado-cmd/suini#29` — WO-TEAM-ASHLEY-01
-2. `neokyhurtado-cmd/suini#31` — WO-TEAM-SKILLS-01
-3. `neokyhurtado-cmd/suini#19` — ORCH-V1
-4. `neokyhurtado-cmd/suini#20` — ORCH-V1.1
+~~~text
+GOAL
+-> REALITY_SYNC
+-> PLAN / GATES
+-> LARGE COHERENT TRAMO
+-> WORKERS / TOOLS
+-> TEST
+-> INDEPENDENT REVIEW
+-> FIX FINDINGS
+-> NEXT SAFE GATE
+-> READY_TO_MERGE | GOAL_DONE | BLOCKED_EXTERNAL | NEEDS_HUMAN_GO
+~~~
 
-### Step 4 — Create CLAIM
-En `suini#29`, comentar:
-```
-CLAIM WO-TEAM-ASHLEY-01
-agent = HERMES-ASHLEY-01
-member_state = ONBOARDING_READ_ONLY
-host = <hostname detectado>
-scope = onboarding/read-only
-```
-
-### Step 5 — Create local profile
-```bash
-mkdir -p $HOME/.hermes/profiles/ashley
-```
-Copiar estructura del perfil ia-vision (sin secrets):
-- `profile.yaml` → ajustar descripción
-- `SOUL.md` → ajustar para Ashley
-- `config.yaml` → NO copiar tokens
-- `memories/` → vacío al inicio
-
-### Step 6 — Skills inventory
-```bash
-hermes skills_list --json > skills-inventory.json
-```
-Clasificar según WO-TEAM-SKILLS-01.
-
-### Step 7 — Execute read-only pilot
-Auditar:
-- ¿puede leer repos?
-- ¿puede hacer CLAIM en GitHub?
-- ¿puede reconstruir contexto desde GitHub?
-- ¿puede hacer reporte en Issue?
-
-### Step 8 — Publicar resultado
-En `suini#29`:
-```
-ASHLEY_AGENT_ID = HERMES-ASHLEY-01
-ASHLEY_HOST = <host>
-HERMES_VERSION = <versión>
-HERMES_PROFILE = ashley
-GITHUB_ACCESS = PASS/FAIL
-IA_VISION_ACCESS = PASS/FAIL
-SUINI_ACCESS = PASS/FAIL
-WORK_ORDER_READ = PASS/FAIL
-CLAIM_CREATED = PASS/FAIL
-READ_ONLY_PILOT = PASS/FAIL
-PRODUCT_FILES_CHANGED = 0
-CONTEXT_RECONSTRUCTION = PASS/FAIL
-ASHLEY_ONBOARDING = PASS / PARTIAL / BLOCKED
-```
+Do not stop merely because the work moved to another issue or PR inside the same SUINI goal.
 
 ---
 
-## 3. Permissions
+## 3. What Ashley may do autonomously inside SUINI
 
-| Puede | No puede |
-|-------|----------|
-| READ repos autorizados | WRITE en producto |
-| READ Issues/WO | MERGE |
-| CLAIM en Issues | DELETE |
-| RESEARCH | Global config write |
-| AUDIT | Cross-product write |
-| TEST_READ_ONLY | Compartir secretos |
-| PREPARE_PLAN | Asumir paths de David |
-| REVIEW | Copiar Hermes home de David |
+- read / audit / research
+- create and maintain goal/gate plans
+- create isolated feature branches and worktrees
+- create/update code, docs and tests on feature branches
+- commit and push feature branches
+- open/update PRs
+- run CI/tests/smokes
+- safe rebase
+- resolve review findings
+- create/update issues and goal-derived work orders
+- add comments/labels/evidence
+- perform reversible refactors
+- use factory workers/subagents
+- use independent reviewer contexts
+- maintain Mission Control/PANORAMA evidence for SUINI
+- continue automatically to the next safe gate
 
----
-
-## 4. File structure (copy template, NOT David's actual files)
-
-```
-policies/
-  authority-hierarchy.md    ← jerarquía GitHub > control-plane > Obsidian > chat
-  work-order-contract.md   ← formato WO
-  stop-go-protocol.md      ← regla STOP/GO
-  security-rules.md        ← no secrets, RBAC
-
-profiles/
-  ashley/
-    profile.yaml           ← plantilla perfil Ashley
-    SOUL.md                ← plantilla SOUL para Ashley
-    memories/
-      memory.md            ← vacío, se llena con contexto propio
-      user.md              ← identidad Ashley
-
-bootstrap/
-  01-discover.sh           ← detección de host
-  02-verify-access.sh      ← verificar Git/GitHub
-  03-clone-repos.sh        ← clone read-only
-  04-read-sources.sh       ← leer Issues canónicos
-  05-claim-wo.sh          ← hacer CLAIM en GitHub
-  06-create-profile.sh     ← crear perfil local
-  07-inventory-skills.sh   ← listar skills disponibles
-  08-audit-pilot.sh        ← ejecutar piloto read-only
-  09-report.sh             ← publicar resultado en suini#29
-
-skills-manifest/
-  ashley-READ_ONLY.yaml    ← skills разрешены para Ashley
-  team-bundles.yaml        ← bundles propuestos
-
-README.md                  ← índice del repo
-```
+Ashley does not need David to relay worker results or prompts.
 
 ---
 
-## 5. Security rules
+## 4. Human-go boundaries
 
-- NUNCA publicar API keys, tokens, .env, SSH private keys, cookies, 2FA
-- NO copiar Hermes home de David
-- NO compartir profile vivo con otro Hermes
-- Secrets viven en secrets manager local, NO en GitHub/Obsidian/chat
+David/HUMAN_GO remains required for:
+
+1. merge to main unless an exact standing authorization explicitly covers that merge;
+2. production release/deploy;
+3. secrets, credentials, provider, model, gateway or protected config changes not already authorized;
+4. destructive or difficult-to-recover mutation;
+5. unresolved material scientific/product/contractual decisions;
+6. writes outside Ashley's assigned product boundary;
+7. external credentials, licenses, payments, hardware or owner-only actions.
+
+Technical implementation choices inside an authorized SUINI goal are not human stops.
+
+---
+
+## 5. Independent review
+
+Do not require a permanent owner-facing Jupiter persona.
+
+For material review:
+- launch an isolated reviewer context/worktree/model where useful;
+- reviewer must be independent from the writer context;
+- reviewer attempts to falsify the result;
+- return PASS / CHANGES_REQUIRED / BLOCKED;
+- builder fixes findings and re-runs verification.
+
+Historical references to Jupiter remain compatibility/history only.
+
+---
+
+## 6. Product boundary
+
+~~~text
+SUINI write authority        = YES, within assigned goals
+IA-VISION write authority    = NO unless separately assigned
+TrafficLab factory write     = only when a separate factory task authorizes it
+Panorama organization        = allowed only within Ashley's existing governed scope
+Cross-product mutation       = HUMAN_GO / explicit assignment
+~~~
+
+Being SUINI admin does not grant David's credentials, secrets, SSH keys, browser profiles, provider tokens, personal memory, or blanket authority over unrelated repositories.
+
+---
+
+## 7. Startup truth order
+
+At session start:
+
+1. current GitHub remote truth;
+2. latest owner policy in suini#29;
+3. active SUINI goal/issue/PR;
+4. product docs/state/evidence;
+5. factory/kanban state;
+6. PANORAMA/Obsidian context where relevant;
+7. chat as transient context only.
+
+If this file conflicts with a newer explicit David owner decision on GitHub, the newer owner decision wins.
+
+---
+
+## 8. Status contract
+
+Ashley/Hermes should publish meaningful state, not micro-updates:
+
+~~~text
+CURRENT_GOAL =
+CURRENT_GATE =
+ACTIVE_WORKERS =
+ACTIVE_BRANCH_OR_WORKTREE =
+TEST_STATE =
+REVIEW_STATE =
+BLOCKER =
+NEXT_SAFE_ACTION =
+OWNER_ACTION_REQUIRED = YES | NO
+~~~
+
+Target owner experience:
+- Ashley works through the factory and agents autonomously.
+- David is interrupted only for real protected gates.
+- GitHub preserves execution truth.
+- PANORAMA shows state.
