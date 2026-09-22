@@ -168,6 +168,16 @@ def default_execution(
     future case where the dispatcher reports DONE (delegated work
     completed). Until then it is never emitted by the default execution.
     """
+    # JEV-DP-V1: evaluate every directive in a fail-soft advisory lane.
+    # This writes evidence only; Jev never authorizes protected actions and
+    # never controls dispatch. Missing credentials/provider errors must not
+    # break the canonical watcher path.
+    try:
+        from jev_shadow.runtime import record_directive_shadow_decision
+        record_directive_shadow_decision(directive, evidence_dir)
+    except Exception as _jev_exc:  # noqa: BLE001
+        LOG.warning("Jev shadow decision failed open for %s: %s", directive.directive_id, _jev_exc)
+
     if directive.requires_human_go_real:
         return ExecutionOutcome(
             status=RESULT_HUMAN_GO,

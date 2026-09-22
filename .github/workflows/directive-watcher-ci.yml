@@ -57,13 +57,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
-      - name: Install base Python deps
+      - name: Install project + test dependencies
         run: |
           python -m pip install --upgrade pip
-          # The repo has no requirements.txt on purpose — the watcher is
-          # stdlib + PyYAML only. If a future PR adds deps, write them
-          # to requirements.txt and update this step accordingly.
-          pip install pytest pyyaml
+          # Install the project itself so CI verifies declared runtime
+          # dependencies (including TypeSafe's official Jev SDK).
+          pip install -e . pytest
 
       # Per Fix #6 from the Astra re-audit: real pytest discovery, no
       # testpaths narrowing. Run pytest from the repo root with no path
