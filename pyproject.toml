@@ -9,6 +9,7 @@ description = "Phase 1 GitHub Directive Watcher for Hermes 2.0."
 requires-python = ">=3.10"
 dependencies = [
     "PyYAML>=6.0",
+    "typesafe-sdk>=0.7.1,<0.8",
 ]
 
 [tool.pytest.ini_options]
