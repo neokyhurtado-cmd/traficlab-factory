@@ -252,7 +252,14 @@ class OrcaAutoWakeBridge:
     def _run(self, d: Directive, handle: str, record: dict[str, Any]) -> tuple[str, str]:
         run_id = str(record.get("run_id") or "")
         env = self._identity(handle)
-        if self._exists("orchestration", run_id, "--id"):
+        run_exists = False
+        if run_id:
+            try:
+                self.runner.call(["orchestration", "run-show", "--id", run_id, "--json"])
+                run_exists = True
+            except OrcaAutoWakeError:
+                run_exists = False
+        if run_exists:
             self.runner.call(["orchestration", "run-use", "--id", run_id, "--json"], env=env)
             return run_id, "resumed"
         objective = f"[factory-auto-wake:{self.run_key(d)}] GitHub #{d.issue} {d.action}"
