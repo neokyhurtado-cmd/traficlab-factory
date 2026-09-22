@@ -188,7 +188,7 @@ class OrcaAutoWakeBridge:
 
     def _worktree(self, repo_id: str, d: Directive, record: dict[str, Any]) -> str:
         wid = str(record.get("worktree_id") or "")
-        if self._exists("worktree", f"id:{wid}", "--worktree"):
+        if wid and self._exists("worktree", f"id:{wid}", "--worktree"):
             return wid
         payload = self.runner.call(["worktree", "list", "--repo", f"id:{repo_id}", "--json"])
         targets = {d.target_branch, f"refs/heads/{d.target_branch}", f"origin/{d.target_branch}"}
