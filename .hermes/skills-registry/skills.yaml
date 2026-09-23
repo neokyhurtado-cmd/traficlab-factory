@@ -1,0 +1,404 @@
+# Skill Fabric V1 — External Skill Registry
+#
+# Canonical home: .hermes/skills-registry/skills.yaml
+# Reference: policies/skill-fabric-intake.md
+# Validator:   agent_body/skill_registry.py::validate_entry
+# Tests:       agent_body/tests/test_skill_fabric_v1.py
+#
+# ANCHORED FACTORY HEAD: 2cbc4b2243fbf886c2d18f74f169fd7f88b15f32
+# G0 AUDIT WORKSPACE:    C:/Users/david/AppData/Local/hermes/kanban/boards/traficlabpro/workspaces/t_dd2be337/audits/
+#
+# All 10 SHAs verified live via `gh api repos/<owner>/<repo>/branches/<default_branch>` on 2026-09-22.
+
+version: 1
+schema: skill-fabric/v1
+fail_closed: true
+
+# Defaults that apply to every entry unless overridden.
+defaults:
+  mode: CATALOG
+  network_access: read-only
+  filesystem_read: declarative
+  filesystem_write: none
+  shell_exec: none
+  subagent_spawn: none
+  prompt_injection_surface: low
+  dependency_install: none
+  conflicts: []
+  allowed_projects:
+    - neokyhurtado-cmd/traficlab-factory
+  activation_scope: task-scoped
+  evidence: ""
+
+skills:
+
+  # ----- 1. obra/superpowers -----
+  # G0: MIT, 5bf4e78011075bcfc0dc295f0724994cd123ee71 (live MAIN HEAD 2026-09-22)
+  # Native Hermes plugin (.hermes-plugin/) + 15 SKILL.md files.
+  # CONFLICT: using-superpowers bootstrap contains EXTREMELY_IMPORTANT wrapper that
+  #           competes with Hermes system instructions and david-decision-protocol.
+  # Initial state: SHADOW (per macrogoal table) but only if conflict review lands.
+  # Guardian tests: test_conflict_superpowers_vs_factory, test_superpowers_blocked_if_drift.
+  - id: superpowers
+    upstream_repo: obra/superpowers
+    upstream_commit: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: SHADOW
+    capabilities:
+      network_access: read-only
+      filesystem_read: SKILL.md-only
+      filesystem_write: none
+      shell_exec: none
+      subagent_spawn: none
+      prompt_injection_surface: high
+      dependency_install: none
+    conflicts:
+      - david-decision-protocol
+      - hermes-decision-authority-hierarchy
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: task-scoped
+    rollback:
+      type: filesystem-mirror
+      mirror_dir: .hermes/skills/superpowers/
+      disable_command: "rm -rf .hermes/skills/superpowers/"
+    evidence: audits/obra_superpowers.md
+    rationale: >
+      High hermes-friendliness (native .hermes-plugin/, pre_llm_call hook, 15 SKILL.md
+      files) but the using-superpowers SKILL emits an EXTREMELY_IMPORTANT wrapper that
+      competes with david-decision-protocol lane routing and Hermes system instructions.
+      SHADOW is the macrogoal-prescribed position until a per-profile hook-merge policy
+      exists; ACTIVE is BLOCKED pending that policy.
+
+  # ----- 2. DietrichGebert/ponytail -----
+  # G0: MIT, e3ba2aa6f1e6f0bc4d69eb09c9f0d0a93af56156 (live main 2026-09-22)
+  # First-class Hermes plugin. pre_llm_call hook injection.
+  # Initial state: CATALOG — macrogoal table said "CANDIDATE; conflict-tested before
+  # activation", but pre_llm_call hook matches the Factory dispatcher surface, so we
+  # register without enabling until a hook-merge policy exists.
+  - id: ponytail
+    upstream_repo: DietrichGebert/ponytail
+    upstream_commit: e3ba2aa6f1e6f0bc4d69eb09c9f0d0a93af56156
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CATALOG
+    capabilities:
+      network_access: none
+      filesystem_read: scope-limited
+      filesystem_write: per-user-config-marker-only
+      shell_exec: none
+      subagent_spawn: none
+      prompt_injection_surface: medium
+      dependency_install: none
+    conflicts:
+      - superpowers
+      - caveman
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: cataloged-only
+    rollback:
+      type: filesystem-marker
+      marker_files:
+        - $CLAUDE_CONFIG_DIR/.ponytail-active
+      disable_command: "hermes plugins disable ponytail || true"
+    evidence: audits/DietrichGebert_ponytail.md
+    rationale: >
+      Pre_llm_call + pre_gateway_dispatch hooks inject ruleset on every model call —
+      same surface as Factory dispatcher. Register without enabling. Promote to SHADOW
+      only after a per-profile hook-merge policy exists.
+
+  # ----- 3. Graphify-Labs/graphify -----
+  # G0: Apache-2.0, a5957aa6ef51c9be8d054de9783d25046c187f3f (live v8 2026-09-22)
+  # Default branch is `v8`; main branch (91f4d120) exists but is NOT default.
+  # install.py mutates host .hermes/, .claude/, .gemini/, .cursor/ — this is the
+  # canonical example of a skill whose installer is mutating despite being read-only
+  # at runtime.
+  # Initial state: CANDIDATE → SHADOW only after SHADOW canary proves no override of
+  # Factory AGENTS.md/.hermes blocks.
+  - id: graphify
+    upstream_repo: Graphify-Labs/graphify
+    upstream_commit: a5957aa6ef51c9be8d054de9783d25046c187f3f
+    upstream_default_branch: v8
+    upstream_license: Apache-2.0
+    spdx_id_ok: true
+    mode: CANDIDATE
+    capabilities:
+      network_access: optional-extras
+      filesystem_read: full-repo-readonly
+      filesystem_write: derived-graph-only
+      shell_exec: install-only
+      subagent_spawn: none
+      prompt_injection_surface: medium
+      dependency_install: optional-pypi-extras
+    optional_extras_used:
+      - neo4j
+      - falkordb
+    conflicts:
+      - canonical-knowledge-graph
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: read-only-derived-adapter
+    rollback:
+      type: derived-cache
+      cache_dir: .hermes/skills/graphify/graphify-out/
+      disable_command: "rm -rf .hermes/skills/graphify/graphify-out/"
+    evidence: audits/Graphify-Labs_graphify.md
+    rationale: >
+      Native Hermes installer writes SKILL.md into .hermes/skills/, but install.py
+      ALSO mutates .claude/, .gemini/, .cursor/, and AGENTS.md — outside our scope.
+      CANDIDATE keeps the install gated behind explicit installer review.
+
+  # ----- 4. JuliusBrussee/caveman -----
+  # G0: DUAL — MIT (skills/adapters) + BSL-1.1 (engine/), SHA 2fd153c67988e980fb0b2455c90832159a6a5a25
+  # LICENSE_GATE: PASS for skills/, FAIL for engine/.
+  # Initial state: CATALOG (engine/ explicitly excluded).
+  - id: caveman
+    upstream_repo: JuliusBrussee/caveman
+    upstream_commit: 2fd153c67988e980fb0b2455c90832159a6a5a25
+    upstream_default_branch: main
+    upstream_license: DUAL
+    license_detail:
+      permissive: MIT
+      restrictive: BSL-1.1
+      scope_separation: >
+        LICENSE (MIT) covers everything EXCEPT engine-linked directories
+        (engine/, proxy/, rewriter/, browse/, mcp/, shrink/, cavememe/, core, shared/platform/).
+        LICENSE.BSL (BSL-1.1) covers the engine-linked directories.
+    spdx_id_ok: false
+    mode: CATALOG
+    vendored_directories: []
+    capabilities:
+      network_access: vendor-dependent
+      filesystem_read: vendor-dependent
+      filesystem_write: vendor-dependent
+      shell_exec: vendor-dependent
+      subagent_spawn: vendor-dependent
+      prompt_injection_surface: vendor-dependent
+      dependency_install: vendor-dependent
+    conflicts:
+      - ponytail
+    allowed_projects: []
+    activation_scope: cataloged-only
+    rollback:
+      type: filesystem-mirror
+      mirror_dir: .hermes/skills/caveman/
+      disable_command: "rm -rf .hermes/skills/caveman/"
+    evidence: audits/JuliusBrussee_caveman.md
+    rationale: >
+      Engine/ BSL-1.1 fails LICENSE_GATE; skills/adapters are MIT. Register in catalog
+      ONLY because the catalog itself is reference material (no vendoring of engine/).
+      Promote to CANDIDATE only if a future scope-bounded take is documented.
+
+  # ----- 5. Egonex-AI/Understand-Anything -----
+  # G0: MIT, 6df3065f1d8ddc2ce3615314d1d493f36d6b1c80 (live main 2026-09-22)
+  # Hermes install path wired; writes .ua/ artifacts (project-local knowledge graph).
+  # Initial state: CANDIDATE — needs sandbox shim before SHADOW.
+  - id: understand-anything
+    upstream_repo: Egonex-AI/Understand-Anything
+    upstream_commit: 6df3065f1d8ddc2ce3615314d1d493f36d6b1c80
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CANDIDATE
+    capabilities:
+      network_access: optional-llm-bridge
+      filesystem_read: project-readonly
+      filesystem_write: .ua-only
+      shell_exec: optional-watchman
+      subagent_spawn: none
+      prompt_injection_surface: low
+      dependency_install: optional-pnpm
+    conflicts:
+      - canonical-knowledge-graph
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: task-scoped
+    rollback:
+      type: filesystem-cache
+      cache_dir: .ua/
+      disable_command: "rm -rf .ua/ .understand-anything/"
+    evidence: audits/Egonex-AI_Understand-Anything.md
+    rationale: >
+      Hermes-native install path via install.sh; writes project-local knowledge graph
+      (.ua/) and offers a post-commit hook (auto-update). CANDIDATE until sandbox shim
+      documents the hook surface.
+
+  # ----- 6. mvanhorn/last30days-skill -----
+  # G0: MIT, 349ca444b4fda466e74d471dffa2aff36bb997f1 (live main 2026-09-22)
+  # Hermes `skills install` is HARD-BLOCKED (19 scanner findings: env-key reads +
+  # subprocess). 13 paid API keys. Fans out to Reddit/X/YouTube/TikTok/IG/HN/Polymarket.
+  # Initial state: CATALOG — more conservative than macrogoal table's "candidate for SHADOW"
+  # because the installer itself is hard-blocked by the scanner.
+  - id: last30days
+    upstream_repo: mvanhorn/last30days-skill
+    upstream_commit: 349ca444b4fda466e74d471dffa2aff36bb997f1
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CATALOG
+    capabilities:
+      network_access: paid-api-fanout
+      filesystem_read: optional-keychain
+      filesystem_write: output-dir-only
+      shell_exec: optional-yt-dlp
+      subagent_spawn: none
+      prompt_injection_surface: low
+      dependency_install: optional-external-bins
+    scanner_findings: 19
+    scanner_blocking: true
+    conflicts: []
+    allowed_projects: []
+    activation_scope: cataloged-only
+    rollback:
+      type: filesystem-mirror
+      mirror_dir: .hermes/skills/research/last30days/
+      disable_command: "rm -rf .hermes/skills/research/last30days/"
+    evidence: audits/mvanhorn_last30days-skill.md
+    rationale: >
+      Hermes scanner hard-blocks the install (19 findings: env-key reads, subprocess
+      fanout to yt-dlp/digg-pp-cli/node). 13 API keys required at runtime; no factory
+      budget gate. Register in catalog; do NOT install from this image.
+
+  # ----- 7. ayghri/i-have-adhd -----
+  # G0: MIT, 839872f9d1cd634fed642b4589ce7226199cc15f (live main 2026-09-22)
+  # Claude-only SKILL.md format (would need port), formatting-only plugin.
+  # Initial state: CATALOG — opt-in style layer with no authority surface.
+  - id: i-have-adhd
+    upstream_repo: ayghri/i-have-adhd
+    upstream_commit: 839872f9d1cd634fed642b4589ce7226199cc15f
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CATALOG
+    capabilities:
+      network_access: none
+      filesystem_read: SKILL.md-only
+      filesystem_write: none
+      shell_exec: none
+      subagent_spawn: none
+      prompt_injection_surface: low
+      dependency_install: none
+    hermes_native: false
+    hermes_port_required: true
+    conflicts: []
+    allowed_projects: []
+    activation_scope: cataloged-only
+    rollback:
+      type: opt-in-flag
+      flag: $CLAUDE_CONFIG_DIR/.i-have-adhd-always
+      disable_command: "rm -f $CLAUDE_CONFIG_DIR/.i-have-adhd-always"
+    evidence: audits/ayghri_i-have-adhd.md
+    rationale: >
+      Formatting-only plugin with zero authority surface. Hermes port would need
+      frontmatter rewrite. CATALOG (reference-only) — formatting is orthogonal to
+      decision authority, so it is acceptable to surface this in the catalog without
+      active install.
+
+  # ----- 8. sickn33/agentic-awesome-skills -----
+  # G0: MIT, 12123b491916cbde2811e2a6b3855a3839298a1c (live main 2026-09-22)
+  # AAS Core (V18.2.0) catalog layer; produces aas-stack.json (immutable plan) +
+  # human review gate; does NOT auto-install. 2445 sub-skills at audited SHA.
+  # Initial state: CATALOG (per macrogoal section F). Acts as a discovery feed for the
+  # Factory's own registry; NEVER replaces the Factory's authoritative registry.
+  - id: agentic-awesome-skills
+    upstream_repo: sickn33/agentic-awesome-skills
+    upstream_commit: 12123b491916cbde2811e2a6b3855a3839298a1c
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CATALOG
+    catalog_role: discovery
+    registry_subtree_count_at_audit_sha: 2445
+    capabilities:
+      network_access: local-mcp-only
+      filesystem_read: skills-readonly
+      filesystem_write: aas-stack.json-only
+      shell_exec: none-on-install
+      subagent_spawn: none
+      prompt_injection_surface: low
+      dependency_install: per-skill
+    conflicts:
+      - canonical-factory-registry  # AAS Core does not replace Factory; treated as feed
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: cataloged-discovery-feed
+    rollback:
+      type: filesystem-cache
+      cache_dir: aas-stack.json
+      disable_command: "rm -f aas-stack.json"
+    evidence: audits/sickn33_agentic-awesome-skills.md
+    rationale: >
+      Catalog / discovery role. AAS Core produces a validated selection
+      (aas-stack.json) and a human-review gate; no auto-install. Useful as one
+      upstream catalog feed for our Skill Fabric. Per macrogoal section F.
+
+  # ----- 9. K-Dense-AI/scientific-agent-skills -----
+  # G0: MIT, 49c6e97775eaa18ba791bebe23162a70ae601c18 (live main 2026-09-22)
+  # 157 sub-skills, Hermes-compatible YAML, no Factory/merge authority claims.
+  # Initial state: CANDIDATE — surface warrants shadow gating before any install.
+  - id: scientific-agent-skills
+    upstream_repo: K-Dense-AI/scientific-agent-skills
+    upstream_commit: 49c6e97775eaa18ba791bebe23162a70ae601c18
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CANDIDATE
+    capabilities:
+      network_access: optional-llm-bridge
+      filesystem_read: per-skill
+      filesystem_write: per-skill-declared
+      shell_exec: optional-per-skill
+      subagent_spawn: none
+      prompt_injection_surface: low
+      dependency_install: per-skill-pypi-or-npm
+    registry_subtree_count_at_audit_sha: 157
+    conflicts: []
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: per-subskill-on-demand
+    rollback:
+      type: filesystem-mirror
+      mirror_dir: .hermes/skills/scientific-agent-skills/
+      disable_command: "rm -rf .hermes/skills/scientific-agent-skills/"
+    evidence: audits/K-Dense-AI_scientific-agent-skills.md
+    rationale: >
+      157 sub-skills, MIT, Hermes-compatible YAML frontmatter, no Factory/merge
+      authority claims, no shipped model weights. CANDIDATE — large surface warrants
+      shadow-mode gating before any `gh skill install` or `npx skills add` actually
+      runs in t_dd2be337.
+
+  # ----- 10. cathrynlavery/diagram-design -----
+  # G0: MIT, dc1ace47b99a419e42d01a03cb6ace5346efa8ae (live main 2026-09-22)
+  # Single skill, no install side-effects, Hermes SKILL.md-shaped.
+  # Initial state: CATALOG — single skill, single output HTML, well-formed frontmatter.
+  - id: diagram-design
+    upstream_repo: cathrynlavery/diagram-design
+    upstream_commit: dc1ace47b99a419e42d01a03cb6ace5346efa8ae
+    upstream_default_branch: main
+    upstream_license: MIT
+    spdx_id_ok: true
+    mode: CATALOG
+    capabilities:
+      network_access: optional-google-fonts-cdn
+      filesystem_read: skill-files-only
+      filesystem_write: output-html-only
+      shell_exec: none
+      subagent_spawn: none
+      prompt_injection_surface: low
+      dependency_install: none
+    conflicts: []
+    allowed_projects:
+      - neokyhurtado-cmd/traficlab-factory
+    activation_scope: task-scoped
+    rollback:
+      type: filesystem-mirror
+      mirror_dir: .hermes/skills/diagram-design/
+      disable_command: "rm -rf .hermes/skills/diagram-design/"
+    evidence: audits/cathrynlavery_diagram-design.md
+    rationale: >
+      Single skill (diagram generation), MIT, well-formed Hermes SKILL.md,
+      no install-time side effects, no authority conflicts — safe to index for
+      human opt-in before any SHADOW/ACTIVE trial.
