@@ -5,11 +5,13 @@ Fábrica de perfiles, políticas y bootstrap para onboarding de equipo Hermes.
 ## Estructura
 
 ```
-policies/           ← reglas canónicas de operación
-profiles/           ← plantillas de perfil Hermes
-  ashley/           ← perfil para HERMES-ASHLEY-01
-bootstrap/          ← scripts de setup (pendientes)
-skills-manifest/   ← inventario y bundles de skills
+policies/               ← reglas canónicas de operación
+profiles/               ← plantillas de perfil Hermes
+  ashley/               ← perfil para HERMES-ASHLEY-01
+.hermes/skills/          ← skills internas (repo-local, descubribles)
+.hermes/skills-registry/← registry de skills externas (skill-fabric/v1)
+agent_body/             ← bootstrap sidecar (BODY-0..BODY-2)
+scripts/                ← scripts de soporte
 ```
 
 ## Propósito

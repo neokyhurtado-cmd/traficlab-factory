@@ -131,23 +131,20 @@ profiles/
       memory.md            ← vacío, se llena con contexto propio
       user.md              ← identidad Ashley
 
-bootstrap/
-  01-discover.sh           ← detección de host
-  02-verify-access.sh      ← verificar Git/GitHub
-  03-clone-repos.sh        ← clone read-only
-  04-read-sources.sh       ← leer Issues canónicos
-  05-claim-wo.sh          ← hacer CLAIM en GitHub
-  06-create-profile.sh     ← crear perfil local
-  07-inventory-skills.sh   ← listar skills disponibles
-  08-audit-pilot.sh        ← ejecutar piloto read-only
-  09-report.sh             ← publicar resultado en suini#29
+.hermes/skills/                  ← repo-local skills (descubribles por agent_body/skill_discovery.py)
+  internal-consult/SKILL.md
+  skill-fabric-router/SKILL.md
 
-skills-manifest/
-  ashley-READ_ONLY.yaml    ← skills разрешены para Ashley
-  team-bundles.yaml        ← bundles propuestos
+.hermes/skills-registry/
+  skills.yaml                    ← external skill registry (skill-fabric/v1)
 
-README.md                  ← índice del repo
-```
+agent_body/                       ← bootstrap sidecar (BODY-0..BODY-2)
+  skill_discovery.py             ← repo-local skill discovery
+  skill_registry.py              ← skill-fabric/v1 registry + validator + router
+
+scripts/                          ← scripts de soporte
+  install_hermes_runtime.py      ← smoke-check del runtime Hermes
+
 
 ---
 
