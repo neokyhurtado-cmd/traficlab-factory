@@ -9,8 +9,17 @@ policies/           ← reglas canónicas de operación
 profiles/           ← plantillas de perfil Hermes
   ashley/           ← perfil para HERMES-ASHLEY-01
 bootstrap/          ← scripts de setup (pendientes)
-skills-manifest/   ← inventario y bundles de skills
+.hermes/skills/     ← skills nativas (descubiertas por agent_body/skill_discovery.py)
+agent_body/         ← Agent Body v1 (capability boundaries, internal-consult, skill_discovery)
+agent_body/skill_fabric/  ← Skill Fabric V1 (issue #51 — SCAFFOLD)
+docs/skill-fabric-v1/      ← arquitectura + intake policy de Skill Fabric V1
+scripts/g0_audit.py        ← harness read-only para auditar las 10 candidatas upstream
 ```
+
+> Nota: el README histórico referenciaba `skills-manifest/` como ruta de
+> inventario de skills. Esa ruta nunca existió en `main`; el inventario
+> real está en `.hermes/skills/` (nativas) y `agent_body/skill_fabric/`
+> (externas, SCAFFOLD). Ver `docs/skill-fabric-v1/architecture.md`.
 
 ## Propósito
 

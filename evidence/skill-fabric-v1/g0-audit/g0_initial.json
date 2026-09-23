@@ -1,0 +1,109 @@
+{
+  "candidate_count": 10,
+  "directive": "skill-fabric-v1-implant-20260922-01",
+  "issue": "neokyhurtado-cmd/traficlab-factory#51",
+  "note": "Heuristic G0 evidence only. A skill cannot leave CANDIDATE_PENDING_G1 state until the G1 intake validator (registry.validate_entry) accepts a manually-authored entry with full provenance, scope, and capability declaration.",
+  "results": [
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "An agentic skills framework & software development methodology that works.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "obra/superpowers",
+      "UPSTREAM_SHA": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "DietrichGebert/ponytail",
+      "UPSTREAM_SHA": "e3ba2aa6f1e6f0bc4d69eb09c9f0d0a93af56156"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "v8",
+      "DESCRIPTION": "Turn any codebase, with its docs, SQL schemas, configs, and PDFs, into a queryable knowledge graph. A /graphify skill for Claude Code, Cursor, Codex, and Gemini CLI: local deterministic AST parsing, every edge explained, no vector store.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "Apache-2.0",
+      "REPO": "Graphify-Labs/graphify",
+      "UPSTREAM_SHA": "a5957aa6ef51c9be8d054de9783d25046c187f3f"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "\ud83e\udea8 why use many token when few token do trick. Viral skill + proxy for coding agents that cuts 65% of tokens by talking like a caveman.",
+      "EVAL_OUTCOME": "BLOCKED",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "NOASSERTION",
+      "REASON": "no SPDX license",
+      "REPO": "JuliusBrussee/caveman",
+      "UPSTREAM_SHA": "2fd153c67988e980fb0b2455c90832159a6a5a25"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "Egonex-AI/Understand-Anything",
+      "UPSTREAM_SHA": "6df3065f1d8ddc2ce3615314d1d493f36d6b1c80"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "AI agent skill that researches any topic across Reddit, X, YouTube, HN, Polymarket, and the web - then synthesizes a grounded summary",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "mvanhorn/last30days-skill",
+      "UPSTREAM_SHA": "349ca444b4fda466e74d471dffa2aff36bb997f1"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "A skill to stop your coding agent from burying the answer. ADHD-friendly output.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "ayghri/i-have-adhd",
+      "UPSTREAM_SHA": "839872f9d1cd634fed642b4589ce7226199cc15f"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "AAS Core is the local, agent-first control plane for complete catalog discovery, agent-owned selection, stack validation, and planning, backed by 2,445+ agentic skills. Includes CLI, local MCP, catalog, plugins, and Workbench.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "sickn33/agentic-awesome-skills",
+      "UPSTREAM_SHA": "12123b491916cbde2811e2a6b3855a3839298a1c"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "Turn any AI agent into an AI Scientist. The #1 Agent Skills library for science, used by 190,000+ scientists worldwide. 165 ready-to-use validated skills plus 100+ scientific databases covering biology, chemistry, medicine, and drug discovery. Compatible with Cursor, Claude Code, Codex, Pi, Antigravity, and the open Agent Skills standard.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "K-Dense-AI/scientific-agent-skills",
+      "UPSTREAM_SHA": "49c6e97775eaa18ba791bebe23162a70ae601c18"
+    },
+    {
+      "ARCHIVED": false,
+      "DEFAULT_BRANCH": "main",
+      "DESCRIPTION": "Editorial diagram design for Claude Code, Codex, and Pi. Self-contained HTML + SVG. No shadows. No Mermaid slop.",
+      "EVAL_OUTCOME": "CANDIDATE_PENDING_G1",
+      "INSTALL_HOOKS": "readme present (manual review required for hooks)",
+      "LICENSE": "MIT",
+      "REPO": "cathrynlavery/diagram-design",
+      "UPSTREAM_SHA": "dc1ace47b99a419e42d01a03cb6ace5346efa8ae"
+    }
+  ]
+}
