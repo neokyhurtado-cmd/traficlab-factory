@@ -143,7 +143,7 @@ def test_loop_enforce_replaces_only_large_evidence_and_recall_is_exact(tmp_path)
     assert r.EVIDENCE[0].startswith("obs://sha256/")
     assert r.EVIDENCE[1] == "small.txt"
     handle = r.EVIDENCE[0].split()[0]
-    assert e.recall_evidence(handle) == evidence.rstrip("\n")
+    assert e.recall_evidence(handle) == evidence
     saved = json.loads(snap.read_text())
     assert saved["SOL_EFFICIENCY"]["observations_packed"] == 1
     assert saved["SOL_CONTEXT_CHECKPOINT"]["evidence_handles"] == [handle]
