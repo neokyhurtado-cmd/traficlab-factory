@@ -38,6 +38,7 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 .loop_snapshots/
+.sol_artifacts/
 
 # Watcher runtime
 directive_watcher.sqlite
