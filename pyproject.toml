@@ -12,6 +12,13 @@ dependencies = [
     "typesafe-sdk>=0.7.1,<0.8",
 ]
 
+[project.optional-dependencies]
+a2a = [
+    "a2a-sdk>=1.0.3,<2",
+    "starlette>=0.37",
+    "uvicorn>=0.30",
+]
+
 [tool.pytest.ini_options]
 # Per Fix #6 from the Astra re-audit: do NOT narrow pytest discovery
 # to a single directory. The previous ``testpaths = ["directive_watcher/tests"]``
