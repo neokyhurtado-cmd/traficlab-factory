@@ -41,7 +41,7 @@ def build_app(
         from starlette.applications import Starlette
     except ImportError as exc:  # pragma: no cover - deployment-only dependency
         raise RuntimeError(
-            'A2A runtime dependencies are not installed. Install with: pip install -e ".[a2a]"'
+            'A2A runtime dependencies are not installed. Install with: pip install -r a2a_bridge/requirements.txt'
         ) from exc
 
     live_bridge = bridge or FactoryA2ABridge()
@@ -95,7 +95,7 @@ def main() -> None:
         import uvicorn
     except ImportError as exc:  # pragma: no cover
         raise RuntimeError(
-            'uvicorn is required for the A2A server. Install with: pip install -e ".[a2a]"'
+            'uvicorn is required for the A2A server. Install with: pip install -r a2a_bridge/requirements.txt'
         ) from exc
 
     host = os.getenv("TRAFICLAB_A2A_HOST", "127.0.0.1")
