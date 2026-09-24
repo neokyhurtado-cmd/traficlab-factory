@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import pytest
+
 from a2a_bridge.bridge import FactoryA2ABridge, parse_a2a_text
 from a2a_bridge.card import agent_card_document
 from a2a_bridge.contracts import resolve_mode
-from a2a_bridge.server import validate_bind_policy
+from a2a_bridge.server import build_app, validate_bind_policy
 from jev_shadow.provider import ProviderResult
 
 
@@ -48,12 +50,8 @@ def test_shadow_is_advisory_only():
 
 
 def test_enforce_mode_does_not_exist():
-    try:
+    with pytest.raises(ValueError, match="off, shadow"):
         resolve_mode("enforce")
-    except ValueError as exc:
-        assert "off, shadow" in str(exc)
-    else:
-        raise AssertionError("enforce must not be accepted")
 
 
 def test_secret_like_arbitrary_fields_do_not_affect_digest():
@@ -85,9 +83,14 @@ def test_agent_card_targets_v1_and_shadow_skill():
 
 def test_non_loopback_bind_requires_explicit_opt_in():
     validate_bind_policy("127.0.0.1")
-    try:
+    with pytest.raises(RuntimeError, match="Refusing non-loopback"):
         validate_bind_policy("0.0.0.0")
-    except RuntimeError as exc:
-        assert "Refusing non-loopback" in str(exc)
-    else:
-        raise AssertionError("remote bind must require explicit opt-in")
+
+
+def test_official_sdk_can_build_routes_when_installed():
+    pytest.importorskip("a2a")
+    app = build_app(
+        public_url="http://127.0.0.1:8787",
+        bridge=FactoryA2ABridge(mode="off", provider=FakeProvider()),
+    )
+    assert len(app.routes) >= 2
