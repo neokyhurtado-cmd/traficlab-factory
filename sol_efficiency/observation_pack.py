@@ -162,9 +162,11 @@ class ObservationPack:
                 f"observation digest mismatch: expected {sha}, got {actual}"
             )
         text = data.decode("utf-8")
-        lines = text.splitlines()
         if start_line < 1:
             raise ValueError("start_line must be >= 1")
+        if start_line == 1 and end_line is None:
+            return text
+        lines = text.splitlines()
         if end_line is None:
             end_line = len(lines)
         if end_line < start_line:
