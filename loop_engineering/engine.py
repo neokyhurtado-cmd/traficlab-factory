@@ -85,7 +85,8 @@ class LoopEngine:
         snap["BLOCKED_NODES"] = self.blocked_nodes
         snap["ACTIVE_NODES"] = self.active_nodes
         snap["ITERATION"] = self.iteration
-        snap["SOL_EFFICIENCY"] = dict(self._sol_metrics)
+        if self.sol_mode != "off":
+            snap["SOL_EFFICIENCY"] = dict(self._sol_metrics)
         if self._sol_compactor is not None:
             checkpoint = self._sol_compactor.compact(
                 snap, evidence_handles=self._sol_handles
