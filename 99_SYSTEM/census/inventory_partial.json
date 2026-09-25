@@ -2071,10 +2071,15 @@
       "path": "C:\\Users\\david\\repos\\IA-VISION-product-cert",
       "name": "IA-VISION-product-cert",
       "is_git_repo": true,
-      "disk_bytes": 340591016,
+      "disk_bytes": 340591120,
       "disk_gb": 0.317,
       "head_sha": "64c35c051fb4",
-      "branch": "audit/pr110-evidence-cert-fbe17d2"
+      "branch": "audit/pr110-evidence-cert-fbe17d2",
+      "du_reconciliation": {
+        "old_bytes": 340591016,
+        "new_bytes": 340591120,
+        "delta_bytes": 104
+      }
     },
     {
       "path": "C:\\Users\\david\\repos\\IA-VISION-product-fix2",
@@ -3161,8 +3166,8 @@
     "ACTIVE_CANONICAL": 2
   },
   "disk_totals": {
-    "worktrees_bytes": 22455179020,
-    "untracked_clones_bytes": 539622323,
+    "worktrees_bytes": 9889652715,
+    "untracked_clones_bytes": 539622427,
     "sqlite_dbs_bytes": 26750976,
     "heavy_non_repo_bytes": 615857269109,
     "total_discovered_bytes": 638878821428,
@@ -3181,12 +3186,68 @@
       "ollama app",
       "postgres",
       "python"
-    ]
+    ],
+    "du_canonical_worktrees_bytes": 9889652715,
+    "du_canonical_clones_bytes": 539622427
   },
-  "finished_at": "2026-09-25T06:13:57.914825+00:00",
+  "finished_at": "2026-09-25T06:18:40.136734+00:00",
   "ia_vision_main": {
     "origin_main_sha": "bbab7260231c",
     "local_main_sha": "ba4e26975577",
     "fetch_exit_code": 0
+  },
+  "du_correction": {
+    "method": "du -sb (cross-check against Path.rglob)",
+    "measured_at": "2026-09-25T06:18:40.136734+00:00",
+    "per_root": {
+      "IA-VISION_bare": 1596860496,
+      "IA-VISION.worktrees": 9889652715,
+      "panorama-mission-control": 26886258,
+      "traficlab-factory": 8254430,
+      "suini": -1,
+      "corrective-closeout": 0,
+      "data": 0
+    },
+    "per_root_gb": {
+      "IA-VISION_bare": 1.487,
+      "IA-VISION.worktrees": 9.21,
+      "panorama-mission-control": 0.025,
+      "traficlab-factory": 0.008,
+      "suini": null,
+      "corrective-closeout": 0.0,
+      "data": 0.0
+    },
+    "ia_vision_clones": {
+      "IA-VISION-cert-study-wt": 42299630,
+      "IA-VISION-cert-template": 13306688,
+      "IA-VISION-g5sha37": 32130578,
+      "IA-VISION-pipeline-w2": 30824433,
+      "IA-VISION-pipeline-witness": 13296364,
+      "IA-VISION-product-cert": 340591120,
+      "IA-VISION-product-fix2": 24337,
+      "IA-VISION-w2-witness-wiring": 35017195,
+      "ia-vision-post-merge-smoke": 0,
+      "ia-vision-rebase-142": 32132082
+    },
+    "ia_vision_clones_total_bytes": 539622427,
+    "ia_vision_clones_total_gb": 0.503,
+    "findings": [
+      {
+        "kind": "phantom_local_path",
+        "description": "MEMORY and gh repo list reference 'suini' as canonical, but ~/repos/suini does not exist locally.",
+        "verified_by": "du -sb /c/Users/david/repos/suini  -> DOES_NOT_EXIST",
+        "gh_remote": "https://github.com/neokyhurtado-cmd/suini",
+        "gh_local_clone_exists": false,
+        "classification": "GHOST_LOCAL_PATH",
+        "action": "none — out of scope until David clones it"
+      },
+      {
+        "kind": "measurement_methodology",
+        "description": "Path.rglob and du -sb agree on worktrees (~10 GB) but Path.rglob over-counted earlier — it walked clones too.",
+        "old_total_worktrees_gb_rglob": 20.913,
+        "new_total_worktrees_gb_du": 9.21,
+        "delta_gb": -11.703
+      }
+    ]
   }
 }
