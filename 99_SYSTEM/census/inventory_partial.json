@@ -3249,5 +3249,881 @@
         "delta_gb": -11.703
       }
     ]
+  },
+  "docker_full": {
+    "measured_at": "2026-09-25T06:49:09.800422+00:00",
+    "containers": [
+      {
+        "name": "nuclio-local-storage-reader",
+        "image": "gcr.io/iguazio/alpine:3.20",
+        "status": "Up 2 hours",
+        "ports": "",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/nuclio-local-storage/_data",
+            "destination": "/etc/nuclio/store",
+            "mode": "z",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-visor",
+        "image": "ia-vision:latest",
+        "status": "Up 2 hours (healthy)",
+        "ports": "127.0.0.1:7921->7921/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia-vision_ia_vision_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-admin",
+        "image": "ia-vision:latest",
+        "status": "Up 2 hours (healthy)",
+        "ports": "127.0.0.1:7920->7920/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia-vision_ia_vision_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-admin-f1",
+        "image": "ia-vision:live-media",
+        "status": "Exited (255) 9 days ago",
+        "ports": "127.0.0.1:7930->7920/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_f1_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-visor-f1",
+        "image": "ia-vision:live-media",
+        "status": "Exited (255) 9 days ago",
+        "ports": "127.0.0.1:7931->7921/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_f1_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-admin-live",
+        "image": "sha256:cb3ca8b2f43c91f222d35e0262a057eccbdffdc2afb23538416265c091b7e1b3",
+        "status": "Exited (255) 11 days ago",
+        "ports": "127.0.0.1:7920->7920/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_live_media_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-visor-live",
+        "image": "sha256:cb3ca8b2f43c91f222d35e0262a057eccbdffdc2afb23538416265c091b7e1b3",
+        "status": "Exited (255) 11 days ago",
+        "ports": "127.0.0.1:7921->7921/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_live_media_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "traficlab_mysql_m624",
+        "image": "mysql:8.0",
+        "status": "Up 2 hours (healthy)",
+        "ports": "127.0.0.1:3306->3306/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\dev\\traficlab-dashboard\\M591_idom_cam1_dia1\\init.sql",
+            "destination": "/docker-entrypoint-initdb.d/00_init.sql",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/mysql_data_m624/_data",
+            "destination": "/var/lib/mysql",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "carla-server",
+        "image": "carlasim/carla:0.9.16",
+        "status": "Exited (255) 2 months ago",
+        "ports": "0.0.0.0:2000-2002->2000-2002/tcp",
+        "mount_count": 0,
+        "mounts": []
+      },
+      {
+        "name": "openclaw-sbx-agent-main-f331f052",
+        "image": "openclaw-sandbox:bookworm-slim",
+        "status": "Exited (255) 4 months ago",
+        "ports": "",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\Users\\david\\.openclaw\\sandboxes\\agent-main-f331f052",
+            "destination": "/workspace",
+            "mode": "ro,z",
+            "rw": false,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_ui",
+        "image": "cvat/ui:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 0,
+        "mounts": []
+      },
+      {
+        "name": "cvat_vector",
+        "image": "timberio/vector:0.26.0-alpine",
+        "status": "Exited (127) 3 weeks ago",
+        "ports": "",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\vector\\vector.toml",
+            "destination": "/etc/vector/vector.toml",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "tmpfs",
+            "source": "",
+            "destination": "/vector-data-dir",
+            "mode": "",
+            "rw": true,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_quality_reports",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_server",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_utils",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_import",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_consensus",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_chunks",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_export",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_annotation",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_webhooks",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "traefik",
+        "image": "traefik:v3.6",
+        "status": "Exited (127) 3 weeks ago",
+        "ports": "",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\grafana_conf.yml",
+            "destination": "/etc/traefik/rules/grafana_conf.yml",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "bind",
+            "source": "/var/run/docker.sock",
+            "destination": "/var/run/docker.sock",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_db",
+        "image": "postgres:15-alpine",
+        "status": "Up 2 hours",
+        "ports": "5432/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_db/_data",
+            "destination": "/var/lib/postgresql/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_redis_ondisk",
+        "image": "apache/kvrocks:2.12.1",
+        "status": "Up 2 hours (healthy)",
+        "ports": "6666/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_cache_db/_data",
+            "destination": "/var/lib/kvrocks",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_opa",
+        "image": "openpolicyagent/opa:1.12.2",
+        "status": "Up 2 hours",
+        "ports": "",
+        "mount_count": 0,
+        "mounts": []
+      },
+      {
+        "name": "cvat_redis_inmem",
+        "image": "redis:7.2.11-alpine",
+        "status": "Up 2 hours",
+        "ports": "6379/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_inmem_db/_data",
+            "destination": "/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_clickhouse",
+        "image": "clickhouse/clickhouse-server:23.11-alpine",
+        "status": "Up 2 hours",
+        "ports": "8123/tcp, 9000/tcp, 9009/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_events_db/_data",
+            "destination": "/var/lib/clickhouse",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6/_data",
+            "destination": "/var/log/clickhouse-server",
+            "mode": "",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "nuclio",
+        "image": "quay.io/nuclio/dashboard:1.15.9-amd64",
+        "status": "Up 2 hours (healthy)",
+        "ports": "80/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/var/run/docker.sock",
+            "destination": "/var/run/docker.sock",
+            "mode": "rw",
+            "rw": true,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_grafana",
+        "image": "grafana/grafana-oss:10.1.2",
+        "status": "Up 2 hours",
+        "ports": "3000/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\grafana\\dashboards",
+            "destination": "/var/lib/grafana/dashboards",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          }
+        ]
+      }
+    ],
+    "volumes": [
+      {
+        "name": "bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6/_data",
+        "created_at": "2026-04-18T22:34:08Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_cache_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_cache_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_data",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_events_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_events_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_inmem_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_inmem_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_keys",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_logs",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "ia-vision_ia_vision_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/ia-vision_ia_vision_db/_data",
+        "created_at": "2026-09-15T17:09:30Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "ia_vision_f1_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/ia_vision_f1_db/_data",
+        "created_at": "2026-09-05T18:28:00Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "ia_vision_live_media_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/ia_vision_live_media_db/_data",
+        "created_at": "2026-09-05T02:47:10Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "mysql_data_m624",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/mysql_data_m624/_data",
+        "created_at": "2026-07-19T00:37:02Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "nuclio-local-storage",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/nuclio-local-storage/_data",
+        "created_at": "2026-04-18T22:34:12Z",
+        "used_by_containers": []
+      }
+    ],
+    "stale_worktree_mount_intersections": [],
+    "stale_x_bind_intersections": [],
+    "bind_mounts_in_repos": [],
+    "running_bind_mounts_on_windows": [
+      {
+        "container": "ia-vision-visor",
+        "status": "Up 2 hours (healthy)",
+        "running": true,
+        "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+        "destination": "/media/raw",
+        "rw": false
+      },
+      {
+        "container": "ia-vision-admin",
+        "status": "Up 2 hours (healthy)",
+        "running": true,
+        "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+        "destination": "/media/raw",
+        "rw": false
+      },
+      {
+        "container": "traficlab_mysql_m624",
+        "status": "Up 2 hours (healthy)",
+        "running": true,
+        "source": "C:\\dev\\traficlab-dashboard\\M591_idom_cam1_dia1\\init.sql",
+        "destination": "/docker-entrypoint-initdb.d/00_init.sql",
+        "rw": false
+      },
+      {
+        "container": "cvat_grafana",
+        "status": "Up 2 hours",
+        "running": true,
+        "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\grafana\\dashboards",
+        "destination": "/var/lib/grafana/dashboards",
+        "rw": false
+      }
+    ]
+  },
+  "runtime_scan": {
+    "measured_at": "2026-09-25T06:52:42.410195+00:00",
+    "method": "PowerShell Get-CimInstance Win32_Process (no admin required)",
+    "processes_total": 522,
+    "processes_with_cmdline": 501,
+    "procs_touching_repos": 0,
+    "cwd_touching_repos": 12,
+    "stale_x_runtime_intersections": []
+  },
+  "astra_review": {
+    "packet_path": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json",
+    "reviewed_at": "2026-09-25T06:53:51.956150+00:00",
+    "verdict": "PASS_TRULY_STALE",
+    "truly_stale_count": 23,
+    "false_stale_count": 0,
+    "reclassified_count": 8,
+    "truly_stale_paths": [
+      "C:/c/c/c/Users/david/repos/corrective-closeout/baseline-check",
+      "C:/c/c/Users/david/repos/corrective-closeout/feat-pedestrian-v1.0.1-a4-clarify",
+      "C:/c/c/Users/david/repos/IA-VISION-cert-read",
+      "C:/c/c/Users/david/repos/IA-VISION-docs",
+      "C:/c/c/Users/david/repos/IA-VISION-docs-ps",
+      "C:/c/c/Users/david/repos/IA-VISION-product-fix",
+      "C:/c/Users/david/repos/corrective-closeout/feat-combined-closeout",
+      "C:/c/Users/david/repos/IA-VISION-pr109",
+      "C:/c/Users/david/repos/M591-sidecar-inspect",
+      "C:/c/x/00_PROYECTOS/IA-VISION.worktrees/rt4a-evidence-orthomosaic",
+      "C:/Users/david/orca/workspaces/IA-VISION/h2-canonical-fresh-from-b723202",
+      "C:/Users/david/orca/workspaces/IA-VISION/test-orca-h3-cursor",
+      "C:/Users/david/repos/IA-VISION-cert-template",
+      "C:/Users/david/repos/IA-VISION-g5sha37",
+      "C:/Users/david/repos/IA-VISION.worktrees/owner-view-v1",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v2a-layer-inspector",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v2b-click-select",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v3a-trayectorias",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v3b-trayectorias-toggle",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v4a-gates-aforos",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v5-kpi-tracks",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v5b-gate-listener",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v6-timeline-events"
+    ],
+    "false_stale_paths": []
+  },
+  "safe_delete_manifest": {
+    "path": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\SAFE_DELETE_MANIFEST_20260925_015424.json",
+    "summary_path": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\SAFE_DELETE_MANIFEST_20260925_015424_SUMMARY.md",
+    "generated_at": "2026-09-25T06:54:24.992740+00:00",
+    "candidate_count": 23,
+    "recoverable_gb": 1.8113,
+    "review_verdict": "PASS_TRULY_STALE"
   }
 }
