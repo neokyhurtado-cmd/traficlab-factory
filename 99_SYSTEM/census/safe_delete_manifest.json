@@ -1,0 +1,287 @@
+{
+  "manifest_id": "manifest_20260925_011432",
+  "policy": "DRY_RUN_MANIFEST — NO DELETE GATE PASSED. Gate requires: CENSUS_PASS + CLASSIFICATION_PASS + DEPENDENCY_CHECK_PASS + INDEPENDENT_REVIEW_PASS",
+  "candidates": [
+    {
+      "path": "C:/c/c/c/Users/david/repos/corrective-closeout/baseline-check",
+      "branch": "refs/heads/feat-reality-twin-baseline-check",
+      "sha": "53554d72e2e7c4858d169a81483e4024ffdc5d06",
+      "disk_gb": 0.012,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/corrective-closeout/feat-pedestrian-v1.0.1-a4-clarify",
+      "branch": "refs/heads/feat/pedestrian-v1.0.1-a4-clarify",
+      "sha": "53554d72e2e7c4858d169a81483e4024ffdc5d06",
+      "disk_gb": 0.012,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-cert-read",
+      "branch": "refs/heads/ia-cert-readonly",
+      "sha": "e90ec1ff74647efcb211a8c95c64f5c0773d688e",
+      "disk_gb": 0.012,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-docs",
+      "branch": "refs/heads/docs/g12-pr71-merged-reconcile",
+      "sha": "3fa6e107ef13b70a19f74218d803a5606479fedd",
+      "disk_gb": 0.012,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-docs-ps",
+      "branch": "refs/heads/docs/project-state-pr105-stale-reconcile",
+      "sha": "6f805de26e0d70459dfc30d61eb528efe58550bc",
+      "disk_gb": 0.012,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-product-fix",
+      "branch": "refs/heads/audit/pr110-check4-overlay-alignment-fbe17d2",
+      "sha": "6c12fec741b216966ef6f8122d652edd24ecfc90",
+      "disk_gb": 0.028,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/Users/david/repos/corrective-closeout/feat-combined-closeout",
+      "branch": "refs/heads/feat/combined-closeout",
+      "sha": "51dc9252db0a499214f3e9b7f1057a72aba84250",
+      "disk_gb": 0.013,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/Users/david/repos/IA-VISION/IA-VISION.worktrees/jet-p3-perf-v1",
+      "branch": "refs/heads/feat/jet-p3-perf-remediation-v1",
+      "sha": "3021c0656d987ce3ba6ae8bef299273afa33824e",
+      "disk_gb": 0.149,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/Users/david/repos/IA-VISION-pr109",
+      "branch": "refs/heads/deploy/pr109-physical-audit",
+      "sha": "52bfb93810ad31de4bac6761f4d33cab8136bdf8",
+      "disk_gb": 0.013,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/Users/david/repos/M591-sidecar-inspect",
+      "branch": "refs/heads/audit/p6-sidecar-inspection-M591-diagnosis",
+      "sha": "0ee5ff417fd9e4b1b3b03417cf529e2ae1c1eb25",
+      "disk_gb": 0.108,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/c/x/00_PROYECTOS/IA-VISION.worktrees/rt4a-evidence-orthomosaic",
+      "branch": "refs/heads/feat/rt4a-evidence-orthomosaic-77",
+      "sha": "777c2363ef7507870aa086ca927a3c21adcf44c5",
+      "disk_gb": 0.019,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/h2-canonical-fresh-from-b723202",
+      "branch": "refs/heads/neokyhurtado-cmd/h2-canonical-fresh-from-b723202",
+      "sha": "b723202528aa75fbadc54e1a4153bcd178f6dd37",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/test-orca-h3-cursor",
+      "branch": "refs/heads/neokyhurtado-cmd/test-orca-h3-cursor",
+      "sha": "b723202528aa75fbadc54e1a4153bcd178f6dd37",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION-cert-template",
+      "branch": "refs/heads/audit/ia-cert-template-fbe17d2-wt",
+      "sha": "ce4cc2364ecaaafd884335d786c65929a8e27448",
+      "disk_gb": 0.012,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION-g5sha37",
+      "branch": "refs/heads/feat/g5-sha37-20260917",
+      "sha": "0955f87d333ad34206b15ba34a4b6b00d00b997a",
+      "disk_gb": 0.03,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/g5-m591-port-7921-smoke",
+      "branch": "refs/heads/fix/g5-m591-port-7921-smoke",
+      "sha": "6b620afbf3f270f74181ba19659300bfe6f6e34c",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-g-safety",
+      "branch": "refs/heads/feat/lane-g-safety",
+      "sha": "ecc15d97d9a64c772068ee498a1049bd8bca5803",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-i-platform",
+      "branch": "refs/heads/feat/lane-i-platform",
+      "sha": "86b6d2581944aae579db15d3c0210207ce76b67d",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/owner-view-v1",
+      "branch": "refs/heads/feat/owner-view-v1",
+      "sha": "85756284e0fbe9decb9a8017b97a4def12162497",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v10-stack-consistency",
+      "branch": "refs/heads/feat/pr-v10-stack-consistency",
+      "sha": "5dcbb213a74755ba0bcf91437d4d3cb32cf57cbb",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v2a-layer-inspector",
+      "branch": "refs/heads/feat/pr-v2a-layer-control-inspector",
+      "sha": "bc627eb49e462b3e6209240a6068b810919f9810",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v2b-click-select",
+      "branch": "refs/heads/feat/pr-v2b-click-select",
+      "sha": "3d78a5307bf35c0b97a669fd9ab46be73134729d",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v3a-trayectorias",
+      "branch": "refs/heads/feat/pr-v3a-trayectorias",
+      "sha": "195d89a3578dc5ea6d51f8aea58a447d1c8e5622",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v3b-trayectorias-toggle",
+      "branch": "refs/heads/feat/pr-v3b-trayectorias-toggle",
+      "sha": "b47271a061bd246aa223a589ff312e22647a4e9d",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v4a-gates-aforos",
+      "branch": "refs/heads/feat/pr-v4a-gates-aforos",
+      "sha": "732ee5affef4099ae50e55d44e988aa26c4d1e43",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v5-kpi-tracks",
+      "branch": "refs/heads/feat/pr-v5-kpi-tracks",
+      "sha": "6e8fdadd364d39c0df6cb6799b03afc55eaf5b2b",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v5b-gate-listener",
+      "branch": "refs/heads/feat/pr-v5b-gate-clicked-listener",
+      "sha": "55ba686eba9a11bf75270035b636096d55c8b72e",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v6-timeline-events",
+      "branch": "refs/heads/feat/pr-v6-timeline-events",
+      "sha": "8f610501f3fb6e1c8653c0fc5757afa9eba09552",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v7-export-scope",
+      "branch": "refs/heads/feat/pr-v7-export-scope",
+      "sha": "2cdc8978eb48ad900869ecdba618e350aeea4718",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v8-mobile-sidepanel",
+      "branch": "refs/heads/feat/pr-v8-mobile-sidepanel",
+      "sha": "277c21be8906b06a622017f6aa529e2d35a18de9",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v9-states-helper",
+      "branch": "refs/heads/feat/pr-v9-states-helper",
+      "sha": "0b921581c09a29a33f02e023355e0f33536959c3",
+      "disk_gb": 0.139,
+      "reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    }
+  ],
+  "total_candidates": 31,
+  "total_recoverable_gb": 2.934
+}

@@ -1,0 +1,88 @@
+{
+  "manifest_id": "sup_manifest_20260925_011432",
+  "policy": "EVIDENCE_KEEP — worktrees merged to origin/main; sha already in main. Cleanup safe, evidence preserved in main.",
+  "candidates": [
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-evidence-package-run-4-20260922T1200",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-evidence-package-run-4-20260922T1200",
+      "sha": "f8119a9e035cbbaff830a82d511f7004a915b43f",
+      "disk_gb": 0.148,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-evidence-package-run-5-20260923T1200",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-evidence-package-run-5-20260923T1200",
+      "sha": "47f93614c2cce988af7e1d14e5de6ed45b1e347e",
+      "disk_gb": 0.148,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-runtime-smoke-run-6-20260923T1100",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-runtime-smoke-run-6-20260923T1100",
+      "sha": "47f93614c2cce988af7e1d14e5de6ed45b1e347e",
+      "disk_gb": 0.148,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/sabrefish",
+      "branch": "refs/heads/neokyhurtado-cmd/sabrefish",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "disk_gb": 0.139,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION/IA-VISION.worktrees/domo-trajectories-speed",
+      "branch": "refs/heads/feat/domo-trajectories-speed-v1",
+      "sha": "f2c65e56117a1aa65e1f4ff0fc8c7feacab0ee50",
+      "disk_gb": 0.149,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION/IA-VISION.worktrees/lane-B-cabin-shell",
+      "branch": "refs/heads/feat/lane-B-cabin-shell-v1",
+      "sha": "54a958cd073f562818f47b8ceacf915de5229c99",
+      "disk_gb": 0.14,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-c1",
+      "branch": "refs/heads/feat/lane-d-c1-dedup",
+      "sha": "4f5d43a67fd738923e094b2145c51e34ef4d02c5",
+      "disk_gb": 0.139,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-l-integration",
+      "branch": "refs/heads/feat/lane-l-integration",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "disk_gb": 0.14,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-l-v2",
+      "branch": "refs/heads/feat/lane-l-v2-integration",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "disk_gb": 0.139,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/polish-multiview-v2",
+      "branch": "refs/heads/polish/multiview-v2",
+      "sha": "656897e470072ee067b6cfc943ffc4b925696546",
+      "disk_gb": 0.145,
+      "merged_into_origin_main": true,
+      "evidence_kept_in": "99_SYSTEM/census/evidence_keep.md"
+    }
+  ],
+  "total_candidates": 10,
+  "total_gb": 1.435
+}
