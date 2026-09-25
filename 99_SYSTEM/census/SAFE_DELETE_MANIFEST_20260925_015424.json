@@ -1,0 +1,297 @@
+{
+  "manifest_id": "SAFE_DELETE_MANIFEST_20260925_015424",
+  "generated_at": "2026-09-25T06:54:24.992740+00:00",
+  "policy": "FINAL SAFE_DELETE_MANIFEST. Independent review PASS on the candidate set. Contains 23 TRULY_STALE worktrees verified by ASTRA_REAUDIT_HOUSEKEEPER_V1. DOES NOT auto-execute. OWNER_GO required to run `housekeeper delete --i-have-reviewed`. Refuses while live runtime detected.",
+  "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json",
+  "review_verdict": "PASS_TRULY_STALE",
+  "candidates": [
+    {
+      "path": "C:/c/c/c/Users/david/repos/corrective-closeout/baseline-check",
+      "branch": "refs/heads/feat-reality-twin-baseline-check",
+      "wt_sha": "53554d72e2e7",
+      "disk_gb": 0.012,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/corrective-closeout/feat-pedestrian-v1.0.1-a4-clarify",
+      "branch": "refs/heads/feat/pedestrian-v1.0.1-a4-clarify",
+      "wt_sha": "53554d72e2e7",
+      "disk_gb": 0.012,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-cert-read",
+      "branch": "refs/heads/ia-cert-readonly",
+      "wt_sha": "e90ec1ff7464",
+      "disk_gb": 0.0124,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-docs",
+      "branch": "refs/heads/docs/g12-pr71-merged-reconcile",
+      "wt_sha": "3fa6e107ef13",
+      "disk_gb": 0.0124,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-docs-ps",
+      "branch": "refs/heads/docs/project-state-pr105-stale-reconcile",
+      "wt_sha": "6f805de26e0d",
+      "disk_gb": 0.0124,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/c/Users/david/repos/IA-VISION-product-fix",
+      "branch": "refs/heads/audit/pr110-check4-overlay-alignment-fbe17d2",
+      "wt_sha": "6c12fec741b2",
+      "disk_gb": 0.0279,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/Users/david/repos/corrective-closeout/feat-combined-closeout",
+      "branch": "refs/heads/feat/combined-closeout",
+      "wt_sha": "51dc9252db0a",
+      "disk_gb": 0.0126,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/Users/david/repos/IA-VISION-pr109",
+      "branch": "refs/heads/deploy/pr109-physical-audit",
+      "wt_sha": "52bfb93810ad",
+      "disk_gb": 0.0126,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/Users/david/repos/M591-sidecar-inspect",
+      "branch": "refs/heads/audit/p6-sidecar-inspection-M591-diagnosis",
+      "wt_sha": "0ee5ff417fd9",
+      "disk_gb": 0.1083,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/c/x/00_PROYECTOS/IA-VISION.worktrees/rt4a-evidence-orthomosaic",
+      "branch": "refs/heads/feat/rt4a-evidence-orthomosaic-77",
+      "wt_sha": "777c2363ef75",
+      "disk_gb": 0.0195,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/h2-canonical-fresh-from-b723202",
+      "branch": "refs/heads/neokyhurtado-cmd/h2-canonical-fresh-from-b723202",
+      "wt_sha": "b723202528aa",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/test-orca-h3-cursor",
+      "branch": "refs/heads/neokyhurtado-cmd/test-orca-h3-cursor",
+      "wt_sha": "b723202528aa",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION-cert-template",
+      "branch": "refs/heads/audit/ia-cert-template-fbe17d2-wt",
+      "wt_sha": "ce4cc2364eca",
+      "disk_gb": 0.0124,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION-g5sha37",
+      "branch": "refs/heads/feat/g5-sha37-20260917",
+      "wt_sha": "0955f87d333a",
+      "disk_gb": 0.0299,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/owner-view-v1",
+      "branch": "refs/heads/feat/owner-view-v1",
+      "wt_sha": "85756284e0fb",
+      "disk_gb": 0.139,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v2a-layer-inspector",
+      "branch": "refs/heads/feat/pr-v2a-layer-control-inspector",
+      "wt_sha": "bc627eb49e46",
+      "disk_gb": 0.1391,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v2b-click-select",
+      "branch": "refs/heads/feat/pr-v2b-click-select",
+      "wt_sha": "3d78a5307bf3",
+      "disk_gb": 0.1391,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v3a-trayectorias",
+      "branch": "refs/heads/feat/pr-v3a-trayectorias",
+      "wt_sha": "195d89a3578d",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v3b-trayectorias-toggle",
+      "branch": "refs/heads/feat/pr-v3b-trayectorias-toggle",
+      "wt_sha": "b47271a061bd",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v4a-gates-aforos",
+      "branch": "refs/heads/feat/pr-v4a-gates-aforos",
+      "wt_sha": "732ee5affef4",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v5-kpi-tracks",
+      "branch": "refs/heads/feat/pr-v5-kpi-tracks",
+      "wt_sha": "6e8fdadd364d",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v5b-gate-listener",
+      "branch": "refs/heads/feat/pr-v5b-gate-clicked-listener",
+      "wt_sha": "55ba686eba9a",
+      "disk_gb": 0.1387,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    },
+    {
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v6-timeline-events",
+      "branch": "refs/heads/feat/pr-v6-timeline-events",
+      "wt_sha": "8f610501f3fb",
+      "disk_gb": 0.1388,
+      "evidence": {
+        "classification": "STALE_CONFIRMED",
+        "reason": "not on origin, not merged into origin/main, no dirty work",
+        "verified_by": "ASTRA_REAUDIT_HOUSEKEEPER_V1",
+        "review_packet": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json"
+      }
+    }
+  ],
+  "total_candidates": 23,
+  "total_recoverable_gb": 1.8113,
+  "rollback": "git worktree remove --force does not delete git refs. Refs and commits remain reachable via reflog for 90+ days. Recovery: git worktree add <path> <branch>  (the branch itself was never deleted).",
+  "out_of_scope_paths": [
+    "IA-VISION :7921 production runtime",
+    "origin/main = bbab726",
+    "canonical DBs (production)",
+    "live Docker volumes (ia-vision_ia_vision_db, etc.)",
+    "DAVID_OS originals",
+    "30 ACTIVE_DIRTY_OWNER_PRESERVE worktrees (owner's active work)",
+    "10 SUPERSEDED_KEEP_EVIDENCE worktrees (kept as evidence per ASTRA)"
+  ]
+}

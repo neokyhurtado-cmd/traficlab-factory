@@ -1,0 +1,4129 @@
+{
+  "census_id": "census_20260925_010711",
+  "started_at": "2026-09-25T06:06:59.197914+00:00",
+  "phase": "B",
+  "mutations_during_census": 0,
+  "repos": [
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION",
+      "exists": true,
+      "head_sha": "b3665d68a032",
+      "current_branch": "feat/wo171-lane-g-subset-validation-20260922",
+      "dirty_files": 0,
+      "remote_url": "https://github.com/neokyhurtado-cmd/IA-VISION.git",
+      "disk_bytes": null,
+      "worktree_count": 123
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "exists": true,
+      "head_sha": "7af8650625e3",
+      "current_branch": "main",
+      "dirty_files": 0,
+      "remote_url": "https://github.com/neokyhurtado-cmd/panorama-mission-control.git",
+      "disk_bytes": null,
+      "worktree_count": 13
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\traficlab-factory",
+      "exists": true,
+      "head_sha": "2cbc4b2243fb",
+      "current_branch": "main",
+      "dirty_files": 0,
+      "remote_url": "https://github.com/neokyhurtado-cmd/traficlab-factory.git",
+      "disk_bytes": null,
+      "worktree_count": 7
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\suini",
+      "exists": false
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\corrective-closeout",
+      "exists": true,
+      "head_sha": null,
+      "current_branch": null,
+      "dirty_files": 0,
+      "remote_url": null,
+      "disk_bytes": null,
+      "worktree_count": 0
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\data",
+      "exists": true,
+      "head_sha": null,
+      "current_branch": null,
+      "dirty_files": 0,
+      "remote_url": null,
+      "disk_bytes": null,
+      "worktree_count": 0
+    }
+  ],
+  "worktrees": [
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION",
+      "sha": "b3665d68a0321e3d291b159a950bd926c89d335c",
+      "branch": "refs/heads/feat/wo171-lane-g-subset-validation-20260922",
+      "dirty_files": 8,
+      "disk_bytes": 1622100604,
+      "disk_gb": 1.511,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/c/Users/david/repos/corrective-closeout/baseline-check",
+      "sha": "53554d72e2e7c4858d169a81483e4024ffdc5d06",
+      "branch": "refs/heads/feat-reality-twin-baseline-check",
+      "dirty_files": 0,
+      "disk_bytes": 12868271,
+      "disk_gb": 0.012,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/c/Users/david/repos/IA-VISION-product-visor-idom",
+      "sha": "d87f638c472f9a45520945fdc1e6028a9dbb3210",
+      "branch": "refs/heads/feat/visor-idom-master-test-e2e-fbe17d2",
+      "dirty_files": 0,
+      "disk_bytes": 31806028,
+      "disk_gb": 0.03,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/c/Users/david/repos/IA-VISION-results-fix1",
+      "sha": "1a6ad47ce2ad6c6c0bff1b5760b9e684063a702c",
+      "branch": "refs/heads/fix/visor-info-no-opencv-fbe17d2",
+      "dirty_files": 1,
+      "disk_bytes": 30216941,
+      "disk_gb": 0.028,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/c/Users/david/repos/IA-VISION-results-g5",
+      "sha": "c14ee395efb335892d38c8b4fede298efb2ee0ce",
+      "branch": "refs/heads/audit/ia-results-g5-unclassified-check-fbe17d2",
+      "dirty_files": 0,
+      "disk_bytes": 29876338,
+      "disk_gb": 0.028,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/c/Users/david/repos/IA-VISION-results-inv",
+      "sha": "7f064fff50155340a1ec21ed6e6abec15d69e597",
+      "branch": "refs/heads/evidence/idom-unified-inventory-94-2026-09-15",
+      "dirty_files": 0,
+      "disk_bytes": 29937591,
+      "disk_gb": 0.028,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/c/Users/david/repos/IA-VISION-witness-impl",
+      "sha": "8cb4d74ec7ab18ec7c13aa2dbaa60fcd30096483",
+      "branch": "refs/heads/reconcile/witness-impl-review",
+      "dirty_files": 0,
+      "disk_bytes": 29872051,
+      "disk_gb": 0.028,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/corrective-closeout/feat-pedestrian-v1.0.1-a4-clarify",
+      "sha": "53554d72e2e7c4858d169a81483e4024ffdc5d06",
+      "branch": "refs/heads/feat/pedestrian-v1.0.1-a4-clarify",
+      "dirty_files": 0,
+      "disk_bytes": 12868290,
+      "disk_gb": 0.012,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/corrective-closeout/feat-reality-twin-corrective-01",
+      "sha": "f59bc6e85e7af2ca4d0112309856227611c3e091",
+      "branch": "refs/heads/feat/reality-twin-corrective-01",
+      "dirty_files": 0,
+      "disk_bytes": 13210573,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/IA-VISION-cert-read",
+      "sha": "e90ec1ff74647efcb211a8c95c64f5c0773d688e",
+      "branch": "refs/heads/ia-cert-readonly",
+      "dirty_files": 0,
+      "disk_bytes": 13285204,
+      "disk_gb": 0.012,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/IA-VISION-docs",
+      "sha": "3fa6e107ef13b70a19f74218d803a5606479fedd",
+      "branch": "refs/heads/docs/g12-pr71-merged-reconcile",
+      "dirty_files": 0,
+      "disk_bytes": 13277985,
+      "disk_gb": 0.012,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/IA-VISION-docs-ps",
+      "sha": "6f805de26e0d70459dfc30d61eb528efe58550bc",
+      "branch": "refs/heads/docs/project-state-pr105-stale-reconcile",
+      "dirty_files": 0,
+      "disk_bytes": 13278432,
+      "disk_gb": 0.012,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/IA-VISION-product-fix",
+      "sha": "6c12fec741b216966ef6f8122d652edd24ecfc90",
+      "branch": "refs/heads/audit/pr110-check4-overlay-alignment-fbe17d2",
+      "dirty_files": 0,
+      "disk_bytes": 30010798,
+      "disk_gb": 0.028,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/IA-VISION-product-fix2",
+      "sha": "334f5082bd44a9e6d5d588026bc46639fab0608e",
+      "branch": "refs/heads/fix/admin-db-trigger-syntax-fbe17d2",
+      "dirty_files": 1,
+      "disk_bytes": 29950625,
+      "disk_gb": 0.028,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/c/Users/david/repos/IA-VISION-witness",
+      "sha": "a8a89d70a7953960f2ff8b447df34cae0bdea58e",
+      "branch": "refs/heads/reconcile/pr118-witness-on-main",
+      "dirty_files": 0,
+      "disk_bytes": 29818667,
+      "disk_gb": 0.028,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/corrective-closeout/feat-combined-closeout",
+      "sha": "51dc9252db0a499214f3e9b7f1057a72aba84250",
+      "branch": "refs/heads/feat/combined-closeout",
+      "dirty_files": 0,
+      "disk_bytes": 13566584,
+      "disk_gb": 0.013,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/corrective-closeout/feat-enforcer-origin-matrix-v2",
+      "sha": "651ffa44c3009ba2d0a49a572681f5e15f4459f2",
+      "branch": "refs/heads/feat/enforcer-origin-matrix-v2",
+      "dirty_files": 0,
+      "disk_bytes": 13036319,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/corrective-closeout/feat-rt-c2-r4-id-collision",
+      "sha": "01d30a5249652fc6d5a66d0f63e038b5e78507f9",
+      "branch": "refs/heads/feat/rt-c2-r4-id-collision",
+      "dirty_files": 0,
+      "disk_bytes": 13229267,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/corrective-closeout/feat-video-hotpath-productization-94",
+      "sha": "d57f85fd68279694bae0e90fad72d0d1efcff822",
+      "branch": "refs/heads/feat/video-hotpath-productization-94",
+      "dirty_files": 0,
+      "disk_bytes": 13004030,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/corrective-closeout/fix-server-visor-cruces-timeline-identity",
+      "sha": "04a48d3f12bb61b54f7a1ee02657cabff40780f5",
+      "branch": "refs/heads/fix/server-visor-cruces-timeline-identity",
+      "dirty_files": 0,
+      "disk_bytes": 13062194,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/IA-VISION/IA-VISION.worktrees/jet-p3-perf-v1",
+      "sha": "3021c0656d987ce3ba6ae8bef299273afa33824e",
+      "branch": "refs/heads/feat/jet-p3-perf-remediation-v1",
+      "dirty_files": 0,
+      "disk_bytes": 160315096,
+      "disk_gb": 0.149,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/IA-VISION-main",
+      "sha": "58e82ad0928a0522883859572118434eec0e583b",
+      "branch": "refs/heads/audit/visor-closeout-103-fbe17d2",
+      "dirty_files": 0,
+      "disk_bytes": 6546451469,
+      "disk_gb": 6.097,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/IA-VISION-pr109",
+      "sha": "52bfb93810ad31de4bac6761f4d33cab8136bdf8",
+      "branch": "refs/heads/deploy/pr109-physical-audit",
+      "dirty_files": 0,
+      "disk_bytes": 13553385,
+      "disk_gb": 0.013,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/IA-VISION-review",
+      "sha": "ac7066efce08e6e91cb6c84892f048e6971ece89",
+      "branch": "refs/heads/audit/gui-review-mirror-3-cae04aa91",
+      "dirty_files": 2,
+      "disk_bytes": 23117452,
+      "disk_gb": 0.022,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/IA-VISION-w2-verify",
+      "sha": "86bd30136d3bcaff139fdd1f4d02cdfe207a2c4e",
+      "dirty_files": 0,
+      "disk_bytes": 30235031,
+      "disk_gb": 0.028,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/Users/david/repos/M591-sidecar-inspect",
+      "sha": "0ee5ff417fd9e4b1b3b03417cf529e2ae1c1eb25",
+      "branch": "refs/heads/audit/p6-sidecar-inspection-M591-diagnosis",
+      "dirty_files": 0,
+      "disk_bytes": 116283040,
+      "disk_gb": 0.108,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/x/00_PROYECTOS/IA-VISION.worktrees/rt4a-evidence-orthomosaic",
+      "sha": "777c2363ef7507870aa086ca927a3c21adcf44c5",
+      "branch": "refs/heads/feat/rt4a-evidence-orthomosaic-77",
+      "dirty_files": 0,
+      "disk_bytes": 20904284,
+      "disk_gb": 0.019,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/c/x/00_PROYECTOS/IA-VISION.worktrees/wt-orca-hermes-aforo-pipeline-111-correction",
+      "sha": "9d70f3a56758c8afd23a62ce0da1c2b0e6f2f6e8",
+      "branch": "refs/heads/neokyhurtado-cmd/wt-orca-hermes-aforo-pipeline-111",
+      "dirty_files": 2,
+      "disk_bytes": 32408670,
+      "disk_gb": 0.03,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/tmp/cvv00-v5-r5",
+      "sha": "ab7dd8f0173cfc88d99d3ddc7f8018e5d71eb92f",
+      "branch": "refs/heads/feat/cvv-00-v5-r5-emit",
+      "dirty_files": 0,
+      "disk_bytes": 4194180,
+      "disk_gb": 0.004,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/tmp/cvv00-v5-restore",
+      "sha": "e46dbb011c080b75a3f8079deb139ea22cd536be",
+      "branch": "refs/heads/feat/cvv-00-v5-notebook-restore",
+      "dirty_files": 0,
+      "disk_bytes": 476297514,
+      "disk_gb": 0.444,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/AppData/Local/hermes/kanban/boards/panorama-mission-control/workspaces/t_70882ee1/pr137-test-wt",
+      "sha": "f71ed1139e7175bde0bdc8a5f7194f9c23261d80",
+      "dirty_files": 0,
+      "disk_bytes": 30267065,
+      "disk_gb": 0.028,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-evidence-package-run-1-20260919T1200",
+      "sha": "20b20bb1107350a2bf91a843900e43aed4a6e70c",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-evidence-package-run-1-20260919T1200",
+      "dirty_files": 1,
+      "disk_bytes": 174550593,
+      "disk_gb": 0.163,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-evidence-package-run-2-20260920T1200",
+      "sha": "a2c2f0f37092310ee8e7a8f50167ec24f724d05d",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-evidence-package-run-2-20260920T1200",
+      "dirty_files": 1,
+      "disk_bytes": 180685108,
+      "disk_gb": 0.168,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-evidence-package-run-4-20260922T1200",
+      "sha": "f8119a9e035cbbaff830a82d511f7004a915b43f",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-evidence-package-run-4-20260922T1200",
+      "dirty_files": 0,
+      "disk_bytes": 158621922,
+      "disk_gb": 0.148,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-evidence-package-run-5-20260923T1200",
+      "sha": "47f93614c2cce988af7e1d14e5de6ed45b1e347e",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-evidence-package-run-5-20260923T1200",
+      "dirty_files": 0,
+      "disk_bytes": 158647974,
+      "disk_gb": 0.148,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-runtime-smoke-run-1-20260919T0544",
+      "sha": "b723202528aa75fbadc54e1a4153bcd178f6dd37",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-runtime-smoke-run-1-20260919T0544",
+      "dirty_files": 1,
+      "disk_bytes": 174266218,
+      "disk_gb": 0.162,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-runtime-smoke-run-2-20260919T1100",
+      "sha": "20b20bb1107350a2bf91a843900e43aed4a6e70c",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-runtime-smoke-run-2-20260919T1100",
+      "dirty_files": 1,
+      "disk_bytes": 174550587,
+      "disk_gb": 0.163,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-runtime-smoke-run-3-20260920T1100",
+      "sha": "a2c2f0f37092310ee8e7a8f50167ec24f724d05d",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-runtime-smoke-run-3-20260920T1100",
+      "dirty_files": 1,
+      "disk_bytes": 180685102,
+      "disk_gb": 0.168,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-runtime-smoke-run-5-20260922T1100",
+      "sha": "aa47b73d13797a3e9a2203e21e567b131e660b83",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-runtime-smoke-run-5-20260922T1100",
+      "dirty_files": 1,
+      "disk_bytes": 189498409,
+      "disk_gb": 0.176,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/auto-nightly-runtime-smoke-run-6-20260923T1100",
+      "sha": "47f93614c2cce988af7e1d14e5de6ed45b1e347e",
+      "branch": "refs/heads/neokyhurtado-cmd/auto-nightly-runtime-smoke-run-6-20260923T1100",
+      "dirty_files": 0,
+      "disk_bytes": 158647971,
+      "disk_gb": 0.148,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/h2-canonical-fresh-from-b723202",
+      "sha": "b723202528aa75fbadc54e1a4153bcd178f6dd37",
+      "branch": "refs/heads/neokyhurtado-cmd/h2-canonical-fresh-from-b723202",
+      "dirty_files": 0,
+      "disk_bytes": 148927773,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/sabrefish",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "branch": "refs/heads/neokyhurtado-cmd/sabrefish",
+      "dirty_files": 0,
+      "disk_bytes": 149013359,
+      "disk_gb": 0.139,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/test-orca-h3-cursor",
+      "sha": "b723202528aa75fbadc54e1a4153bcd178f6dd37",
+      "branch": "refs/heads/neokyhurtado-cmd/test-orca-h3-cursor",
+      "dirty_files": 0,
+      "disk_bytes": 148927761,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/orca/workspaces/IA-VISION/test-orca-h3-opencode",
+      "sha": "b723202528aa75fbadc54e1a4153bcd178f6dd37",
+      "branch": "refs/heads/neokyhurtado-cmd/test-orca-h3-opencode",
+      "dirty_files": 1,
+      "disk_bytes": 174266168,
+      "disk_gb": 0.162,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION/IA-VISION.worktrees/domo-trajectories-speed",
+      "sha": "f2c65e56117a1aa65e1f4ff0fc8c7feacab0ee50",
+      "branch": "refs/heads/feat/domo-trajectories-speed-v1",
+      "dirty_files": 0,
+      "disk_bytes": 159467169,
+      "disk_gb": 0.149,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=True"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION/IA-VISION.worktrees/lane-B-cabin-shell",
+      "sha": "54a958cd073f562818f47b8ceacf915de5229c99",
+      "branch": "refs/heads/feat/lane-B-cabin-shell-v1",
+      "dirty_files": 0,
+      "disk_bytes": 150363013,
+      "disk_gb": 0.14,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION/IA-VISION.worktrees/lane-B-cabin-shell-v2",
+      "sha": "ced39bbece659ef92fc9b259d19d23959a588e63",
+      "branch": "refs/heads/feat/lane-B-cabin-shell-v2",
+      "dirty_files": 0,
+      "disk_bytes": 150919145,
+      "disk_gb": 0.141,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-cert-study-wt",
+      "sha": "a28d98182cc58c1d7fd89fdbe76d23b81ff49427",
+      "branch": "refs/heads/wt/ia-vision-certification-study-20260917",
+      "dirty_files": 3,
+      "disk_bytes": 42299630,
+      "disk_gb": 0.039,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-cert-template",
+      "sha": "ce4cc2364ecaaafd884335d786c65929a8e27448",
+      "branch": "refs/heads/audit/ia-cert-template-fbe17d2-wt",
+      "dirty_files": 0,
+      "disk_bytes": 13306688,
+      "disk_gb": 0.012,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-g5sha37",
+      "sha": "0955f87d333ad34206b15ba34a4b6b00d00b997a",
+      "branch": "refs/heads/feat/g5-sha37-20260917",
+      "dirty_files": 0,
+      "disk_bytes": 32130578,
+      "disk_gb": 0.03,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-pipeline-w2",
+      "sha": "55118a9a5e39f95f1e84a25bd955ac759bae692a",
+      "branch": "refs/heads/feat/witness-w1-productize-fbe17d2",
+      "dirty_files": 11,
+      "disk_bytes": 30824433,
+      "disk_gb": 0.029,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-pipeline-witness",
+      "sha": "1fe1ab47327ac38443c7d1ea71aca602b844e89a",
+      "branch": "refs/heads/feat/behavioral-witness-w01-fbe17d2",
+      "dirty_files": 0,
+      "disk_bytes": 13296364,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-product-cert",
+      "sha": "64c35c051fb44071f8e3e6de9efc4276ec01044f",
+      "branch": "refs/heads/audit/pr110-evidence-cert-fbe17d2",
+      "dirty_files": 11,
+      "disk_bytes": 340591016,
+      "disk_gb": 0.317,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION-w2-witness-wiring",
+      "sha": "86bd30136d3bcaff139fdd1f4d02cdfe207a2c4e",
+      "branch": "refs/heads/feat/witness-w2-visor-wiring",
+      "dirty_files": 0,
+      "disk_bytes": 35017195,
+      "disk_gb": 0.033,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/feat-fmi-feasibility-layer",
+      "sha": "b750c161aa0021cb498df68d74beb9e656526f60",
+      "branch": "refs/heads/feat/fmi-feasibility-layer",
+      "dirty_files": 0,
+      "disk_bytes": 149333884,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/feat-geojson-export",
+      "sha": "43027d5143b7a88525cb903705ed2ac850a2c665",
+      "branch": "refs/heads/feat/geojson-export",
+      "dirty_files": 0,
+      "disk_bytes": 149330483,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/feat-opendrive-export",
+      "sha": "5eb8218f29965516a050d6a6ef3efd0ffd3f9c49",
+      "branch": "refs/heads/feat/opendrive-export",
+      "dirty_files": 0,
+      "disk_bytes": 149344490,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/feat-openscenario-export",
+      "sha": "63b6ba085514761002b254e6d28b54834c7886f2",
+      "branch": "refs/heads/feat/openscenario-export",
+      "dirty_files": 0,
+      "disk_bytes": 149323274,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/fix-lane-a-regressions",
+      "sha": "f97d99ca0e2866b7351c1cba6dcb07a4ceebd8ab",
+      "branch": "refs/heads/fix/lane-a-walkthrough-regressions",
+      "dirty_files": 0,
+      "disk_bytes": 150363017,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/g5-m591-port-7921-smoke",
+      "sha": "6b620afbf3f270f74181ba19659300bfe6f6e34c",
+      "branch": "refs/heads/fix/g5-m591-port-7921-smoke",
+      "dirty_files": 0,
+      "disk_bytes": 149013192,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-A-analytics-v7-local",
+      "sha": "10fbb0abd042b29caf7169830e6c7f8b58e034ed",
+      "branch": "refs/heads/feat/lane-A-analytics-v7-local",
+      "dirty_files": 0,
+      "disk_bytes": 150337825,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-a-canvas-firstframe",
+      "sha": "f39a7665c866b140e1ea8f10ef80ff40f4ecd51e",
+      "branch": "refs/heads/feat/lane-a-canvas-firstframe",
+      "dirty_files": 0,
+      "disk_bytes": 150342160,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-A-control-aforos",
+      "sha": "3deec49bbc825c4a5539dffd5e67437d15e62b43",
+      "branch": "refs/heads/feat/lane-A-control-aforos",
+      "dirty_files": 0,
+      "disk_bytes": 150363026,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-A-filmstrip-mobile",
+      "sha": "169d68ebb7e8bff77e7e74d37661a0ea756053e7",
+      "branch": "refs/heads/feat/lane-a-filmstrip-mobile",
+      "dirty_files": 0,
+      "disk_bytes": 150341006,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-A-p0-canvas-black",
+      "sha": "252885c36e1e023c16f1bc12952ac8c89d9b8b39",
+      "branch": "refs/heads/feat/lane-A-p0-canvas-black",
+      "dirty_files": 0,
+      "disk_bytes": 150878413,
+      "disk_gb": 0.141,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-A-scene-endpoints",
+      "sha": "1f967140f26b3408c41dfe5bbce54a67e20f6fa8",
+      "branch": "refs/heads/feat/lane-A-scene-endpoints-v1",
+      "dirty_files": 3,
+      "disk_bytes": 150992997,
+      "disk_gb": 0.141,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-A-sidepanel-mobile-clip",
+      "sha": "a77c2cae09a1c7f16cca8e0b61263fd455c0dce8",
+      "branch": "refs/heads/feat/lane-a-sidepanel-mobile-clip",
+      "dirty_files": 0,
+      "disk_bytes": 150340711,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-b-evidence",
+      "sha": "7c1f955ad6b6c86d043a29c538be49acb31766ed",
+      "branch": "refs/heads/feat/lane-b-evidence-data",
+      "dirty_files": 0,
+      "disk_bytes": 152660237,
+      "disk_gb": 0.142,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-b21",
+      "sha": "9ebba12eef797ed8ca3850769a9fe5384d27e55a",
+      "branch": "refs/heads/feat/lane-b21-uncertainty",
+      "dirty_files": 1,
+      "disk_bytes": 150171278,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-b22",
+      "sha": "1be5642f0ab9cf1a0f76d52bfc1b3af1ba238e82",
+      "branch": "refs/heads/feat/lane-b22-contracts",
+      "dirty_files": 0,
+      "disk_bytes": 149076717,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-b24-bundles",
+      "sha": "b2afe9f7a581f14831c4cefc6deb2283039aed3a",
+      "branch": "refs/heads/feat/lane-b24-bundles",
+      "dirty_files": 0,
+      "disk_bytes": 149965319,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-c-cv",
+      "sha": "68340dd7e9e6a87245ecfd41849086b9e088432e",
+      "branch": "refs/heads/feat/lane-c-cv",
+      "dirty_files": 0,
+      "disk_bytes": 149622166,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-c1",
+      "sha": "4f5d43a67fd738923e094b2145c51e34ef4d02c5",
+      "branch": "refs/heads/feat/lane-d-c1-dedup",
+      "dirty_files": 0,
+      "disk_bytes": 149040371,
+      "disk_gb": 0.139,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=True"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-c2",
+      "sha": "09861d7eafca4e4a615fd0d6f581ec87ba606bfc",
+      "branch": "refs/heads/feat/lane-d-c2-sidepanel-open",
+      "dirty_files": 0,
+      "disk_bytes": 149043933,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-fixes",
+      "sha": "69b11fdd617aab78560ae7234023c770d33307a0",
+      "branch": "refs/heads/feat/lane-d-fixes",
+      "dirty_files": 4,
+      "disk_bytes": 149241889,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-h2",
+      "sha": "e415a61571b4fc7cb6ba6fd61aa0efae864bccbc",
+      "branch": "refs/heads/feat/lane-d-h2-interval-cleanup",
+      "dirty_files": 0,
+      "disk_bytes": 149929116,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-h4",
+      "sha": "c40262b3e84c8dc2a54d9a2ec6303a203315c5f0",
+      "branch": "refs/heads/feat/lane-d-h4-resize-debounce",
+      "dirty_files": 0,
+      "disk_bytes": 149037909,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-d-tests-port-fix",
+      "sha": "ad5e7838b6818bbcc042d24bfb29e54bed49825c",
+      "branch": "refs/heads/feat/lane-d-tests-port-fix",
+      "dirty_files": 0,
+      "disk_bytes": 150261771,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e-e110",
+      "sha": "e3c164aa40ec3ff87c11cfb811706c9fd6c9d7c5",
+      "branch": "refs/heads/feat/lane-e-e110-instancing",
+      "dirty_files": 0,
+      "disk_bytes": 149032182,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e-e111",
+      "sha": "be59878a2bf47e44bc8ab981833fe78741ff0e5c",
+      "branch": "refs/heads/feat/lane-e-e111-lod",
+      "dirty_files": 0,
+      "disk_bytes": 149028722,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e-e19",
+      "sha": "5cc06e493dc23767ed99edc8f2dda803bc59e6ee",
+      "branch": "refs/heads/feat/lane-e-e19-workers",
+      "dirty_files": 0,
+      "disk_bytes": 149046383,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e-multiview",
+      "sha": "63798734223b8b46f9683455bac621d7481d7aee",
+      "branch": "refs/heads/feat/lane-e-multiview",
+      "dirty_files": 0,
+      "disk_bytes": 149081496,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e-tests",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "branch": "refs/heads/feat/lane-e-tests",
+      "dirty_files": 2,
+      "disk_bytes": 149024236,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e11",
+      "sha": "90fa179a7c898dc2edcb91451a155a8f42428c2d",
+      "branch": "refs/heads/feat/lane-e11-drift-detector",
+      "dirty_files": 3,
+      "disk_bytes": 149038142,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e12",
+      "sha": "028cae53ae38eb298de67c14d0a6916b083660c9",
+      "branch": "refs/heads/feat/lane-e12-reid",
+      "dirty_files": 3,
+      "disk_bytes": 149064375,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e17",
+      "sha": "249b5dcf85d658cd2611d70b828e91342d8f7791",
+      "branch": "refs/heads/feat/lane-e17-road-model",
+      "dirty_files": 0,
+      "disk_bytes": 149271094,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e17-lineage",
+      "sha": "3da17340cc5b105b70840ab07a99042c3aef9bba",
+      "branch": "refs/heads/feat/lane-e17-lineage",
+      "dirty_files": 0,
+      "disk_bytes": 150000448,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-e20",
+      "sha": "526db60e8bde3d5b47670c7197487bfc95fd6b3f",
+      "branch": "refs/heads/feat/lane-e20-drift-dashboard",
+      "dirty_files": 0,
+      "disk_bytes": 149281112,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-f-csv",
+      "sha": "2a5214280a3cdb772f254b7c5877228ae023ae3a",
+      "branch": "refs/heads/feat/lane-f-csv-sanitizer",
+      "dirty_files": 0,
+      "disk_bytes": 149078158,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-f-csv-hardening",
+      "sha": "696e483e86ad4b5ad5ee1a45b865b03068f9ccaf",
+      "branch": "refs/heads/feat/lane-f-csv-hardening",
+      "dirty_files": 4,
+      "disk_bytes": 150334115,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-g-safety",
+      "sha": "ecc15d97d9a64c772068ee498a1049bd8bca5803",
+      "branch": "refs/heads/feat/lane-g-safety",
+      "dirty_files": 0,
+      "disk_bytes": 149292726,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-g-tests",
+      "sha": "1e8f6f0dfff78fa8bc0f2ba2bfff0d7a1bd1aabd",
+      "branch": "refs/heads/feat/lane-g-tests-addendum",
+      "dirty_files": 0,
+      "disk_bytes": 150549199,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-h-interop",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "branch": "refs/heads/feat/lane-h-interop",
+      "dirty_files": 1,
+      "disk_bytes": 149183033,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=True"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-i-b23",
+      "sha": "7bb327dc6522f051246ccd129f6e42703c810227",
+      "branch": "refs/heads/feat/lane-i-b23-obs",
+      "dirty_files": 0,
+      "disk_bytes": 149441444,
+      "disk_gb": 0.139,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-i-platform",
+      "sha": "86b6d2581944aae579db15d3c0210207ce76b67d",
+      "branch": "refs/heads/feat/lane-i-platform",
+      "dirty_files": 0,
+      "disk_bytes": 149137160,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-l-integration",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "branch": "refs/heads/feat/lane-l-integration",
+      "dirty_files": 0,
+      "disk_bytes": 150241647,
+      "disk_gb": 0.14,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/lane-l-v2",
+      "sha": "2486a031c22c4b8fd80988baea4eb3a7068befa2",
+      "branch": "refs/heads/feat/lane-l-v2-integration",
+      "dirty_files": 0,
+      "disk_bytes": 149013359,
+      "disk_gb": 0.139,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=False"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/merge-194",
+      "sha": "4809fd881bcfc640e6e793118cedb8860bbb2a23",
+      "dirty_files": 0,
+      "disk_bytes": 149901393,
+      "disk_gb": 0.14,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/merge-208",
+      "sha": "312acad1220df152dd53893f287165a19daf6825",
+      "dirty_files": 0,
+      "disk_bytes": 150042545,
+      "disk_gb": 0.14,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/merge-209",
+      "sha": "6433cf0709f850878925aba076f67a0f83cd4606",
+      "dirty_files": 0,
+      "disk_bytes": 150068482,
+      "disk_gb": 0.14,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/micro-fix-seek-mobile",
+      "sha": "da8cccc4bb1be2c870d02ef8ff7d712f12a5631c",
+      "branch": "refs/heads/feat/micro-fix-seek-mobile-display",
+      "dirty_files": 0,
+      "disk_bytes": 150340376,
+      "disk_gb": 0.14,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/owner-view-v1",
+      "sha": "85756284e0fbe9decb9a8017b97a4def12162497",
+      "branch": "refs/heads/feat/owner-view-v1",
+      "dirty_files": 0,
+      "disk_bytes": 149234283,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/polish-multiview-v1",
+      "sha": "b8fab6c77f94dd9ed5db31e672132435c3f22c8b",
+      "branch": "refs/heads/polish/multiview-v1",
+      "dirty_files": 0,
+      "disk_bytes": 151066444,
+      "disk_gb": 0.141,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/polish-multiview-v2",
+      "sha": "656897e470072ee067b6cfc943ffc4b925696546",
+      "branch": "refs/heads/polish/multiview-v2",
+      "dirty_files": 0,
+      "disk_bytes": 155168748,
+      "disk_gb": 0.145,
+      "classification": "SUPERSEDED_KEEP_EVIDENCE",
+      "confidence": "low",
+      "classification_reason": "merged into origin/main; KEEP evidence",
+      "remote_status": "MERGED_INTO_MAIN",
+      "remote_reason": "merged into origin/main; on_origin=True"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v10-stack-consistency",
+      "sha": "5dcbb213a74755ba0bcf91437d4d3cb32cf57cbb",
+      "branch": "refs/heads/feat/pr-v10-stack-consistency",
+      "dirty_files": 0,
+      "disk_bytes": 149006392,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v2a-layer-inspector",
+      "sha": "bc627eb49e462b3e6209240a6068b810919f9810",
+      "branch": "refs/heads/feat/pr-v2a-layer-control-inspector",
+      "dirty_files": 0,
+      "disk_bytes": 149324018,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v2b-click-select",
+      "sha": "3d78a5307bf35c0b97a669fd9ab46be73134729d",
+      "branch": "refs/heads/feat/pr-v2b-click-select",
+      "dirty_files": 0,
+      "disk_bytes": 149326956,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v3a-trayectorias",
+      "sha": "195d89a3578dc5ea6d51f8aea58a447d1c8e5622",
+      "branch": "refs/heads/feat/pr-v3a-trayectorias",
+      "dirty_files": 0,
+      "disk_bytes": 148967169,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v3b-trayectorias-toggle",
+      "sha": "b47271a061bd246aa223a589ff312e22647a4e9d",
+      "branch": "refs/heads/feat/pr-v3b-trayectorias-toggle",
+      "dirty_files": 0,
+      "disk_bytes": 148970234,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v4a-gates-aforos",
+      "sha": "732ee5affef4099ae50e55d44e988aa26c4d1e43",
+      "branch": "refs/heads/feat/pr-v4a-gates-aforos",
+      "dirty_files": 0,
+      "disk_bytes": 148970995,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v5-kpi-tracks",
+      "sha": "6e8fdadd364d39c0df6cb6799b03afc55eaf5b2b",
+      "branch": "refs/heads/feat/pr-v5-kpi-tracks",
+      "dirty_files": 0,
+      "disk_bytes": 148974425,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v5b-gate-listener",
+      "sha": "55ba686eba9a11bf75270035b636096d55c8b72e",
+      "branch": "refs/heads/feat/pr-v5b-gate-clicked-listener",
+      "dirty_files": 0,
+      "disk_bytes": 148979196,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v6-timeline-events",
+      "sha": "8f610501f3fb6e1c8653c0fc5757afa9eba09552",
+      "branch": "refs/heads/feat/pr-v6-timeline-events",
+      "dirty_files": 0,
+      "disk_bytes": 148985414,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v7-export-scope",
+      "sha": "2cdc8978eb48ad900869ecdba618e350aeea4718",
+      "branch": "refs/heads/feat/pr-v7-export-scope",
+      "dirty_files": 0,
+      "disk_bytes": 148989187,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v8-mobile-sidepanel",
+      "sha": "277c21be8906b06a622017f6aa529e2d35a18de9",
+      "branch": "refs/heads/feat/pr-v8-mobile-sidepanel",
+      "dirty_files": 0,
+      "disk_bytes": 148994334,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/pr-v9-states-helper",
+      "sha": "0b921581c09a29a33f02e023355e0f33536959c3",
+      "branch": "refs/heads/feat/pr-v9-states-helper",
+      "dirty_files": 0,
+      "disk_bytes": 148999456,
+      "disk_gb": 0.139,
+      "classification": "STALE_CANDIDATE",
+      "confidence": "low",
+      "classification_reason": "orphan local branch, not merged, not on origin",
+      "remote_status": "ORPHAN_LOCAL_ONLY",
+      "remote_reason": "not on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/promote-lane-h",
+      "sha": "62332d65aaa821f53dd50ad10a1bbdb1458dc293",
+      "dirty_files": 0,
+      "disk_bytes": 150359383,
+      "disk_gb": 0.14,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/wireup-final",
+      "sha": "6090af9c3f1ba3591dc48d06310ee170ed19bb1b",
+      "branch": "refs/heads/feat/wireup-final-elite20",
+      "dirty_files": 0,
+      "disk_bytes": 151079161,
+      "disk_gb": 0.141,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/Users/david/repos/IA-VISION.worktrees/wt-feat-trafficlab-premium-cabin",
+      "sha": "c7c577f766f143fa0605666092d2cb2ee1421248",
+      "dirty_files": 0,
+      "disk_bytes": 155105281,
+      "disk_gb": 0.144,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "detached HEAD — do not touch",
+      "remote_status": "NO_BRANCH",
+      "remote_reason": "no local branch"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/x/00_PROYECTOS/IA-VISION.worktrees/audit-ia-results-111-inventory",
+      "sha": "411b0a2ccd0376346349f076aab2e7f9f0da390c",
+      "branch": "refs/heads/audit/ia-results-111-inventory-fbe17d2",
+      "dirty_files": 0,
+      "disk_bytes": 13299342,
+      "disk_gb": 0.012,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/x/00_PROYECTOS/IA-VISION.worktrees/lane6-vehicular-batch8",
+      "sha": "1d05041c10c568cad1a615d5ebba45cbf980b16d",
+      "branch": "refs/heads/feat/vehicular-batch8-79",
+      "dirty_files": 0,
+      "disk_bytes": 3216327,
+      "disk_gb": 0.003,
+      "classification": "ACTIVE_STACKED",
+      "confidence": "low",
+      "classification_reason": "still on origin, not merged",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/x/00_PROYECTOS/IA-VISION.worktrees/reality-twin-01-20260911",
+      "sha": "3d7e21e9200d77a344972423b7bd147528c2de00",
+      "branch": "refs/heads/feat/reality-twin-01-20260911",
+      "dirty_files": 4,
+      "disk_bytes": 11813511,
+      "disk_gb": 0.011,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\IA-VISION",
+      "path": "C:/x/00_PROYECTOS/IA-VISION.worktrees/yolo-vnext-80",
+      "sha": "cabcd3f6acad93ff4b154f141d2fdbf9a99c0650",
+      "branch": "refs/heads/feat/engine-peatones-class-config-v2",
+      "dirty_files": 6,
+      "disk_bytes": 20239952,
+      "disk_gb": 0.019,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule",
+      "remote_status": "OPEN_ON_ORIGIN",
+      "remote_reason": "still on origin, not merged into main"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control",
+      "sha": "7af8650625e3bc8f3451e1898af47963bb1b543a",
+      "branch": "refs/heads/main",
+      "dirty_files": 1,
+      "disk_bytes": 26886258,
+      "disk_gb": 0.025,
+      "classification": "ACTIVE_CANONICAL",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/agent-body-mvp",
+      "sha": "3609c07171a2e9fc44f61726ff9947c1ddaf70fc",
+      "branch": "refs/heads/ashley/agent-body-mvp-20260921",
+      "dirty_files": 0,
+      "disk_bytes": 2341004,
+      "disk_gb": 0.002,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/integration-brain-recon",
+      "sha": "b96c3b6ab8845939c34075b0eca287848cf53483",
+      "branch": "refs/heads/integration/brain-reconciliation-20260919",
+      "dirty_files": 0,
+      "disk_bytes": 984110,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/MVP04",
+      "sha": "227003f8e6646ab54a89f4dc173022db212e1676",
+      "branch": "refs/heads/feat/mvp04-live-brain-v3-20260923",
+      "dirty_files": 2,
+      "disk_bytes": 2277723,
+      "disk_gb": 0.002,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/MVP05A",
+      "sha": "0e159592f7120798ccad6a3bac09e0485703c4db",
+      "branch": "refs/heads/feat/mvp05a-learning-observatory-20260923",
+      "dirty_files": 1,
+      "disk_bytes": 2737355,
+      "disk_gb": 0.003,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/MVP05B",
+      "sha": "a4b77b9be08cb53eed883685b53fa2e9a9b7692c",
+      "branch": "refs/heads/feat/mvp05b-neuroplasticity-controlled-20260923",
+      "dirty_files": 1,
+      "disk_bytes": 3537018,
+      "disk_gb": 0.003,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/orca-owner-reports-v1-20260922",
+      "sha": "8dfbba0537215bb43edfab919536a04ef2898b34",
+      "branch": "refs/heads/feat/orca-owner-reports-v1-20260922",
+      "dirty_files": 0,
+      "disk_bytes": 2364437,
+      "disk_gb": 0.002,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/persistent-policy-v2",
+      "sha": "afc1bc15f48524d3a1bb64356d18863103830326",
+      "branch": "refs/heads/hermes/persistent-policy-v2-20260919",
+      "dirty_files": 0,
+      "disk_bytes": 846754,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/t_293aa6a8",
+      "sha": "60d61c3e4294fb46800850f4720be1462448d87d",
+      "branch": "refs/heads/ashley/mc-phase2-gate-e-knowledge-graph-20260919",
+      "dirty_files": 0,
+      "disk_bytes": 719066,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/t_5cc459b6",
+      "sha": "391509ff177e66e77196b0478ca4126f119df9ff",
+      "branch": "refs/heads/ashley/mc-phase2-gate-d-discovery-20260919",
+      "dirty_files": 0,
+      "disk_bytes": 819449,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/t_6afa2ac9",
+      "sha": "bcaf27841ba9835cc6dbf0627db49bb40968b596",
+      "branch": "refs/heads/ashley/source-scope-backfill-20260919",
+      "dirty_files": 0,
+      "disk_bytes": 649199,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/t_97ecb0d5",
+      "sha": "e539e2a1ede36b797c6fe36df812bf210bef7564",
+      "branch": "refs/heads/wt/t_97ecb0d5",
+      "dirty_files": 0,
+      "disk_bytes": 1054347,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\panorama-mission-control",
+      "path": "C:/Users/david/repos/panorama-mission-control/.worktrees/v4-neural-mc",
+      "sha": "5316572aa7b157a5c8011c9fd3be12bba2671ef2",
+      "branch": "refs/heads/feat/archify-v4-neural-mc-10",
+      "dirty_files": 0,
+      "disk_bytes": 2346717,
+      "disk_gb": 0.002,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/Users/david/repos/traficlab-factory",
+      "sha": "2cbc4b2243fbf886c2d18f74f169fd7f88b15f32",
+      "branch": "refs/heads/main",
+      "dirty_files": 1,
+      "disk_bytes": 7845201,
+      "disk_gb": 0.007,
+      "classification": "ACTIVE_CANONICAL",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/c/Users/david/repos/traficlab-factory/.worktrees/baseline-guard-v1",
+      "sha": "cc371d94ccc98ea00cdb0ea08b6ecd7c5d5ae39b",
+      "branch": "refs/heads/feat/baseline-guard-v1",
+      "dirty_files": 0,
+      "disk_bytes": 1579777,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/c/Users/david/repos/traficlab-factory/.worktrees/disk-guardian-v1",
+      "sha": "0448070adb5838605f91ca97ecf2cb74b49f8820",
+      "branch": "refs/heads/feat/disk-guardian-v1",
+      "dirty_files": 0,
+      "disk_bytes": 1495235,
+      "disk_gb": 0.001,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/c/Users/david/repos/traficlab-factory.worktrees/loop-engineering-v1",
+      "sha": "795b5a571261b720f714a871853570ac1fdf9e5d",
+      "branch": "refs/heads/feat/loop-engineering-v1",
+      "dirty_files": 1,
+      "disk_bytes": 1118710,
+      "disk_gb": 0.001,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/dev/tlc-t3bc6e5ce",
+      "sha": "3d0ec05dbe162e75cfbe200d4c1bcf1fd39d8317",
+      "branch": "refs/heads/feat/control-v0-mission-control",
+      "dirty_files": 0,
+      "disk_bytes": 3109363,
+      "disk_gb": 0.003,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "low",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/dev/traficlab-factory-handoff/jev-e2e-final-canary-20260922-02/repo",
+      "sha": "2cbc4b2243fbf886c2d18f74f169fd7f88b15f32",
+      "dirty_files": 0,
+      "disk_bytes": 3010759,
+      "disk_gb": 0.003,
+      "classification": "UNKNOWN_PRESERVE",
+      "confidence": "med",
+      "classification_reason": "no upgrade"
+    },
+    {
+      "repo": "C:\\Users\\david\\repos\\traficlab-factory",
+      "path": "C:/Users/david/repos/traficlab-factory/.worktrees/canary-orca-bridge-49",
+      "sha": "d66f42047b97fead899a30ffb6ddf2c9d713254b",
+      "dirty_files": 8,
+      "disk_bytes": 1731165,
+      "disk_gb": 0.002,
+      "classification": "ACTIVE_DIRTY_OWNER_PRESERVE",
+      "confidence": "high",
+      "classification_reason": "preserved by base rule"
+    }
+  ],
+  "untracked_repos": [
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-cert-study-wt",
+      "name": "IA-VISION-cert-study-wt",
+      "is_git_repo": true,
+      "disk_bytes": 42299630,
+      "disk_gb": 0.039,
+      "head_sha": "a28d98182cc5",
+      "branch": "wt/ia-vision-certification-study-20260917"
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-cert-template",
+      "name": "IA-VISION-cert-template",
+      "is_git_repo": true,
+      "disk_bytes": 13306688,
+      "disk_gb": 0.012,
+      "head_sha": "ce4cc2364eca",
+      "branch": "audit/ia-cert-template-fbe17d2-wt"
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-g5sha37",
+      "name": "IA-VISION-g5sha37",
+      "is_git_repo": true,
+      "disk_bytes": 32130578,
+      "disk_gb": 0.03,
+      "head_sha": "0955f87d333a",
+      "branch": "feat/g5-sha37-20260917"
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-pipeline-w2",
+      "name": "IA-VISION-pipeline-w2",
+      "is_git_repo": true,
+      "disk_bytes": 30824433,
+      "disk_gb": 0.029,
+      "head_sha": "55118a9a5e39",
+      "branch": "feat/witness-w1-productize-fbe17d2"
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-pipeline-witness",
+      "name": "IA-VISION-pipeline-witness",
+      "is_git_repo": true,
+      "disk_bytes": 13296364,
+      "disk_gb": 0.012,
+      "head_sha": "1fe1ab47327a",
+      "branch": "feat/behavioral-witness-w01-fbe17d2"
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\ia-vision-post-merge-smoke",
+      "name": "ia-vision-post-merge-smoke",
+      "is_git_repo": false,
+      "disk_bytes": 0,
+      "disk_gb": 0.0
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-product-cert",
+      "name": "IA-VISION-product-cert",
+      "is_git_repo": true,
+      "disk_bytes": 340591120,
+      "disk_gb": 0.317,
+      "head_sha": "64c35c051fb4",
+      "branch": "audit/pr110-evidence-cert-fbe17d2",
+      "du_reconciliation": {
+        "old_bytes": 340591016,
+        "new_bytes": 340591120,
+        "delta_bytes": 104
+      }
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-product-fix2",
+      "name": "IA-VISION-product-fix2",
+      "is_git_repo": false,
+      "disk_bytes": 24337,
+      "disk_gb": 0.0
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\ia-vision-rebase-142",
+      "name": "ia-vision-rebase-142",
+      "is_git_repo": true,
+      "disk_bytes": 32132082,
+      "disk_gb": 0.03,
+      "head_sha": "068a8de271ba",
+      "branch": "feat/visor-loadspeeds-compkey-fix-rebased"
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION-w2-witness-wiring",
+      "name": "IA-VISION-w2-witness-wiring",
+      "is_git_repo": true,
+      "disk_bytes": 35017195,
+      "disk_gb": 0.033,
+      "head_sha": "86bd30136d3b",
+      "branch": "feat/witness-w2-visor-wiring"
+    }
+  ],
+  "docker": {
+    "containers_running": {
+      "count": 21,
+      "items": [
+        [
+          "nuclio-local-storage-reader",
+          "gcr.io/iguazio/alpine:3.20",
+          "Up 56 minutes"
+        ],
+        [
+          "ia-vision-visor",
+          "ia-vision:latest",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "ia-vision-admin",
+          "ia-vision:latest",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "traficlab_mysql_m624",
+          "mysql:8.0",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "cvat_ui",
+          "cvat/ui:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_quality_reports",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_server",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_utils",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_import",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_consensus",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_chunks",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_export",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_annotation",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_webhooks",
+          "cvat/server:dev",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_db",
+          "postgres:15-alpine",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_redis_ondisk",
+          "apache/kvrocks:2.12.1",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "cvat_opa",
+          "openpolicyagent/opa:1.12.2",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_redis_inmem",
+          "redis:7.2.11-alpine",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_clickhouse",
+          "clickhouse/clickhouse-server:23.11-alpine",
+          "Up 56 minutes"
+        ],
+        [
+          "nuclio",
+          "quay.io/nuclio/dashboard:1.15.9-amd64",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "cvat_grafana",
+          "grafana/grafana-oss:10.1.2",
+          "Up 56 minutes"
+        ]
+      ]
+    },
+    "containers_all": {
+      "count": 29,
+      "items": [
+        [
+          "nuclio-local-storage-reader",
+          "Up 56 minutes"
+        ],
+        [
+          "ia-vision-visor",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "ia-vision-admin",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "ia-vision-admin-f1",
+          "Exited (255) 9 days ago"
+        ],
+        [
+          "ia-vision-visor-f1",
+          "Exited (255) 9 days ago"
+        ],
+        [
+          "ia-vision-admin-live",
+          "Exited (255) 11 days ago"
+        ],
+        [
+          "ia-vision-visor-live",
+          "Exited (255) 11 days ago"
+        ],
+        [
+          "traficlab_mysql_m624",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "carla-server",
+          "Exited (255) 2 months ago"
+        ],
+        [
+          "openclaw-sbx-agent-main-f331f052",
+          "Exited (255) 4 months ago"
+        ],
+        [
+          "cvat_ui",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_vector",
+          "Exited (127) 2 weeks ago"
+        ],
+        [
+          "cvat_worker_quality_reports",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_server",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_utils",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_import",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_consensus",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_chunks",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_export",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_annotation",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_worker_webhooks",
+          "Up 56 minutes"
+        ],
+        [
+          "traefik",
+          "Exited (127) 2 weeks ago"
+        ],
+        [
+          "cvat_db",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_redis_ondisk",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "cvat_opa",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_redis_inmem",
+          "Up 56 minutes"
+        ],
+        [
+          "cvat_clickhouse",
+          "Up 56 minutes"
+        ],
+        [
+          "nuclio",
+          "Up 56 minutes (healthy)"
+        ],
+        [
+          "cvat_grafana",
+          "Up 56 minutes"
+        ]
+      ]
+    },
+    "images": {
+      "count": 22,
+      "items": [
+        [
+          "mariadb:11",
+          "458MB"
+        ],
+        [
+          "ia-vision:live-media",
+          "1.2GB"
+        ],
+        [
+          "ia-vision:latest",
+          "1.2GB"
+        ],
+        [
+          "python:3.11-slim",
+          "200MB"
+        ],
+        [
+          "alpine:latest",
+          "13MB"
+        ],
+        [
+          "mysql:8.0",
+          "1.1GB"
+        ],
+        [
+          "debian:bookworm-slim",
+          "116MB"
+        ],
+        [
+          "openclaw-sandbox:bookworm-slim",
+          "116MB"
+        ],
+        [
+          "cvat/ui:dev",
+          "235MB"
+        ],
+        [
+          "cvat/server:dev",
+          "2.11GB"
+        ],
+        [
+          "gcr.io/iguazio/alpine:3.20",
+          "12.1MB"
+        ],
+        [
+          "postgres:15-alpine",
+          "392MB"
+        ],
+        [
+          "traefik:v3.6",
+          "242MB"
+        ],
+        [
+          "openpolicyagent/opa:1.12.2",
+          "123MB"
+        ],
+        [
+          "quay.io/nuclio/dashboard:1.15.9-amd64",
+          "423MB"
+        ],
+        [
+          "redis:7.2.11-alpine",
+          "60.2MB"
+        ],
+        [
+          "carlasim/carla:0.9.16",
+          "29.4GB"
+        ],
+        [
+          "apache/kvrocks:2.12.1",
+          "230MB"
+        ],
+        [
+          "clickhouse/clickhouse-server:23.11-alpine",
+          "1.2GB"
+        ],
+        [
+          "carlasim/carla:0.9.15",
+          "30.1GB"
+        ],
+        [
+          "grafana/grafana-oss:10.1.2",
+          "527MB"
+        ],
+        [
+          "timberio/vector:0.26.0-alpine",
+          "169MB"
+        ]
+      ]
+    },
+    "volumes": {
+      "count": 13,
+      "items": [
+        [
+          "bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6",
+          "local"
+        ],
+        [
+          "cvat_cvat_cache_db",
+          "local"
+        ],
+        [
+          "cvat_cvat_data",
+          "local"
+        ],
+        [
+          "cvat_cvat_db",
+          "local"
+        ],
+        [
+          "cvat_cvat_events_db",
+          "local"
+        ],
+        [
+          "cvat_cvat_inmem_db",
+          "local"
+        ],
+        [
+          "cvat_cvat_keys",
+          "local"
+        ],
+        [
+          "cvat_cvat_logs",
+          "local"
+        ],
+        [
+          "ia-vision_ia_vision_db",
+          "local"
+        ],
+        [
+          "ia_vision_f1_db",
+          "local"
+        ],
+        [
+          "ia_vision_live_media_db",
+          "local"
+        ],
+        [
+          "mysql_data_m624",
+          "local"
+        ],
+        [
+          "nuclio-local-storage",
+          "local"
+        ]
+      ]
+    }
+  },
+  "sqlite_dbs": [
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION\\.codegraph\\codegraph.db",
+      "relative_to": "C:\\Users\\david\\repos\\IA-VISION",
+      "size_bytes": 25337856,
+      "size_mb": 24.16,
+      "valid_sqlite": true,
+      "table_count": 14
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION\\tools\\cert_evidence\\synth_v24_for_g6_v2.db",
+      "relative_to": "C:\\Users\\david\\repos\\IA-VISION",
+      "size_bytes": 913408,
+      "size_mb": 0.87,
+      "valid_sqlite": true,
+      "table_count": 19
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION\\tools\\cert_evidence\\synth_v24_for_g6.db",
+      "relative_to": "C:\\Users\\david\\repos\\IA-VISION",
+      "size_bytes": 368640,
+      "size_mb": 0.35,
+      "valid_sqlite": true,
+      "table_count": 11
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\traficlab-factory\\directive_watcher.sqlite",
+      "relative_to": "C:\\Users\\david\\repos\\traficlab-factory",
+      "size_bytes": 45056,
+      "size_mb": 0.04,
+      "valid_sqlite": true,
+      "table_count": 6
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\traficlab-factory\\control\\tests\\_test_control.db",
+      "relative_to": "C:\\Users\\david\\repos\\traficlab-factory",
+      "size_bytes": 36864,
+      "size_mb": 0.04,
+      "valid_sqlite": true,
+      "table_count": 2
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION\\04_storage\\reid\\candidates.db",
+      "relative_to": "C:\\Users\\david\\repos\\IA-VISION",
+      "size_bytes": 28672,
+      "size_mb": 0.03,
+      "valid_sqlite": true,
+      "table_count": 2
+    },
+    {
+      "path": "C:\\Users\\david\\repos\\IA-VISION\\04_storage\\lineage\\lineage.sqlite",
+      "relative_to": "C:\\Users\\david\\repos\\IA-VISION",
+      "size_bytes": 20480,
+      "size_mb": 0.02,
+      "valid_sqlite": true,
+      "table_count": 2
+    }
+  ],
+  "sqlite_dbs_total_bytes": 26750976,
+  "processes": {
+    "suspicious_running": [
+      {
+        "name": "postgres.exe",
+        "pid": "7156"
+      },
+      {
+        "name": "postgres.exe",
+        "pid": "8172"
+      },
+      {
+        "name": "postgres.exe",
+        "pid": "8264"
+      },
+      {
+        "name": "postgres.exe",
+        "pid": "8288"
+      },
+      {
+        "name": "postgres.exe",
+        "pid": "2788"
+      },
+      {
+        "name": "postgres.exe",
+        "pid": "7316"
+      },
+      {
+        "name": "postgres.exe",
+        "pid": "7676"
+      },
+      {
+        "name": "ollama app.exe",
+        "pid": "24488"
+      },
+      {
+        "name": "ollama.exe",
+        "pid": "18196"
+      },
+      {
+        "name": "node.exe",
+        "pid": "30288"
+      },
+      {
+        "name": "Hermes.exe",
+        "pid": "41152"
+      },
+      {
+        "name": "Hermes.exe",
+        "pid": "48356"
+      },
+      {
+        "name": "Hermes.exe",
+        "pid": "49580"
+      },
+      {
+        "name": "Hermes.exe",
+        "pid": "38948"
+      },
+      {
+        "name": "Hermes.exe",
+        "pid": "12300"
+      },
+      {
+        "name": "node.exe",
+        "pid": "47372"
+      },
+      {
+        "name": "com.docker.backend.exe",
+        "pid": "2956"
+      },
+      {
+        "name": "com.docker.backend.exe",
+        "pid": "37928"
+      },
+      {
+        "name": "com.docker.build.exe",
+        "pid": "19192"
+      },
+      {
+        "name": "docker-sandbox.exe",
+        "pid": "44948"
+      },
+      {
+        "name": "Docker Desktop.exe",
+        "pid": "44284"
+      },
+      {
+        "name": "Docker Desktop.exe",
+        "pid": "3648"
+      },
+      {
+        "name": "Docker Desktop.exe",
+        "pid": "8224"
+      },
+      {
+        "name": "python.exe",
+        "pid": "37172"
+      },
+      {
+        "name": "python.exe",
+        "pid": "27828"
+      },
+      {
+        "name": "python.exe",
+        "pid": "16224"
+      },
+      {
+        "name": "python.exe",
+        "pid": "38348"
+      },
+      {
+        "name": "python.exe",
+        "pid": "4336"
+      },
+      {
+        "name": "python.exe",
+        "pid": "46188"
+      },
+      {
+        "name": "python.exe",
+        "pid": "45916"
+      },
+      {
+        "name": "hermes.exe",
+        "pid": "42268"
+      },
+      {
+        "name": "python.exe",
+        "pid": "33760"
+      },
+      {
+        "name": "python.exe",
+        "pid": "47268"
+      },
+      {
+        "name": "hermes.exe",
+        "pid": "40872"
+      },
+      {
+        "name": "python.exe",
+        "pid": "27212"
+      },
+      {
+        "name": "python.exe",
+        "pid": "39700"
+      },
+      {
+        "name": "node.exe",
+        "pid": "53720"
+      },
+      {
+        "name": "node.exe",
+        "pid": "46664"
+      },
+      {
+        "name": "python.exe",
+        "pid": "39032"
+      },
+      {
+        "name": "python.exe",
+        "pid": "8040"
+      },
+      {
+        "name": "python.exe",
+        "pid": "15832"
+      },
+      {
+        "name": "python.exe",
+        "pid": "48504"
+      },
+      {
+        "name": "python.exe",
+        "pid": "21464"
+      },
+      {
+        "name": "python.exe",
+        "pid": "42324"
+      },
+      {
+        "name": "python.exe",
+        "pid": "46576"
+      },
+      {
+        "name": "python.exe",
+        "pid": "29472"
+      },
+      {
+        "name": "python.exe",
+        "pid": "42328"
+      },
+      {
+        "name": "python.exe",
+        "pid": "27248"
+      },
+      {
+        "name": "python.exe",
+        "pid": "37500"
+      },
+      {
+        "name": "python.exe",
+        "pid": "25444"
+      },
+      {
+        "name": "hermes.exe",
+        "pid": "55844"
+      },
+      {
+        "name": "python.exe",
+        "pid": "32408"
+      },
+      {
+        "name": "python.exe",
+        "pid": "16464"
+      },
+      {
+        "name": "node.exe",
+        "pid": "6900"
+      },
+      {
+        "name": "python.exe",
+        "pid": "13468"
+      },
+      {
+        "name": "python.exe",
+        "pid": "17560"
+      },
+      {
+        "name": "hermes.exe",
+        "pid": "9796"
+      },
+      {
+        "name": "python.exe",
+        "pid": "7420"
+      },
+      {
+        "name": "python.exe",
+        "pid": "41536"
+      },
+      {
+        "name": "node.exe",
+        "pid": "32792"
+      },
+      {
+        "name": "python.exe",
+        "pid": "24292"
+      },
+      {
+        "name": "python.exe",
+        "pid": "42232"
+      },
+      {
+        "name": "python.exe",
+        "pid": "26628"
+      },
+      {
+        "name": "python.exe",
+        "pid": "33804"
+      },
+      {
+        "name": "python.exe",
+        "pid": "50624"
+      },
+      {
+        "name": "python.exe",
+        "pid": "23764"
+      },
+      {
+        "name": "python.exe",
+        "pid": "29596"
+      },
+      {
+        "name": "python.exe",
+        "pid": "52076"
+      },
+      {
+        "name": "python.exe",
+        "pid": "34416"
+      }
+    ]
+  },
+  "heavy_non_repo_dirs": [
+    {
+      "path": "C:\\Users\\david\\AppData\\Local\\hermes\\cache",
+      "size_bytes": 496415922,
+      "size_gb": 0.462
+    },
+    {
+      "path": "C:\\Users\\david\\.cache",
+      "size_bytes": 2002922453,
+      "size_gb": 1.865
+    },
+    {
+      "path": "C:\\Users\\david\\.ollama",
+      "size_bytes": 375222042965,
+      "size_gb": 349.453
+    },
+    {
+      "path": "C:\\Users\\david\\.docker",
+      "size_bytes": 115503698,
+      "size_gb": 0.108
+    },
+    {
+      "path": "C:\\Users\\david\\Videos",
+      "size_bytes": 504,
+      "size_gb": 0.0
+    },
+    {
+      "path": "C:\\Users\\david\\Music",
+      "size_bytes": 504,
+      "size_gb": 0.0
+    },
+    {
+      "path": "C:\\Users\\david\\OneDrive",
+      "size_bytes": 234981865031,
+      "size_gb": 218.844
+    },
+    {
+      "path": "C:\\Users\\david\\Documents",
+      "size_bytes": 674445736,
+      "size_gb": 0.628
+    },
+    {
+      "path": "C:\\Users\\david\\Downloads",
+      "size_bytes": 2295315096,
+      "size_gb": 2.138
+    },
+    {
+      "path": "C:\\Users\\david\\Videos",
+      "size_bytes": 504,
+      "size_gb": 0.0
+    },
+    {
+      "path": "C:\\Users\\david\\.minimax",
+      "size_bytes": 68756696,
+      "size_gb": 0.064
+    }
+  ],
+  "batch2_finished_at": "2026-09-25T06:07:35.670210+00:00",
+  "branches": {
+    "IA-VISION": {
+      "local_count": 182,
+      "remote_count": 183,
+      "locals": [
+        "audit/c0-canon-reconcile-bc913b8",
+        "audit/c1-blocked-m591-material-evidence-cae04aa91",
+        "audit/contrato-live-visor-cae04aa91",
+        "audit/g0-residual-clean-clone-cae04aa91",
+        "audit/g0-residual-governance-cae04aa91",
+        "audit/g0-residual-media-hotpath-cae04aa91",
+        "audit/gui-review-mirror-2-cae04aa91",
+        "+ audit/gui-review-mirror-3-cae04aa91",
+        "audit/gui-review-mirror-cae04aa91",
+        "audit/ia-cert-falsify-111-fbe17d2",
+        "audit/ia-cert-template-fbe17d2",
+        "+ audit/ia-cert-template-fbe17d2-wt",
+        "+ audit/ia-results-111-inventory-fbe17d2",
+        "+ audit/ia-results-g5-unclassified-check-fbe17d2",
+        "audit/m591-review-page-cae04aa91",
+        "+ audit/p6-sidecar-inspection-M591-diagnosis",
+        "+ audit/pr110-check4-overlay-alignment-fbe17d2",
+        "+ audit/pr110-evidence-cert-fbe17d2",
+        "audit/product-closeout-into-ia-vision-product-md-cae04aa91",
+        "audit/promote-check7-to-visor-tests-fbe17d2",
+        "audit/result-evidence-corrections-v2-4daffbd",
+        "+ audit/visor-closeout-103-fbe17d2",
+        "chore/upload-audit-evidence-pr172",
+        "+ deploy/pr109-physical-audit",
+        "+ docs/g12-pr71-merged-reconcile",
+        "+ docs/project-state-pr105-stale-reconcile",
+        "+ evidence/idom-unified-inventory-94-2026-09-15",
+        "+ feat-reality-twin-baseline-check",
+        "feat/3d-tiles-contract",
+        "feat/analytics-ui-v1-from-current-main",
+        "feat/analytics-ui-v7-fork",
+        "feat/annotations",
+        "+ feat/behavioral-witness-w01-fbe17d2",
+        "+ feat/combined-closeout",
+        "feat/contracts-registry",
+        "feat/cvv-00-shadow",
+        "feat/cvv-00-tooling-audit",
+        "feat/cvv-00-tooling-notebook-restore",
+        "feat/cvv-00-tooling-path-lint",
+        "+ feat/cvv-00-v5-notebook-restore",
+        "+ feat/cvv-00-v5-r5-emit",
+        "+ feat/domo-trajectories-speed-v1",
+        "feat/drift-dashboard",
+        "+ feat/enforcer-origin-matrix-v2",
+        "feat/engine-peatones-class-config",
+        "+ feat/engine-peatones-class-config-v2",
+        "feat/evidence-bundles",
+        "+ feat/fmi-feasibility-layer",
+        "feat/frame-playback-engine-t79",
+        "feat/g5-sha37-2026-09-17"
+      ],
+      "remotes": [
+        "remotes/origin/HEAD -> origin/main",
+        "remotes/origin/a12-browser-media",
+        "remotes/origin/audit/c0-canon-reconcile-bc913b8",
+        "remotes/origin/audit/c1-blocked-m591-material-evidence-cae04aa91",
+        "remotes/origin/audit/contrato-live-visor-cae04aa91",
+        "remotes/origin/audit/g0-residual-clean-clone-cae04aa91",
+        "remotes/origin/audit/g0-residual-governance-cae04aa91",
+        "remotes/origin/audit/g0-residual-media-hotpath-cae04aa91",
+        "remotes/origin/audit/gui-review-mirror-2-cae04aa91",
+        "remotes/origin/audit/gui-review-mirror-3-cae04aa91",
+        "remotes/origin/audit/gui-review-mirror-cae04aa91",
+        "remotes/origin/audit/ia-cert-falsify-111-fbe17d2",
+        "remotes/origin/audit/ia-results-111-inventory-fbe17d2",
+        "remotes/origin/audit/ia-results-g5-unclassified-check-fbe17d2",
+        "remotes/origin/audit/m591-review-page-cae04aa91",
+        "remotes/origin/audit/pr110-evidence-cert-fbe17d2",
+        "remotes/origin/audit/product-closeout-into-ia-vision-product-md-cae04aa91",
+        "remotes/origin/audit/promote-check7-to-visor-tests-fbe17d2",
+        "remotes/origin/audit/result-evidence-corrections-v2-4daffbd",
+        "remotes/origin/audit/visor-closeout-103-fbe17d2",
+        "remotes/origin/control/traficlab-engineering",
+        "remotes/origin/docs/control-final-sync",
+        "remotes/origin/docs/control-final-sync-2",
+        "remotes/origin/docs/control-final-sync-3",
+        "remotes/origin/docs/project-control-state",
+        "remotes/origin/docs/result-evidence-contract-v3",
+        "remotes/origin/evidence/idom-unified-inventory-94-2026-09-15",
+        "remotes/origin/evidence/importer-shadow-g3",
+        "remotes/origin/feat/3d-tiles-contract",
+        "remotes/origin/feat/analytics-api-v7",
+        "remotes/origin/feat/analytics-ui-v7",
+        "remotes/origin/feat/annotations",
+        "remotes/origin/feat/behavioral-witness-w01-fbe17d2",
+        "remotes/origin/feat/calibration-governance-clean",
+        "remotes/origin/feat/calibration-governance-clean-rebased",
+        "remotes/origin/feat/cg-a-provider-v1",
+        "remotes/origin/feat/contracts-registry",
+        "remotes/origin/feat/cvv-00-shadow",
+        "remotes/origin/feat/cvv-00-tooling-audit",
+        "remotes/origin/feat/cvv-00-tooling-notebook-restore",
+        "remotes/origin/feat/cvv-00-tooling-path-lint",
+        "remotes/origin/feat/cvv-00-v5-notebook-restore",
+        "remotes/origin/feat/cvv-00-v5-r5-emit",
+        "remotes/origin/feat/db-docker-01",
+        "remotes/origin/feat/domo-trajectories-speed-v1",
+        "remotes/origin/feat/drift-dashboard",
+        "remotes/origin/feat/enforcer-origin-matrix-v2",
+        "remotes/origin/feat/engine-peatones-class-config",
+        "remotes/origin/feat/engine-peatones-class-config-v2",
+        "remotes/origin/feat/evidence-bundles",
+        "remotes/origin/feat/fmi-feasibility-layer",
+        "remotes/origin/feat/frontend-renewal-iavision-#134-clean",
+        "remotes/origin/feat/g5-process-sha37",
+        "remotes/origin/feat/g5-research-sha37",
+        "remotes/origin/feat/g5-review-sha37",
+        "remotes/origin/feat/g5-sha37-20260917-v2",
+        "remotes/origin/feat/g5-visor-verify-sha37",
+        "remotes/origin/feat/g6-admin-platform",
+        "remotes/origin/feat/geojson-export",
+        "remotes/origin/feat/intelligence-os-g11-visual-refinement-premium",
+        "remotes/origin/feat/intelligence-os-product-spec",
+        "remotes/origin/feat/issue-145-mission-control-state-presentation",
+        "remotes/origin/feat/lane-A-analytics-v7-local",
+        "remotes/origin/feat/lane-A-control-aforos",
+        "remotes/origin/feat/lane-A-p0-canvas-black",
+        "remotes/origin/feat/lane-A-scene-endpoints-v1",
+        "remotes/origin/feat/lane-B-cabin-shell-v2",
+        "remotes/origin/feat/lane-a-canvas-firstframe",
+        "remotes/origin/feat/lane-a-filmstrip-mobile",
+        "remotes/origin/feat/lane-a-sidepanel-mobile-clip",
+        "remotes/origin/feat/lane-b-evidence-data",
+        "remotes/origin/feat/lane-b21-uncertainty",
+        "remotes/origin/feat/lane-b22-contracts",
+        "remotes/origin/feat/lane-b24-bundles",
+        "remotes/origin/feat/lane-c-cv",
+        "remotes/origin/feat/lane-d-c1-dedup",
+        "remotes/origin/feat/lane-d-c2-sidepanel-open",
+        "remotes/origin/feat/lane-d-h2-interval-cleanup",
+        "remotes/origin/feat/lane-d-h4-resize-debounce",
+        "remotes/origin/feat/lane-d-tests-port-fix",
+        "remotes/origin/feat/lane-e-e110-instancing",
+        "remotes/origin/feat/lane-e-e111-lod",
+        "remotes/origin/feat/lane-e-e19-workers",
+        "remotes/origin/feat/lane-e-multiview",
+        "remotes/origin/feat/lane-e10-gpu-instancing-prototype",
+        "remotes/origin/feat/lane-e11-drift-detector",
+        "remotes/origin/feat/lane-e11-spatiotemporal-lod",
+        "remotes/origin/feat/lane-e12-reid",
+        "remotes/origin/feat/lane-e17-lineage",
+        "remotes/origin/feat/lane-e17-road-model",
+        "remotes/origin/feat/lane-e20-drift-dashboard",
+        "remotes/origin/feat/lane-e9-web-worker-trajectory-decoder",
+        "remotes/origin/feat/lane-f-csv-sanitizer",
+        "remotes/origin/feat/lane-g-tests-addendum",
+        "remotes/origin/feat/lane-h-interop",
+        "remotes/origin/feat/lane-i-b23-obs",
+        "remotes/origin/feat/lane-j-visual-css",
+        "remotes/origin/feat/lineage-service",
+        "remotes/origin/feat/m503-drift-detector",
+        "remotes/origin/feat/m503-implementation-v2"
+      ]
+    },
+    "panorama-mission-control": {
+      "local_count": 14,
+      "remote_count": 33,
+      "locals": [
+        "+ ashley/agent-body-mvp-20260921",
+        "+ ashley/mc-phase2-gate-d-discovery-20260919",
+        "+ ashley/mc-phase2-gate-e-knowledge-graph-20260919",
+        "ashley/mc-phase2-gates-20260919",
+        "+ ashley/source-scope-backfill-20260919",
+        "+ feat/archify-v4-neural-mc-10",
+        "+ feat/mvp04-live-brain-v3-20260923",
+        "+ feat/mvp05a-learning-observatory-20260923",
+        "+ feat/mvp05b-neuroplasticity-controlled-20260923",
+        "+ feat/orca-owner-reports-v1-20260922",
+        "+ hermes/persistent-policy-v2-20260919",
+        "+ integration/brain-reconciliation-20260919",
+        "* main",
+        "+ wt/t_97ecb0d5"
+      ],
+      "remotes": [
+        "remotes/origin/HEAD -> origin/main",
+        "remotes/origin/ashley/agent-body-mvp-20260921",
+        "remotes/origin/ashley/live-brain-02-owner-view-20260919",
+        "remotes/origin/ashley/mc-phase2-gate-d-discovery-20260919",
+        "remotes/origin/ashley/mc-phase2-gate-d-fullscan-20260919",
+        "remotes/origin/ashley/mc-phase2-gate-e-graph-20260919",
+        "remotes/origin/ashley/mc-phase2-gate-e-knowledge-graph-20260919",
+        "remotes/origin/ashley/mc-phase2-gates-20260919",
+        "remotes/origin/ashley/mc-phase2-ps1-fix-20260919",
+        "remotes/origin/ashley/soul-v4-20260919",
+        "remotes/origin/ashley/source-scope-backfill-20260919",
+        "remotes/origin/ashley/v3-bootstrap-closeout-20260919-01",
+        "remotes/origin/canon/ia-vision-knowledge-20260913",
+        "remotes/origin/decision/hermes-one-front-door",
+        "remotes/origin/feat/agent-control-plane-v2",
+        "remotes/origin/feat/archify-brain-view-v2",
+        "remotes/origin/feat/archify-owner-mode-10",
+        "remotes/origin/feat/archify-v3-live-graph-engine",
+        "remotes/origin/feat/archify-v4-neural-mc-10",
+        "remotes/origin/feat/control-room-delegation-research-skills-37",
+        "remotes/origin/feat/knowledge-loop-v1",
+        "remotes/origin/feat/live-brain-telemetry-v1",
+        "remotes/origin/feat/llm-wiki-core-v1-20260919",
+        "remotes/origin/feat/orca-owner-reports-v1-20260922",
+        "remotes/origin/hermes/persistent-policy-v2-20260919",
+        "remotes/origin/hermes/project-registry-v41-20260919",
+        "remotes/origin/hermes/project-registry-v41-r2-20260919",
+        "remotes/origin/hermes/v5-consolidate-pr21-into-pr20-20260919",
+        "remotes/origin/hermes/v5-intake-stale-runtime-reconcile-20260919-v2",
+        "remotes/origin/integration/brain-reconciliation-20260919",
+        "remotes/origin/main",
+        "remotes/origin/neokyhurtado-cmd/live-brain-02-wire-hermes-jupiter-telemetry-on-b",
+        "remotes/origin/policy/hermes-owner-autonomy-v2"
+      ]
+    },
+    "traficlab-factory": {
+      "local_count": 11,
+      "remote_count": 36,
+      "locals": [
+        "+ feat/baseline-guard-v1",
+        "+ feat/control-v0-mission-control",
+        "+ feat/disk-guardian-v1",
+        "feat/factory-e2e-bridge-01",
+        "feat/hermes-2.0-github-directive-watcher",
+        "+ feat/loop-engineering-v1",
+        "feat/orca-auto-wake-bridge",
+        "feat/trafficlab-control-v1-01-m5-v0",
+        "feature/orch-autodispatch-02",
+        "fix/telegram-normal-hermes-session",
+        "* main"
+      ],
+      "remotes": [
+        "remotes/origin/HEAD -> origin/main",
+        "remotes/origin/control-v1-v0-prototype",
+        "remotes/origin/docs/ashley-active-suini-owner",
+        "remotes/origin/docs/jupiter-canonical-operating-model-v1",
+        "remotes/origin/docs/panorama-mission-control-v1",
+        "remotes/origin/feat/a2a-factory-shadow-v1",
+        "remotes/origin/feat/factory-e2e-bridge-01",
+        "remotes/origin/feat/g5-process-sha37",
+        "remotes/origin/feat/g5-research-sha37",
+        "remotes/origin/feat/g5-review-sha37",
+        "remotes/origin/feat/g5-visor-verify-sha37",
+        "remotes/origin/feat/hermes-2.0-github-directive-watcher",
+        "remotes/origin/feat/hermes-2.0-p1-gate-binding",
+        "remotes/origin/feat/internal-consult-v1-20260913",
+        "remotes/origin/feat/jev-live-decision-plane-20260921",
+        "remotes/origin/feat/jev-shadow-decision-plane",
+        "remotes/origin/feat/loop-engineering-v1",
+        "remotes/origin/feat/multiview-orchestration-20260919",
+        "remotes/origin/feat/omh-control-room-canary",
+        "remotes/origin/feat/one-ticket-autonomy-v1",
+        "remotes/origin/feat/orca-auto-wake-bridge",
+        "remotes/origin/feat/single-front-door-01",
+        "remotes/origin/feat/sol-efficiency-native-v1",
+        "remotes/origin/feature/astra-consult-loop-v1",
+        "remotes/origin/feature/orch-autodispatch-02",
+        "remotes/origin/fix/telegram-normal-hermes-session",
+        "remotes/origin/hermes/skill-fabric-v1-20260922",
+        "remotes/origin/main",
+        "remotes/origin/p1/humango-gate-v2",
+        "remotes/origin/p3-audit-fixes",
+        "remotes/origin/pr19",
+        "remotes/origin/probe/evolution-v1-closeout-20260914",
+        "remotes/origin/probe/kanban-session-sync-20260913",
+        "remotes/origin/reconcile/ashley-auto-wake-factory-promote-20260918-01",
+        "remotes/origin/skill-fabric-v1-implant-20260922-01",
+        "remotes/origin/tmp-internal-consult-check"
+      ]
+    }
+  },
+  "classification_counts": {
+    "ACTIVE_DIRTY_OWNER_PRESERVE": 30,
+    "STALE_CANDIDATE": 31,
+    "ACTIVE_STACKED": 50,
+    "UNKNOWN_PRESERVE": 20,
+    "SUPERSEDED_KEEP_EVIDENCE": 10,
+    "ACTIVE_CANONICAL": 2
+  },
+  "disk_totals": {
+    "worktrees_bytes": 9889652715,
+    "untracked_clones_bytes": 539622427,
+    "sqlite_dbs_bytes": 26750976,
+    "heavy_non_repo_bytes": 615857269109,
+    "total_discovered_bytes": 638878821428,
+    "safe_candidate_bytes": 3148669306,
+    "review_required_bytes": 19306509714,
+    "unknown_preserve_bytes": 17779930506,
+    "live_runtime_detected": true,
+    "suspicious_process_names": [
+      "com.docker.backend",
+      "com.docker.build",
+      "docker desktop",
+      "docker-sandbox",
+      "hermes",
+      "node",
+      "ollama",
+      "ollama app",
+      "postgres",
+      "python"
+    ],
+    "du_canonical_worktrees_bytes": 9889652715,
+    "du_canonical_clones_bytes": 539622427
+  },
+  "finished_at": "2026-09-25T06:18:40.136734+00:00",
+  "ia_vision_main": {
+    "origin_main_sha": "bbab7260231c",
+    "local_main_sha": "ba4e26975577",
+    "fetch_exit_code": 0
+  },
+  "du_correction": {
+    "method": "du -sb (cross-check against Path.rglob)",
+    "measured_at": "2026-09-25T06:18:40.136734+00:00",
+    "per_root": {
+      "IA-VISION_bare": 1596860496,
+      "IA-VISION.worktrees": 9889652715,
+      "panorama-mission-control": 26886258,
+      "traficlab-factory": 8254430,
+      "suini": -1,
+      "corrective-closeout": 0,
+      "data": 0
+    },
+    "per_root_gb": {
+      "IA-VISION_bare": 1.487,
+      "IA-VISION.worktrees": 9.21,
+      "panorama-mission-control": 0.025,
+      "traficlab-factory": 0.008,
+      "suini": null,
+      "corrective-closeout": 0.0,
+      "data": 0.0
+    },
+    "ia_vision_clones": {
+      "IA-VISION-cert-study-wt": 42299630,
+      "IA-VISION-cert-template": 13306688,
+      "IA-VISION-g5sha37": 32130578,
+      "IA-VISION-pipeline-w2": 30824433,
+      "IA-VISION-pipeline-witness": 13296364,
+      "IA-VISION-product-cert": 340591120,
+      "IA-VISION-product-fix2": 24337,
+      "IA-VISION-w2-witness-wiring": 35017195,
+      "ia-vision-post-merge-smoke": 0,
+      "ia-vision-rebase-142": 32132082
+    },
+    "ia_vision_clones_total_bytes": 539622427,
+    "ia_vision_clones_total_gb": 0.503,
+    "findings": [
+      {
+        "kind": "phantom_local_path",
+        "description": "MEMORY and gh repo list reference 'suini' as canonical, but ~/repos/suini does not exist locally.",
+        "verified_by": "du -sb /c/Users/david/repos/suini  -> DOES_NOT_EXIST",
+        "gh_remote": "https://github.com/neokyhurtado-cmd/suini",
+        "gh_local_clone_exists": false,
+        "classification": "GHOST_LOCAL_PATH",
+        "action": "none — out of scope until David clones it"
+      },
+      {
+        "kind": "measurement_methodology",
+        "description": "Path.rglob and du -sb agree on worktrees (~10 GB) but Path.rglob over-counted earlier — it walked clones too.",
+        "old_total_worktrees_gb_rglob": 20.913,
+        "new_total_worktrees_gb_du": 9.21,
+        "delta_gb": -11.703
+      }
+    ]
+  },
+  "docker_full": {
+    "measured_at": "2026-09-25T06:49:09.800422+00:00",
+    "containers": [
+      {
+        "name": "nuclio-local-storage-reader",
+        "image": "gcr.io/iguazio/alpine:3.20",
+        "status": "Up 2 hours",
+        "ports": "",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/nuclio-local-storage/_data",
+            "destination": "/etc/nuclio/store",
+            "mode": "z",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-visor",
+        "image": "ia-vision:latest",
+        "status": "Up 2 hours (healthy)",
+        "ports": "127.0.0.1:7921->7921/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia-vision_ia_vision_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-admin",
+        "image": "ia-vision:latest",
+        "status": "Up 2 hours (healthy)",
+        "ports": "127.0.0.1:7920->7920/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia-vision_ia_vision_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-admin-f1",
+        "image": "ia-vision:live-media",
+        "status": "Exited (255) 9 days ago",
+        "ports": "127.0.0.1:7930->7920/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_f1_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-visor-f1",
+        "image": "ia-vision:live-media",
+        "status": "Exited (255) 9 days ago",
+        "ports": "127.0.0.1:7931->7921/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_f1_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-admin-live",
+        "image": "sha256:cb3ca8b2f43c91f222d35e0262a057eccbdffdc2afb23538416265c091b7e1b3",
+        "status": "Exited (255) 11 days ago",
+        "ports": "127.0.0.1:7920->7920/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_live_media_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "ia-vision-visor-live",
+        "image": "sha256:cb3ca8b2f43c91f222d35e0262a057eccbdffdc2afb23538416265c091b7e1b3",
+        "status": "Exited (255) 11 days ago",
+        "ports": "127.0.0.1:7921->7921/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/run/desktop/mnt/host/x/TraficLabPro/data/raw",
+            "destination": "/media/raw",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/ia_vision_live_media_db/_data",
+            "destination": "/var/lib/ia-vision",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "traficlab_mysql_m624",
+        "image": "mysql:8.0",
+        "status": "Up 2 hours (healthy)",
+        "ports": "127.0.0.1:3306->3306/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\dev\\traficlab-dashboard\\M591_idom_cam1_dia1\\init.sql",
+            "destination": "/docker-entrypoint-initdb.d/00_init.sql",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/mysql_data_m624/_data",
+            "destination": "/var/lib/mysql",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "carla-server",
+        "image": "carlasim/carla:0.9.16",
+        "status": "Exited (255) 2 months ago",
+        "ports": "0.0.0.0:2000-2002->2000-2002/tcp",
+        "mount_count": 0,
+        "mounts": []
+      },
+      {
+        "name": "openclaw-sbx-agent-main-f331f052",
+        "image": "openclaw-sandbox:bookworm-slim",
+        "status": "Exited (255) 4 months ago",
+        "ports": "",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\Users\\david\\.openclaw\\sandboxes\\agent-main-f331f052",
+            "destination": "/workspace",
+            "mode": "ro,z",
+            "rw": false,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_ui",
+        "image": "cvat/ui:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 0,
+        "mounts": []
+      },
+      {
+        "name": "cvat_vector",
+        "image": "timberio/vector:0.26.0-alpine",
+        "status": "Exited (127) 3 weeks ago",
+        "ports": "",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\vector\\vector.toml",
+            "destination": "/etc/vector/vector.toml",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "tmpfs",
+            "source": "",
+            "destination": "/vector-data-dir",
+            "mode": "",
+            "rw": true,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_quality_reports",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_server",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_utils",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_import",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_consensus",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_chunks",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_export",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_annotation",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_worker_webhooks",
+        "image": "cvat/server:dev",
+        "status": "Up 2 hours",
+        "ports": "8080/tcp",
+        "mount_count": 3,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+            "destination": "/home/django/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+            "destination": "/home/django/keys",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+            "destination": "/home/django/logs",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "traefik",
+        "image": "traefik:v3.6",
+        "status": "Exited (127) 3 weeks ago",
+        "ports": "",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\grafana_conf.yml",
+            "destination": "/etc/traefik/rules/grafana_conf.yml",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          },
+          {
+            "type": "bind",
+            "source": "/var/run/docker.sock",
+            "destination": "/var/run/docker.sock",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_db",
+        "image": "postgres:15-alpine",
+        "status": "Up 2 hours",
+        "ports": "5432/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_db/_data",
+            "destination": "/var/lib/postgresql/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_redis_ondisk",
+        "image": "apache/kvrocks:2.12.1",
+        "status": "Up 2 hours (healthy)",
+        "ports": "6666/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_cache_db/_data",
+            "destination": "/var/lib/kvrocks",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_opa",
+        "image": "openpolicyagent/opa:1.12.2",
+        "status": "Up 2 hours",
+        "ports": "",
+        "mount_count": 0,
+        "mounts": []
+      },
+      {
+        "name": "cvat_redis_inmem",
+        "image": "redis:7.2.11-alpine",
+        "status": "Up 2 hours",
+        "ports": "6379/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_inmem_db/_data",
+            "destination": "/data",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "cvat_clickhouse",
+        "image": "clickhouse/clickhouse-server:23.11-alpine",
+        "status": "Up 2 hours",
+        "ports": "8123/tcp, 9000/tcp, 9009/tcp",
+        "mount_count": 2,
+        "mounts": [
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/cvat_cvat_events_db/_data",
+            "destination": "/var/lib/clickhouse",
+            "mode": "rw",
+            "rw": true,
+            "driver": "local"
+          },
+          {
+            "type": "volume",
+            "source": "/var/lib/docker/volumes/bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6/_data",
+            "destination": "/var/log/clickhouse-server",
+            "mode": "",
+            "rw": true,
+            "driver": "local"
+          }
+        ]
+      },
+      {
+        "name": "nuclio",
+        "image": "quay.io/nuclio/dashboard:1.15.9-amd64",
+        "status": "Up 2 hours (healthy)",
+        "ports": "80/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "/var/run/docker.sock",
+            "destination": "/var/run/docker.sock",
+            "mode": "rw",
+            "rw": true,
+            "driver": null
+          }
+        ]
+      },
+      {
+        "name": "cvat_grafana",
+        "image": "grafana/grafana-oss:10.1.2",
+        "status": "Up 2 hours",
+        "ports": "3000/tcp",
+        "mount_count": 1,
+        "mounts": [
+          {
+            "type": "bind",
+            "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\grafana\\dashboards",
+            "destination": "/var/lib/grafana/dashboards",
+            "mode": "ro",
+            "rw": false,
+            "driver": null
+          }
+        ]
+      }
+    ],
+    "volumes": [
+      {
+        "name": "bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/bb48740df91d700e1976c13da7013153755e7dbf65cd6881df244bc99cbd9bb6/_data",
+        "created_at": "2026-04-18T22:34:08Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_cache_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_cache_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_data",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_data/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_events_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_events_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_inmem_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_inmem_db/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_keys",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_keys/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "cvat_cvat_logs",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/cvat_cvat_logs/_data",
+        "created_at": "2026-04-18T22:34:06Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "ia-vision_ia_vision_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/ia-vision_ia_vision_db/_data",
+        "created_at": "2026-09-15T17:09:30Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "ia_vision_f1_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/ia_vision_f1_db/_data",
+        "created_at": "2026-09-05T18:28:00Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "ia_vision_live_media_db",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/ia_vision_live_media_db/_data",
+        "created_at": "2026-09-05T02:47:10Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "mysql_data_m624",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/mysql_data_m624/_data",
+        "created_at": "2026-07-19T00:37:02Z",
+        "used_by_containers": []
+      },
+      {
+        "name": "nuclio-local-storage",
+        "driver": "local",
+        "mountpoint": "/var/lib/docker/volumes/nuclio-local-storage/_data",
+        "created_at": "2026-04-18T22:34:12Z",
+        "used_by_containers": []
+      }
+    ],
+    "stale_worktree_mount_intersections": [],
+    "stale_x_bind_intersections": [],
+    "bind_mounts_in_repos": [],
+    "running_bind_mounts_on_windows": [
+      {
+        "container": "ia-vision-visor",
+        "status": "Up 2 hours (healthy)",
+        "running": true,
+        "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+        "destination": "/media/raw",
+        "rw": false
+      },
+      {
+        "container": "ia-vision-admin",
+        "status": "Up 2 hours (healthy)",
+        "running": true,
+        "source": "/run/desktop/mnt/host/c/dev/traficlab-dashboard",
+        "destination": "/media/raw",
+        "rw": false
+      },
+      {
+        "container": "traficlab_mysql_m624",
+        "status": "Up 2 hours (healthy)",
+        "running": true,
+        "source": "C:\\dev\\traficlab-dashboard\\M591_idom_cam1_dia1\\init.sql",
+        "destination": "/docker-entrypoint-initdb.d/00_init.sql",
+        "rw": false
+      },
+      {
+        "container": "cvat_grafana",
+        "status": "Up 2 hours",
+        "running": true,
+        "source": "C:\\PANORAMA\\TraficLabPro - visor componente - Final - Copy\\cvat_repo\\components\\analytics\\grafana\\dashboards",
+        "destination": "/var/lib/grafana/dashboards",
+        "rw": false
+      }
+    ]
+  },
+  "runtime_scan": {
+    "measured_at": "2026-09-25T06:52:42.410195+00:00",
+    "method": "PowerShell Get-CimInstance Win32_Process (no admin required)",
+    "processes_total": 522,
+    "processes_with_cmdline": 501,
+    "procs_touching_repos": 0,
+    "cwd_touching_repos": 12,
+    "stale_x_runtime_intersections": []
+  },
+  "astra_review": {
+    "packet_path": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\state\\callbacks\\ASTRA_REAUDIT_HOUSEKEEPER_V1_20260925_015351.json",
+    "reviewed_at": "2026-09-25T06:53:51.956150+00:00",
+    "verdict": "PASS_TRULY_STALE",
+    "truly_stale_count": 23,
+    "false_stale_count": 0,
+    "reclassified_count": 8,
+    "truly_stale_paths": [
+      "C:/c/c/c/Users/david/repos/corrective-closeout/baseline-check",
+      "C:/c/c/Users/david/repos/corrective-closeout/feat-pedestrian-v1.0.1-a4-clarify",
+      "C:/c/c/Users/david/repos/IA-VISION-cert-read",
+      "C:/c/c/Users/david/repos/IA-VISION-docs",
+      "C:/c/c/Users/david/repos/IA-VISION-docs-ps",
+      "C:/c/c/Users/david/repos/IA-VISION-product-fix",
+      "C:/c/Users/david/repos/corrective-closeout/feat-combined-closeout",
+      "C:/c/Users/david/repos/IA-VISION-pr109",
+      "C:/c/Users/david/repos/M591-sidecar-inspect",
+      "C:/c/x/00_PROYECTOS/IA-VISION.worktrees/rt4a-evidence-orthomosaic",
+      "C:/Users/david/orca/workspaces/IA-VISION/h2-canonical-fresh-from-b723202",
+      "C:/Users/david/orca/workspaces/IA-VISION/test-orca-h3-cursor",
+      "C:/Users/david/repos/IA-VISION-cert-template",
+      "C:/Users/david/repos/IA-VISION-g5sha37",
+      "C:/Users/david/repos/IA-VISION.worktrees/owner-view-v1",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v2a-layer-inspector",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v2b-click-select",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v3a-trayectorias",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v3b-trayectorias-toggle",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v4a-gates-aforos",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v5-kpi-tracks",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v5b-gate-listener",
+      "C:/Users/david/repos/IA-VISION.worktrees/pr-v6-timeline-events"
+    ],
+    "false_stale_paths": []
+  },
+  "safe_delete_manifest": {
+    "path": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\SAFE_DELETE_MANIFEST_20260925_015424.json",
+    "summary_path": "C:\\Users\\david\\repos\\traficlab-factory\\99_SYSTEM\\census\\SAFE_DELETE_MANIFEST_20260925_015424_SUMMARY.md",
+    "generated_at": "2026-09-25T06:54:24.992740+00:00",
+    "candidate_count": 23,
+    "recoverable_gb": 1.8113,
+    "review_verdict": "PASS_TRULY_STALE"
+  }
+}
