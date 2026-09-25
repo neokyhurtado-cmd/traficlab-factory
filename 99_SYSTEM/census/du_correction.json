@@ -1,0 +1,54 @@
+{
+  "method": "du -sb (cross-check against Path.rglob)",
+  "measured_at": "2026-09-25T06:18:40.136734+00:00",
+  "per_root": {
+    "IA-VISION_bare": 1596860496,
+    "IA-VISION.worktrees": 9889652715,
+    "panorama-mission-control": 26886258,
+    "traficlab-factory": 8254430,
+    "suini": -1,
+    "corrective-closeout": 0,
+    "data": 0
+  },
+  "per_root_gb": {
+    "IA-VISION_bare": 1.487,
+    "IA-VISION.worktrees": 9.21,
+    "panorama-mission-control": 0.025,
+    "traficlab-factory": 0.008,
+    "suini": null,
+    "corrective-closeout": 0.0,
+    "data": 0.0
+  },
+  "ia_vision_clones": {
+    "IA-VISION-cert-study-wt": 42299630,
+    "IA-VISION-cert-template": 13306688,
+    "IA-VISION-g5sha37": 32130578,
+    "IA-VISION-pipeline-w2": 30824433,
+    "IA-VISION-pipeline-witness": 13296364,
+    "IA-VISION-product-cert": 340591120,
+    "IA-VISION-product-fix2": 24337,
+    "IA-VISION-w2-witness-wiring": 35017195,
+    "ia-vision-post-merge-smoke": 0,
+    "ia-vision-rebase-142": 32132082
+  },
+  "ia_vision_clones_total_bytes": 539622427,
+  "ia_vision_clones_total_gb": 0.503,
+  "findings": [
+    {
+      "kind": "phantom_local_path",
+      "description": "MEMORY and gh repo list reference 'suini' as canonical, but ~/repos/suini does not exist locally.",
+      "verified_by": "du -sb /c/Users/david/repos/suini  -> DOES_NOT_EXIST",
+      "gh_remote": "https://github.com/neokyhurtado-cmd/suini",
+      "gh_local_clone_exists": false,
+      "classification": "GHOST_LOCAL_PATH",
+      "action": "none — out of scope until David clones it"
+    },
+    {
+      "kind": "measurement_methodology",
+      "description": "Path.rglob and du -sb agree on worktrees (~10 GB) but Path.rglob over-counted earlier — it walked clones too.",
+      "old_total_worktrees_gb_rglob": 20.913,
+      "new_total_worktrees_gb_du": 9.21,
+      "delta_gb": -11.703
+    }
+  ]
+}
