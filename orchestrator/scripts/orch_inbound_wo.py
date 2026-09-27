@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 """
+TELEGRAM CONTRACT (Lane 18, fixing #20)
+=======================================
+This module is the **only** place in this repository where the literal
+string "telegram" may appear in production code. It appears as a value
+of `requester_platform` (a string field, informational only), exactly
+like `discord` is. There is NO Telegram bot, NO Telegram SDK import, NO
+Telegram session store, NO Telegram scheduler in this repo, and the
+anti-regression tests in ``tests/test_telegram_normal_session.py``,
+``tests/test_no_second_state_store.py``, and
+``tests/test_no_second_scheduler.py`` keep it that way. See
+``TELEGRAM_CONTRACT.md`` at the repo root for the full contract.
+
 orch_inbound_wo.py — Narrow ORCH inbound Work-Order action.
 
 WHY THIS LIVES IN THE ORCHESTRATOR PROFILE
