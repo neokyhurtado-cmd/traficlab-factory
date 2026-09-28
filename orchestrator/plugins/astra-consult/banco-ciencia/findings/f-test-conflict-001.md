@@ -6,6 +6,8 @@ project: nafron/bank-sync-e2e
 refs: []
 evidence_strength: A
 entry_id: f-test-conflict-001
+schema_version: banco-ciencia/v1
+status: ACTIVE
 ---
 
 # Conflict v1 (from operator A)

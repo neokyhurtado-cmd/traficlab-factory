@@ -4,6 +4,9 @@ created: 2026-09-12T15:08Z
 owner: Nafron/David
 project: ia-vision-cadena-corrective
 refs: ["PR #97", "PR #95", "commit 01d30a52", "BR feat/rt-c2-r4-id-collision"]
+entry_id: r4-id-collision-crossing-ids
+schema_version: banco-ciencia/v1
+status: ACTIVE
 evidence_strength: B (reproducible: 52/52 tests pass on fix branch, FAIL on baseline)
 ---
 

@@ -4,6 +4,9 @@ created: 2026-09-12T15:08Z
 owner: Nafron/David
 project: ia-vision-cadena-corrective
 refs: ["comment A4 audit 5647520218", "PR #96 a3b4ac5", "M591_Pedestrian_Report_v1.0.1.md"]
+entry_id: ad4-stay-as-bounded-vs-doc-stale
+schema_version: banco-ciencia/v1
+status: ACTIVE
 evidence_strength: A (audit decision 5647520218 verbatim)
 ---
 

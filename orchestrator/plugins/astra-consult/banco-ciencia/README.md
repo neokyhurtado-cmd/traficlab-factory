@@ -53,7 +53,76 @@ traficlab-factory/orchestrator/plugins/astra-consult/banco-ciencia/
 
 1. ✅ Movido de `~/hermes-tools/hermes-archive/ciencia/` → `traficlab-factory/orchestrator/plugins/astra-consult/banco-ciencia/`
 2. ✅ Reescrito README.md sin las exclusividades erróneas
-3. 🔜 Próxima iteración: agregar sync protocol (append-only + SHA-dedup) si el ecosistema lo requiere
+3. ✅ Sync protocol v1 implementado (banco-ciencia/v1) — ver "Sync protocol v1" abajo
+
+## Sync protocol v1 (2026-09-12, directive astra-scientific-bank-distributed-sync-20260912-01)
+
+The bank now exposes a deterministic, fail-closed, multi-operator sync protocol
+implemented in `../bank_sync.py`. Stdlib-only Python; no extra services.
+
+### Entry identity (v1 frontmatter)
+
+```yaml
+---
+kind: finding|decision|contradiction|playbook|test|other
+entry_id: <stable logical id, must match filename>
+schema_version: banco-ciencia/v1
+status: ACTIVE|SUPERSEDED|REJECTED
+created_at: 2026-09-12T15:08Z
+updated_at: 2026-09-12T15:08Z   # optional
+origin_operator_or_session: nafron/jupiter-astra/...   # optional, non-secret
+source_refs: ["traficlab-factory#14 c5648430968"]      # optional, alias: refs
+content_sha256: <recomputed by tool>                    # optional, tool-managed
+supersedes: ["older-entry-id"]                          # optional, lineage
+---
+```
+
+`type` is accepted as a v0 alias for `kind` (back-compat).
+
+### Where it lives
+
+META files (`INDEX.md`, `README.md`) and conflict/test artifacts under
+`conflicts_pending/`, `mis_tests/` are exempt from schema validation.
+
+### CLI subcommands
+
+| Command | What it does |
+|---|---|
+| `high --entry X --content file.md` | Append/dedup/fail-closed HIGH entry. |
+| `dedup --entry X` | Check existing sha256 for entry X. |
+| `reconcile --entry X --winner=existing\|new` | HUMAN-only conflict resolution. |
+| `ask_astra --query "..."` | Read-only discovery for Astra/Jupiter consult loop. |
+| `list_conflicts` | List pending CONFLICT_PENDING flags. |
+| `validate [--strict]` | Validate every non-meta entry against v1 schema. |
+| `hash-recompute [--subdir X]` | Write `.sha256` sidecar files next to each entry. |
+| `manifest-build [--out path]` | Emit `manifest.json` with per-entry sha256. |
+| `manifest-check [--manifest path]` | Verify manifest against current bank (FAIL on drift/diff/missing). |
+| `sync-classify --candidate file.md` | Read-only classification: NEW / EXACT_DUPLICATE / SAME_ID_DIFFERENT_HASH_CONFLICT / DIFFERENT_ID_SEMANTIC_OVERLAP_REVIEW_CANDIDATE. Never deletes. |
+
+### Convergence rule
+
+Git/GitHub is durable truth for shared bank content. Local operator banks
+are working copies.
+
+1. Read remote bank manifest/index.
+2. Validate local candidate schema + hash.
+3. Classify exact duplicate / conflict / new via `sync-classify`.
+4. Append-only new entries; flag conflicts (FAIL_CLOSED, preserve both).
+5. Update generated/index metadata deterministically.
+6. Test from a second clean clone (`git clone --branch fix/telegram-normal-hermes-session`).
+7. Publish via feature branch / PR under normal governance.
+
+**No silent overwrite. No deletion merely because another operator has a
+newer entry.**
+
+### Consult-loop integration (S6)
+
+- `ask_astra --query "..."` is the read-only discovery surface used by
+  Astra/Jupiter when answering scientific or architecture questions.
+- Bank entries are **evidence**, not infallible authority. Contradictions
+  are surfaced; superseded entries are excluded by default but remain
+  traceable. Source refs are preserved. The bank never authorizes
+  merge/HUMAN_GO.
 
 ## Source-of-truth (Nafron — 2026-09-12)
 

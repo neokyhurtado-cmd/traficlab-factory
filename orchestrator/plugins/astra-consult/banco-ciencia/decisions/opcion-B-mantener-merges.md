@@ -4,6 +4,9 @@ created: 2026-09-12T15:08Z
 owner: Nafron/David
 project: ia-vision-cadena-corrective
 refs: ["issue #93 c5647822982", "comment ASTRA_DIRECTIVE c5647818016", "PR #91", "PR #88", "commit 53554d72e2e7c4858d169a81483e4024ffdc5d06"]
+entry_id: opcion-B-mantener-merges
+schema_version: banco-ciencia/v1
+status: ACTIVE
 evidence_strength: A (verbatim David dictum on #93)
 ---
 

@@ -35,25 +35,52 @@
 ### `playbook/` — guiones de operación
 - `codebase-QA-stack.md` — Nafron + rg + ast-grep + pyright + gh protocol
 
-## Metadata de captura (Nafron-discoverable)
+## Metadata de captura (v1 schema, banco-ciencia/v1)
 
 Cada archivo `.md` arranca con YAML frontmatter:
+
 ```yaml
 ---
-type: finding | decision | paper | contradiction | prompt | test | playbook
-created: 2026-09-12T15:08Z
-owner: Nafron/David
-project: ia-vision-cadena-corrective
-refs: [<issue-id>, <pr-id>, <commit-sha>]
-evidence_strength: A=peer-reviewed/verified | B= reproducible | C= claimed
+kind: finding | decision | contradiction | playbook | test | other   # alias: type
+entry_id: <stable logical id, must match filename>
+schema_version: banco-ciencia/v1
+status: ACTIVE | SUPERSEDED | REJECTED
+created_at: 2026-09-12T15:08Z   # alias: created
+updated_at: 2026-09-12T15:08Z   # optional
+origin_operator_or_session: nafron/jupiter/astra/...   # alias: owner
+source_refs: ["traficlab-factory#14 c5648430968"]      # alias: refs
+content_sha256: <recomputed by tool>                    # optional, tool-managed
+supersedes: ["older-entry-id"]                          # optional, lineage
+evidence_strength: A=peer-reviewed/verified | B=reproducible | C=claimed
 ---
 ```
 
-## Reglas de consolidación (cuando llegue el momento)
-1. Cada operador mantiene su banco individual **sin** sync automática
-2. Consolidación solo cuando vos o el master-GO lo dispare
-3. Consolidación = MANUAL o con diff check explícito; no global overwrite
-4. El banco global vive en `_orchestrator_memory/ciencia_consolidada/`
+Validate with: `python ../bank_sync.py validate` (exits 2 on FAIL).
+META files (`INDEX.md`, `README.md`) and artifacts under `conflicts_pending/`,
+`mis_tests/` are exempt from validation.
+
+## Reglas de consolidación (Sync protocol v1)
+
+S0/S2/S3 — Sync protocol v1 lives in `../bank_sync.py`. Use:
+
+```text
+python ../bank_sync.py validate           # schema gate
+python ../bank_sync.py hash-recompute     # per-entry sha256 sidecars
+python ../bank_sync.py manifest-build     # manifest.json
+python ../bank_sync.py manifest-check     # drift detection
+python ../bank_sync.py sync-classify --candidate <file>  # NEW/DUP/CONFLICT/OVERLAP
+```
+
+1. Cada operador mantiene su banco local **sin** sync automática silenciosa.
+2. La sync se dispara via `git pull` + `manifest-check` (drift) + `validate`
+   (schema gate); nunca merge global overwrite.
+3. Conflictos = FAIL_CLOSED: ambos preservados en `conflicts_pending/`,
+   resueltos vía `reconcile --entry X --winner=existing|new` (HUMAN-only).
+4. Cualquier operador (JUPITER, Astra, Nafron, otra instancia Hermes)
+   puede escribir; el consult loop usa `ask_astra --query "..."` para
+   discovery read-only.
+5. Bank entries son evidencia, no autoridad; el banco nunca autoriza
+   merge / HUMAN_GO.
 
 ---
 _Nafton arranca:_ `[qa-search]` 7 entries reales que verifico en la session actual.

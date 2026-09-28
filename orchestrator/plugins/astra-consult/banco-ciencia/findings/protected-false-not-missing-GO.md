@@ -4,6 +4,9 @@ created: 2026-09-12T15:08Z
 owner: Nafron/David
 project: ia-vision-cadena-corrective
 refs: ["issue #93 c5647822982", "comment ASTRA_CLOSEOUT_RECTIFICATION", "PR #91", "PR #92"]
+entry_id: protected-false-not-missing-GO
+schema_version: banco-ciencia/v1
+status: ACTIVE
 evidence_strength: A (verified by adversarial auditor on 34710115636)
 ---
 

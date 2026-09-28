@@ -4,6 +4,9 @@ created: 2026-09-12T15:08Z
 owner: Nafron/David
 project: nafron/codebase-QA-stack
 refs: ["NAFRON_PROTOCOL_V1 c5648287543 (issue #93)", "decision: effort-ultra-for-subagents"]
+entry_id: codebase-QA-stack
+schema_version: banco-ciencia/v1
+status: ACTIVE
 evidence_strength: B (verified via ripgrep + git log in tests; ast-grep 0.45.3 installed)
 ---
 
