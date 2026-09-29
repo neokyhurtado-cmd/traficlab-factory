@@ -150,6 +150,25 @@ def test_two_writers_one_blocked():
     assert "B" in c.fields["BLOCKED_NODES"]
 
 
+# Test 7b: a blocked sibling must not stop independent eligible work
+def test_blocked_sibling_does_not_stop_safe_work():
+    c = make_contract(
+        DEPENDENCY_GRAPH={"A": [], "B": []},
+        ELIGIBLE_NODES=["A"],
+        BLOCKED_NODES=["B"],
+    )
+    e = LoopEngine(c)
+    assert e.can_continue()
+
+
+# Test 7c: a true external blocker remains terminal
+def test_blocked_external_state_stops_even_with_eligible_nodes():
+    c = make_contract(ELIGIBLE_NODES=["A"], BLOCKED_NODES=["B"])
+    e = LoopEngine(c)
+    walk_engine(e, LoopState.BLOCKED_EXTERNAL)
+    assert not e.can_continue()
+
+
 # Test 8: snapshot persists for recovery
 def test_snapshot_persists_for_recovery():
     c = make_contract()
