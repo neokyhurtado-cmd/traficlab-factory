@@ -40,10 +40,12 @@ class LoopEngine:
         # WAITING_HARD_STOP is reserved for a true owner boundary.
         if state == LoopState.WAITING_HARD_STOP:
             return False
-        # A blocked node is not a global stop. Other independent, safe work must
-        # continue. Global external blockers are represented by the explicit
-        # BLOCKED_EXTERNAL state; owner gates by WAITING_HARD_STOP.
-        return len(eligible) > 0
+        # Eligibility may lag behind a resource collision or worker result.
+        # Exclude both scheduler and ingested worker blockers; an unrelated
+        # blocked sibling must not stop independent work.
+        blocked = set(self.contract.fields.get("BLOCKED_NODES", []))
+        blocked.update(self.blocked_nodes)
+        return any(node not in blocked for node in eligible)
 
     def transition(self, new_state: LoopState) -> None:
         self.contract.transition(new_state)

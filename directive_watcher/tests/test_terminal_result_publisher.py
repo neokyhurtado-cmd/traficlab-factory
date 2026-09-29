@@ -73,6 +73,7 @@ def test_failed_projection_is_terminal_and_not_external(monkeypatch):
 
     assert stats["posted"] == 1
     body = gh.posted[0][2]
-    assert "STATUS = FAILED" in body\n    assert "STATUS = BLOCKED_EXTERNAL_REAL" not in body
+    assert "STATUS = FAILED" in body
+    assert "STATUS = BLOCKED_EXTERNAL_REAL" not in body
     assert "terminal_session_state=FAILED" in body
     assert "WORKER_SPAWN_PROVEN=NO" in body

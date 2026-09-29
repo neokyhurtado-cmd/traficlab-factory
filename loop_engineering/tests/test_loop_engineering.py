@@ -161,6 +161,32 @@ def test_blocked_sibling_does_not_stop_safe_work():
     assert e.can_continue()
 
 
+def test_all_eligible_nodes_blocked_stops(tmp_path):
+    c = make_contract(ELIGIBLE_NODES=["A", "B"], BLOCKED_NODES=["A", "B"])
+    e = LoopEngine(c, snapshot_path=str(tmp_path / "snapshot.json"))
+    assert not e.can_continue()
+
+
+def test_overlap_leaves_independent_work_eligible(tmp_path):
+    c = make_contract(ELIGIBLE_NODES=["A", "B"], BLOCKED_NODES=["A"])
+    e = LoopEngine(c, snapshot_path=str(tmp_path / "snapshot.json"))
+    assert e.can_continue()
+
+
+def test_ingested_worker_blocker_excludes_stale_eligible_node(tmp_path):
+    c = make_contract(ELIGIBLE_NODES=["A"])
+    e = LoopEngine(c, snapshot_path=str(tmp_path / "snapshot.json"))
+    e.ingest_worker_result(WorkerResult(
+        NODE_ID="A", ROLE="worker", INPUT_BASELINE="main",
+        CLAIM="trying", ACTION_TAKEN="resource check",
+        RESULT=WorkerResultStatus.BLOCKED.value, EVIDENCE=["resource.log"],
+        BLOCKER="writer collision",
+    ))
+    assert not e.can_continue()
+    c.fields["ELIGIBLE_NODES"].append("B")
+    assert e.can_continue()
+
+
 # Test 7c: a true external blocker remains terminal
 def test_blocked_external_state_stops_even_with_eligible_nodes():
     c = make_contract(ELIGIBLE_NODES=["A"], BLOCKED_NODES=["B"])
