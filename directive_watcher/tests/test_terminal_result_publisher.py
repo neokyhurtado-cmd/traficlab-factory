@@ -64,7 +64,7 @@ def test_done_projection_and_replay_dedupe(monkeypatch):
     assert "heartbeat_count=1" in body
 
 
-def test_failed_projection_is_terminal_and_honest(monkeypatch):
+def test_failed_projection_is_terminal_and_not_external(monkeypatch):
     monkeypatch.setattr(terminal, "_runtime_evidence_for_directive", lambda *a, **k: {})
     gh = FakeGitHubClient()
     dispatcher = Dispatcher(session(state="FAILED", directive_id="canary-failed"))
@@ -73,6 +73,6 @@ def test_failed_projection_is_terminal_and_honest(monkeypatch):
 
     assert stats["posted"] == 1
     body = gh.posted[0][2]
-    assert "STATUS = BLOCKED_EXTERNAL_REAL" in body
+    assert "STATUS = FAILED" in body\n    assert "STATUS = BLOCKED_EXTERNAL_REAL" not in body
     assert "terminal_session_state=FAILED" in body
     assert "WORKER_SPAWN_PROVEN=NO" in body
