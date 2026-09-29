@@ -146,7 +146,7 @@ def publish_terminal_session_results(
     """Project reconciled terminal sessions back to their source GitHub issue.
 
     A successful physical task maps to READY_FOR_ASTRA_REAUDIT; a failed task
-    maps to BLOCKED_EXTERNAL_REAL. The first DISPATCHED result remains as
+    maps to FAILED. A worker failure is not, by itself, proof of an external blocker. The first DISPATCHED result remains as
     dispatch evidence; this is the later terminal result for the SAME
     directive/execution lineage.
 
@@ -197,7 +197,7 @@ def publish_terminal_session_results(
         status = (
             "READY_FOR_ASTRA_REAUDIT"
             if session.state == SESSION_STATE_DONE
-            else "BLOCKED_EXTERNAL_REAL"
+            else "FAILED"
         )
         body = format_result(ResultFacts(
             directive_id=session.directive_id,

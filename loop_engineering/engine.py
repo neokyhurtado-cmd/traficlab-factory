@@ -34,15 +34,18 @@ class LoopEngine:
     def can_continue(self) -> bool:
         """Hard continuation rule per directive."""
         eligible = self.contract.fields.get("ELIGIBLE_NODES", [])
-        blocked = self.contract.fields.get("BLOCKED_NODES", [])
         state = self.contract.state
         if state in {LoopState.DONE, LoopState.BLOCKED_EXTERNAL, LoopState.CANCELLED}:
             return False
-        # If state is WAITING_HARD_STOP, must wait for owner
+        # WAITING_HARD_STOP is reserved for a true owner boundary.
         if state == LoopState.WAITING_HARD_STOP:
             return False
-        # If eligible work exists and no hard-stop is firing, continue
-        return len(eligible) > 0 and len(blocked) == 0
+        # Eligibility may lag behind a resource collision or worker result.
+        # Exclude both scheduler and ingested worker blockers; an unrelated
+        # blocked sibling must not stop independent work.
+        blocked = set(self.contract.fields.get("BLOCKED_NODES", []))
+        blocked.update(self.blocked_nodes)
+        return any(node not in blocked for node in eligible)
 
     def transition(self, new_state: LoopState) -> None:
         self.contract.transition(new_state)
