@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "owner": "david",
+  "windows_user_sid": "",
+  "host_name": "",
+  "state_dir": "",
+  "vault_path": "",
+  "vault_expected_name": "DAVID_OS",
+  "interval_seconds": 3600,
+  "audit_max_files": 250,
+  "clean_own_cache": true,
+  "disk_roots": ["C:/", "X:/"],
+  "protected_roots": [],
+  "storage_guardian_report": "",
+  "housekeeper_manifest": "",
+  "session_registry": "",
+  "health_urls": [],
+  "projects": [
+    {"repository": "neokyhurtado-cmd/IA-VISION", "local_path": "", "carriers": [94, 81]},
+    {"repository": "neokyhurtado-cmd/suini", "local_path": "", "carriers": [40, 57, 94]}
+  ]
+}
