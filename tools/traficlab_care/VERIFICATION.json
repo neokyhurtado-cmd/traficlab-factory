@@ -1,0 +1,21 @@
+{
+  "app": "TraficLab Care",
+  "version": "0.1.0",
+  "generated_at": "2026-09-30T09:32:04.744900+00:00",
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "linux"
+  },
+  "command": "python -m unittest discover -s tests -v",
+  "result": "PASS",
+  "tests": 25,
+  "python_3_10_syntax": "PASS; not a Python 3.10 runtime test",
+  "git_fixture_audit": "PASS; tracked source/head/clean tree preserved",
+  "health_redirect": "PASS with stub HTTP transport; sandbox forbids network sockets",
+  "windows_installer": "NOT_EXECUTED",
+  "windows_ram_and_task": "NOT_EXECUTED",
+  "actual_server_and_accounts": "NOT_OBSERVED",
+  "existing_scheduler_binding": "PENDING",
+  "actual_product_benchmarks": "NOT_EXECUTED",
+  "product_code_changes": 0
+}
